@@ -36,7 +36,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Use venv
-        run: source $VENV
+        run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.0
@@ -73,7 +73,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Use venv
-        run: source $VENV
+        run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
 
       - name: Set up pyright
         run: echo "PYRIGHT_VERSION=$(poetry run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_ENV
@@ -129,7 +129,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Use venv
-        run: source $VENV
+        run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
 
       - name: Run slotscheck
         run: poetry run task slotscheck
