@@ -12,7 +12,6 @@ jobs:
         with:
           release-type: python
           package-name: mafic
-          pre-release: ${{ github.ref_name != 'master' }}
           token: ${{ secrets.RELEASE_TOKEN }}
       - name: Parse semver string
         if: steps.release.outputs.release_created
