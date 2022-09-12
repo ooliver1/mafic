@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "gabbro"
+version = "0.1.0"
+description = "A properly typehinted python library to use discord.py, nextcord, disnake and py-cord with lavalink."
+authors = ["ooliver1 <oliverwilkes2006@icloud.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aiohttp = "^3.6.0"
+
+[tool.poetry.group.dev.dependencies]
+pyright = "^1.1.270"
+black = "^22.8.0"
+isort = "^5.10.1"
+taskipy = "^1.10.3"
+flake8 = "^5.0.4"
+pre-commit = "^2.20.0"
+python-dotenv = "^0.21.0"
+slotscheck = "^0.15.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
