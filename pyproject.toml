@@ -20,6 +20,35 @@ pre-commit = "^2.20.0"
 python-dotenv = "^0.21.0"
 slotscheck = "^0.15.0"
 
+[tool.taskipy.tasks]
+pre-commit = "pre-commit install --install-hooks"
+slotscheck = "slotscheck --verbose -m gabbro"
+lint = "pre-commit run --all-files"
+black = "task lint black"
+isort = "task lint isort"
+flake8 = "task lint flake8"
+pyright = "dotenv -f task.env run -- pyright"
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310"]
+
+[tool.isort]
+profile = "black"
+py_version = 38
+line_length = 88
+combine_as_imports = true
+filter_files = true
+
+[tool.slotscheck]
+strict-imports = true
+require-superclass = true
+require-subclass = false
+
+[tool.pyright]
+typeCheckingMode = "strict"
+pythonVersion = "3.8"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
