@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-__all__ = ("GabbroException", "LibraryCompatibilityError", "NoCompatibleLibraries")
+__all__ = ("maficException", "LibraryCompatibilityError", "NoCompatibleLibraries")
 
 
-class GabbroException(Exception):
-    """The base exception for gabbro errors."""
+class maficException(Exception):
+    """The base exception for mafic errors."""
 
 
-class LibraryCompatibilityError(GabbroException):
+class LibraryCompatibilityError(maficException):
     """An error raised when no compatible libraries are found."""
 
 

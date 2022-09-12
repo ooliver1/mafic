@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gabbro"
+name = "mafic"
 version = "0.1.0"
 description = "A properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord."
 authors = ["ooliver1 <oliverwilkes2006@icloud.com>"]
@@ -36,7 +36,7 @@ py-cord = ["py-cord@^2.0.0"]
 
 [tool.taskipy.tasks]
 pre-commit = "pre-commit install --install-hooks"
-slotscheck = "slotscheck --verbose -m gabbro"
+slotscheck = "slotscheck --verbose -m mafic"
 lint = "pre-commit run --all-files"
 black = "task lint black"
 isort = "task lint isort"

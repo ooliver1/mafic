@@ -7,7 +7,7 @@ A properly typehinted lavalink client for discord.py, nextcord, disnake and py-c
 :license: MIT, see LICENSE for more details.
 """
 
-__title__ = "gabbro"
+__title__ = "mafic"
 __author__ = "ooliver1"
 __license__ = "MIT"
 __copyright__ = "Copyright 2022-present ooliver1"
