@@ -8,12 +8,15 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - name: Create release if needed
+        id: release
+        uses: google-github-actions/release-please-action@v3
         with:
           release-type: python
-          package-name: mafic
-          pre-release: ${{ github.ref_name != 'master' }}
+          package-name: release-please-action
+          default-branch: ${{ github.ref_name }}
           token: ${{ secrets.RELEASE_TOKEN }}
+          extra-files: botbase/__init__.py
       - name: Parse semver string
         if: steps.release.outputs.release_created
         id: semver_parser

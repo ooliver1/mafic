@@ -11,20 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up python 3.8
-        uses: actions/setup-python@v4
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v2
         with:
           python-version: 3.8
-          cache: poetry
+
+      - name: Load cached Poetry installation
+        uses: actions/cache@v2
+        with:
+          path: ~/.local
+          key: poetry-0
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
 
       - name: Install dependencies
-        run: poetry install --with lint
+        run: poetry install --no-interaction --no-root --with lint
+
+      - name: Install library
+        run: poetry install --no-interaction
+
+      - name: Use venv
+        run: source $VENV
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.0
@@ -36,21 +48,32 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
       fail-fast: false
     steps:
-      - name: Checkout code
+      - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: poetry
+          python-version: 3.8
 
-      # all extras are installed to test
+      - name: Load cached Poetry installation
+        uses: actions/cache@v2
+        with:
+          path: ~/.local
+          key: poetry-0
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Install dependencies
-        run: poetry install --with lint
+        run: poetry install --no-interaction --no-root --with lint
+
+      - name: Install library
+        run: poetry install --no-interaction
+
+      - name: Use venv
+        run: source $VENV
 
       - name: Set up pyright
         run: echo "PYRIGHT_VERSION=$(poetry run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_ENV
@@ -81,20 +104,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up python 3.8
-        uses: actions/setup-python@v4
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v2
         with:
           python-version: 3.8
-          cache: poetry
+
+      - name: Load cached Poetry installation
+        uses: actions/cache@v2
+        with:
+          path: ~/.local
+          key: poetry-0
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
 
       - name: Install dependencies
-        run: poetry install --with lint
+        run: poetry install --no-interaction --no-root --with lint
+
+      - name: Install library
+        run: poetry install --no-interaction
+
+      - name: Use venv
+        run: source $VENV
 
       - name: Run slotscheck
         run: poetry run task slotscheck
