@@ -30,10 +30,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --with lint
-
-      - name: Install library
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --with lint
 
       - name: Use venv
         run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
@@ -67,10 +64,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --with lint
-
-      - name: Install library
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --with lint
 
       - name: Use venv
         run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
@@ -123,10 +117,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --with lint
-
-      - name: Install library
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --with lint
 
       - name: Use venv
         run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
