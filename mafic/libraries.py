@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from os import getenv
+
 from pkg_resources import DistributionNotFound, get_distribution
 
 from .errors import MultipleCompatibleLibraries, NoCompatibleLibraries
@@ -21,10 +23,11 @@ for library in libraries:
         found.append(library)
 
 
-if len(found) == 0:
-    raise NoCompatibleLibraries
-elif len(found) > 1:
-    raise MultipleCompatibleLibraries(found)
+if not getenv("MAFIC_IGNORE_LIBRARY_CHECK", False):
+    if len(found) == 0:
+        raise NoCompatibleLibraries
+    elif len(found) > 1:
+        raise MultipleCompatibleLibraries(found)
 
 
 library = found[0]

@@ -81,6 +81,7 @@ jobs:
           # only add comments for 3.8
           no-comments: ${{ matrix.python-version != '3.8' }}
           warnings: true
+          env-path: "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v1.0.3
@@ -93,6 +94,7 @@ jobs:
           # only add comments for one platform
           no-comments: true
           warnings: true
+          env-path: "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
 
   slotscheck:
     runs-on: ubuntu-latest
@@ -123,4 +125,4 @@ jobs:
         run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
 
       - name: Run slotscheck
-        run: poetry run task slotscheck
+        run: MAFIC_IGNORE_LIBRARY_CHECK=true poetry run task slotscheck
