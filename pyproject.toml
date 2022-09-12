@@ -9,6 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 aiohttp = "^3.6.0"
+nextcord = {version = "^2.0.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 pyright = "^1.1.270"
@@ -20,6 +21,18 @@ pre-commit = "^2.20.0"
 python-dotenv = "^0.21.0"
 slotscheck = "^0.15.0"
 Flake8-pyproject = "^1.1.0.post0"
+
+[tool.poetry.group.lint.dependencies]
+nextcord = "^2.0.0"
+disnake = "^2.0.0"
+py-cord = "^2.0.0"
+"discord.py" = "^2.0.0"
+
+[tool.poetry.extras]
+nextcord = ["nextcord@^2.0.0"]
+disnake = ["disnake@^2.0.0"]
+py-cord = ["py-cord@^2.0.0"]
+"discord.py" = ["discord.py@^2.0.0"]
 
 [tool.taskipy.tasks]
 pre-commit = "pre-commit install --install-hooks"

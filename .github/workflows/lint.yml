@@ -24,7 +24,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --with lint
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.0
@@ -50,7 +50,7 @@ jobs:
 
       # all extras are installed to test
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --with lint
 
       - name: Set up pyright
         run: echo "PYRIGHT_VERSION=$(poetry run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_ENV
@@ -94,7 +94,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --with lint
 
       - name: Run slotscheck
         run: poetry run task slotscheck
