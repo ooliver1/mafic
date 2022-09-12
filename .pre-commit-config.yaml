@@ -21,7 +21,7 @@ repos:
     hooks:
       - id: flake8
         name: Running flake8 in all files.
-        additional_dependencies: [flake8-isort]
+        additional_dependencies: [flake8-isort, Flake8-pyproject]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.3.0

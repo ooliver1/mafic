@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "gabbro"
 version = "0.1.0"
-description = "A properly typehinted python library to use discord.py, nextcord, disnake and py-cord with lavalink."
+description = "A properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord."
 authors = ["ooliver1 <oliverwilkes2006@icloud.com>"]
 license = "MIT"
 readme = "README.md"
@@ -19,6 +19,7 @@ flake8 = "^5.0.4"
 pre-commit = "^2.20.0"
 python-dotenv = "^0.21.0"
 slotscheck = "^0.15.0"
+Flake8-pyproject = "^1.1.0.post0"
 
 [tool.taskipy.tasks]
 pre-commit = "pre-commit install --install-hooks"
@@ -48,6 +49,9 @@ require-subclass = false
 [tool.pyright]
 typeCheckingMode = "strict"
 pythonVersion = "3.8"
+
+[tool.flake8]
+max-line-length = 88
 
 [build-system]
 requires = ["poetry-core"]
