@@ -72,6 +72,9 @@ jobs:
       - name: Set up pyright
         run: echo "PYRIGHT_VERSION=$(poetry run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_ENV
 
+      - name: Get venv path
+        run: echo "VENV_PATH=$(poetry env list --full-path | grep Activated | cut -d' ' -f1)" >> $GITHUB_ENV
+
       - name: Run pyright (Linux)
         uses: jakebailey/pyright-action@v1.2.0
         with:
@@ -81,7 +84,7 @@ jobs:
           # only add comments for 3.8
           no-comments: ${{ matrix.python-version != '3.8' }}
           warnings: true
-          venv-path: "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
+          venv-path: ${{ env.VENV_PATH }}
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v1.0.3
@@ -94,7 +97,7 @@ jobs:
           # only add comments for one platform
           no-comments: true
           warnings: true
-          venv-path: "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
+          venv-path: ${{ env.VENV_PATH }}
 
   slotscheck:
     runs-on: ubuntu-latest
