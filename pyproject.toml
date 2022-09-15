@@ -21,12 +21,14 @@ pre-commit = "^2.20.0"
 python-dotenv = "^0.21.0"
 slotscheck = "^0.15.0"
 Flake8-pyproject = "^1.1.0.post0"
+typing-extensions = "^4.3.0"
 
 [tool.poetry.group.lint.dependencies]
 nextcord = "^2.0.0"
 disnake = "^2.0.0"
 py-cord = "^2.0.0"
 "discord.py" = "^2.0.0"
+orjson = "^3.8.0"
 
 [tool.poetry.extras]
 nextcord = ["nextcord@^2.0.0"]
@@ -65,6 +67,9 @@ pythonVersion = "3.8"
 
 [tool.flake8]
 max-line-length = 88
+per-file-ignores = [
+    '__init__.py:F401,F403',
+]
 
 [build-system]
 requires = ["poetry-core"]

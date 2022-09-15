@@ -15,7 +15,10 @@ __version__ = "0.1.0"
 
 import logging
 
-from . import libraries as __libraries
+from . import __libraries
+from .errors import *
+from .node import *
+from .player import *
 
 del __libraries
 
