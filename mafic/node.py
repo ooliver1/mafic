@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from asyncio import create_task, sleep
 from logging import getLogger
+from os import urandom
 from typing import TYPE_CHECKING
 
 from aiohttp import ClientSession, WSMsgType
@@ -35,6 +36,7 @@ class Node:
         heartbeat: int = 30,
         timeout: float = 10,
         session: ClientSession | None = None,
+        resume_key: str | None = None,
     ) -> None:
         self._host = host
         self._port = port
@@ -48,6 +50,7 @@ class Node:
 
         self._rest_uri = f"http{'s' if secure else ''}://{host}:{port}"
         self._ws_uri = f"ws{'s' if secure else ''}://{host}:{port}"
+        self._resume_key = resume_key or urandom(8).hex()
 
         self._ws: ClientWebSocketResponse | None = None
         self._ws_task: Task[None] | None = None
@@ -88,6 +91,7 @@ class Node:
             "Authorization": self.__password,
             "User-Id": str(self._client.user.id),
             "Client-Name": f"Mafic/{__import__('mafic').__version__}",
+            "Resume-Key": self._resume_key,
         }
 
         self._ws = await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
@@ -96,6 +100,7 @@ class Node:
             heartbeat=self._heartbeat,
             headers=headers,
         )
+        create_task(self.send_resume_configuration())
         self._ws_task = create_task(
             self._ws_listener(), name=f"mafic node {self._label}"
         )
@@ -137,6 +142,9 @@ class Node:
 
         await self._ws.send_json(data, dumps=dumps)
 
+    async def _handle_msg(self, data: dict[str, Any]) -> None:
+        raise NotImplementedError
+
     def send_voice_server_update(
         self, guild_id: int, session_id: str, data: VoiceServerUpdatePayload
     ) -> Coro[None]:
@@ -149,5 +157,11 @@ class Node:
             }
         )
 
-    async def _handle_msg(self, data: dict[str, Any]) -> None:
-        raise NotImplementedError
+    def send_resume_configuration(self) -> Coro[None]:
+        return self.__send(
+            {
+                "op": "configureResuming",
+                "key": self._resume_key,
+                "timeout": 60,
+            }
+        )

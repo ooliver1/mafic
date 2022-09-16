@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 __all__ = (
     "ChannelMix",
+    "ConfigureResumingPayload",
     "DestroyPayload",
     "Distortion",
     "EQBand",
@@ -19,7 +20,7 @@ __all__ = (
     "LavalinkVoiceState",
     "LowPass",
     "OutgoingMessage",
-    "OutgoingMessagePayload",
+    "PayloadWithGuild",
     "PausePayload",
     "PlayPayload",
     "Rotation",
@@ -33,7 +34,7 @@ __all__ = (
 )
 
 
-class OutgoingMessagePayload(TypedDict):
+class PayloadWithGuild(TypedDict):
     guildId: str
 
 
@@ -43,13 +44,13 @@ class LavalinkVoiceState(TypedDict, total=False):
     event: VoiceServerUpdatePayload
 
 
-class VoiceStatePayload(OutgoingMessagePayload):
+class VoiceStatePayload(PayloadWithGuild):
     op: Literal["voiceUpdate"]
     sessionId: str
     event: VoiceServerUpdatePayload
 
 
-class PlayPayload(OutgoingMessagePayload):
+class PlayPayload(PayloadWithGuild):
     op: Literal["play"]
     track: str
     startTime: str
@@ -59,21 +60,21 @@ class PlayPayload(OutgoingMessagePayload):
     pause: bool
 
 
-class StopPayload(OutgoingMessagePayload):
+class StopPayload(PayloadWithGuild):
     op: Literal["stop"]
 
 
-class PausePayload(OutgoingMessagePayload):
+class PausePayload(PayloadWithGuild):
     op: Literal["pause"]
     pause: bool
 
 
-class SeekPayload(OutgoingMessagePayload):
+class SeekPayload(PayloadWithGuild):
     op: Literal["seek"]
     position: int
 
 
-class VolumePayload(OutgoingMessagePayload):
+class VolumePayload(PayloadWithGuild):
     op: Literal["volume"]
     volume: int
 
@@ -132,7 +133,7 @@ class LowPass(TypedDict):
     smoothing: float
 
 
-class FilterPayload(OutgoingMessagePayload):
+class FilterPayload(PayloadWithGuild):
     op: Literal["filters"]
     volume: NotRequired[float]
     equalizer: NotRequired[list[EQBand]]
@@ -146,8 +147,14 @@ class FilterPayload(OutgoingMessagePayload):
     lowPass: NotRequired[LowPass]
 
 
-class DestroyPayload(OutgoingMessagePayload):
+class DestroyPayload(PayloadWithGuild):
     op: Literal["destroy"]
+
+
+class ConfigureResumingPayload(TypedDict):
+    op: Literal["configureResuming"]
+    key: str | None
+    timeout: int
 
 
 OutgoingMessage = Union[
@@ -159,4 +166,5 @@ OutgoingMessage = Union[
     VolumePayload,
     FilterPayload,
     DestroyPayload,
+    ConfigureResumingPayload,
 ]
