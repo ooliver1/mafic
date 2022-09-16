@@ -51,7 +51,14 @@ class Player(VoiceProtocol):
             guild_id=self._guild_id, session_id=self._session_id, data=data
         )
 
-    async def connect(self, *, timeout: float, reconnect: bool) -> None:
+    async def connect(
+        self,
+        *,
+        timeout: float,
+        reconnect: bool,
+        self_mute: bool = False,
+        self_deaf: bool = False,
+    ) -> None:
         raise NotImplementedError
 
     async def disconnect(self, *, force: bool) -> None:
