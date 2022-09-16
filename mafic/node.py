@@ -5,7 +5,7 @@ from __future__ import annotations
 from asyncio import create_task, sleep
 from logging import getLogger
 from os import urandom
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from aiohttp import ClientSession, WSMsgType
 
@@ -13,12 +13,12 @@ from .__libraries import ExponentialBackoff, dumps, loads
 
 if TYPE_CHECKING:
     from asyncio import Task
-    from typing import Any
 
     from aiohttp import ClientWebSocketResponse
 
     from .__libraries import Client, VoiceServerUpdatePayload
-    from .typings import Coro, OutgoingMessage
+    from .player import Player
+    from .typings import Coro, EventPayload, IncomingMessage, OutgoingMessage
 
 _log = getLogger(__name__)
 
@@ -57,6 +57,8 @@ class Node:
 
         self._available = False
         self._backoff = ExponentialBackoff()
+
+        self._players: dict[int, Player] = {}
 
     @property
     def host(self) -> str:
@@ -142,8 +144,51 @@ class Node:
 
         await self._ws.send_json(data, dumps=dumps)
 
-    async def _handle_msg(self, data: dict[str, Any]) -> None:
-        raise NotImplementedError
+    async def _handle_msg(self, data: IncomingMessage) -> None:
+        _log.debug("Received event with op %s", data["op"])
+
+        if data["op"] == "playerUpdate":
+            guild_id = int(data["guildId"])
+            player = self._players.get(guild_id)
+
+            if player is None:
+                _log.error(
+                    "Could not find player for guild %s, discarding event.", guild_id
+                )
+
+            # TODO: update player
+        elif data["op"] == "stats":
+            # TODO
+            ...
+        elif data["op"] == "event":
+            await self._handle_event(data)
+        else:
+            # Of course pyright considers this to be `Never`, so this is to keep types.
+            op = cast(str, data["op"])
+            _log.warn("Unknown incoming op code %s", op)
+
+    async def _handle_event(self, data: EventPayload) -> None:
+        if data["type"] == "WebSocketClosedEvent":
+            # TODO:
+            ...
+        elif data["type"] == "TrackStartEvent":
+            # We do not care about track starts, the user is already aware of it.
+            return
+        elif data["type"] == "TrackEndEvent":
+            # TODO:
+            ...
+        elif data["type"] == "TrackExceptionEvent":
+            # TODO:
+            ...
+        elif data["type"] == "TrackStuckEvent":
+            # TODO:
+            ...
+        else:
+            # Pyright expects this to never happen, so do I, I really hope.
+            # Nobody expects the Spanish Inquisition, neither does pyright.
+
+            event_type = cast(str, data["type"])
+            _log.warn("Unknown incoming event type %s", event_type)
 
     def send_voice_server_update(
         self, guild_id: int, session_id: str, data: VoiceServerUpdatePayload

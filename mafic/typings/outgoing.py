@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, TypedDict, Union
 
 from ..__libraries import VoiceServerUpdatePayload
+from .misc import PayloadWithGuild
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
@@ -20,7 +21,6 @@ __all__ = (
     "LavalinkVoiceState",
     "LowPass",
     "OutgoingMessage",
-    "PayloadWithGuild",
     "PausePayload",
     "PlayPayload",
     "Rotation",
@@ -32,10 +32,6 @@ __all__ = (
     "VoiceStatePayload",
     "VolumePayload",
 )
-
-
-class PayloadWithGuild(TypedDict):
-    guildId: str
 
 
 class LavalinkVoiceState(TypedDict, total=False):
