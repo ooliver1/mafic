@@ -6,6 +6,10 @@ authors = ["ooliver1 <oliverwilkes2006@icloud.com>"]
 license = "MIT"
 readme = "README.md"
 
+packages = [
+    { include = "mafic" },
+]
+
 [tool.poetry.dependencies]
 python = "^3.8"
 aiohttp = "^3.6.0"

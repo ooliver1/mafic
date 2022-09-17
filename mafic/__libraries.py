@@ -12,12 +12,13 @@ from .errors import MultipleCompatibleLibraries, NoCompatibleLibraries
 __all__ = (
     "Client",
     "Connectable",
-    "dumps",
     "ExponentialBackoff",
+    "GuildChannel",
     "GuildVoiceStatePayload",
-    "loads",
     "VoiceProtocol",
     "VoiceServerUpdatePayload",
+    "dumps",
+    "loads",
 )
 
 libraries = ("nextcord", "disnake", "py-cord", "discord.py", "discord")
@@ -56,7 +57,7 @@ library = found[0]
 
 if library == "nextcord":
     from nextcord import Client, VoiceProtocol
-    from nextcord.abc import Connectable
+    from nextcord.abc import Connectable, GuildChannel
     from nextcord.backoff import ExponentialBackoff
     from nextcord.types.voice import (
         GuildVoiceState as GuildVoiceStatePayload,
@@ -64,7 +65,7 @@ if library == "nextcord":
     )
 elif library == "disnake":
     from disnake import Client, VoiceProtocol
-    from disnake.abc import Connectable
+    from disnake.abc import Connectable, GuildChannel
     from disnake.backoff import ExponentialBackoff
     from disnake.types.voice import (
         GuildVoiceState as GuildVoiceStatePayload,
@@ -72,7 +73,7 @@ elif library == "disnake":
     )
 else:
     from discord import Client, VoiceProtocol
-    from discord.abc import Connectable
+    from discord.abc import Connectable, GuildChannel
     from discord.backoff import ExponentialBackoff
     from discord.types.voice import (
         GuildVoiceState as GuildVoiceStatePayload,

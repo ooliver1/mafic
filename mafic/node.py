@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from asyncio import create_task, sleep
 from logging import getLogger
-from os import urandom
 from typing import TYPE_CHECKING, cast
 
 from aiohttp import ClientSession, WSMsgType
@@ -50,7 +49,7 @@ class Node:
 
         self._rest_uri = f"http{'s' if secure else ''}://{host}:{port}"
         self._ws_uri = f"ws{'s' if secure else ''}://{host}:{port}"
-        self._resume_key = resume_key or urandom(8).hex()
+        self._resume_key = resume_key or f"{host}:{port}:{label}"
 
         self._ws: ClientWebSocketResponse | None = None
         self._ws_task: Task[None] | None = None
@@ -58,7 +57,7 @@ class Node:
         self._available = False
         self._backoff = ExponentialBackoff()
 
-        self._players: dict[int, Player] = {}
+        self.players: dict[int, Player] = {}
 
     @property
     def host(self) -> str:
@@ -80,7 +79,7 @@ class Node:
     def secure(self) -> bool:
         return self._secure
 
-    async def _connect(self) -> None:
+    async def connect(self) -> None:
         await self._client.wait_until_ready()
         assert self._client.user is not None
 
@@ -131,7 +130,7 @@ class Node:
                 _log.warning("Websocket closed, reconnecting in %.2f...", wait_time)
 
                 await sleep(wait_time)
-                create_task(self._connect())
+                create_task(self.connect())
                 return
             else:
                 create_task(self._handle_msg(message.json(loads=loads)))
@@ -149,7 +148,7 @@ class Node:
 
         if data["op"] == "playerUpdate":
             guild_id = int(data["guildId"])
-            player = self._players.get(guild_id)
+            player = self.players.get(guild_id)
 
             if player is None:
                 _log.error(

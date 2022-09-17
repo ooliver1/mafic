@@ -5,13 +5,14 @@ from __future__ import annotations
 from random import choice
 from typing import TYPE_CHECKING
 
+from .node import Node
+
 if TYPE_CHECKING:
     from typing import ClassVar, Optional
 
     from aiohttp import ClientSession
 
     from .__libraries import Client
-    from .node import Node
 
 
 class NodePool:
@@ -22,7 +23,7 @@ class NodePool:
         return self._nodes
 
     @classmethod
-    def create_node(
+    async def create_node(
         cls,
         *,
         host: str,
@@ -34,6 +35,7 @@ class NodePool:
         heartbeat: int = 30,
         timeout: float = 10,
         session: ClientSession | None = None,
+        resume_key: str | None = None,
     ) -> Node:
         node = Node(
             host=host,
@@ -45,10 +47,13 @@ class NodePool:
             heartbeat=heartbeat,
             timeout=timeout,
             session=session,
+            resume_key=resume_key,
         )
 
         # TODO: assign dicts for regions and such
         cls._nodes[label] = node
+
+        await node.connect()
 
         return node
 

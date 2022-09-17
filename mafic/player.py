@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from .__libraries import (
         Client,
         Connectable,
+        GuildChannel,
         GuildVoiceStatePayload,
         VoiceServerUpdatePayload,
     )
@@ -59,7 +60,12 @@ class Player(VoiceProtocol):
         self_mute: bool = False,
         self_deaf: bool = False,
     ) -> None:
-        raise NotImplementedError
+        if not isinstance(self.channel, GuildChannel):
+            raise TypeError("Voice channel must be a GuildChannel.")
+
+        await self.channel.guild.change_voice_state(
+            channel=self.channel, self_mute=self_mute, self_deaf=self_deaf
+        )
 
     async def disconnect(self, *, force: bool) -> None:
         self.cleanup()
