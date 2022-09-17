@@ -81,6 +81,7 @@ jobs:
           # only add comments for 3.8
           no-comments: ${{ matrix.python-version != '3.8' }}
           warnings: true
+          verify-types: mafic
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v1.0.3
@@ -93,6 +94,7 @@ jobs:
           # only add comments for one platform
           no-comments: true
           warnings: true
+          verify-types: mafic
 
   slotscheck:
     runs-on: ubuntu-latest
