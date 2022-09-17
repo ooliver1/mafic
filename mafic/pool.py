@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from logging import getLogger
 from random import choice
 from typing import TYPE_CHECKING
 
@@ -13,6 +14,9 @@ if TYPE_CHECKING:
     from aiohttp import ClientSession
 
     from .__libraries import Client
+
+
+_log = getLogger(__name__)
 
 
 class NodePool:
@@ -53,6 +57,7 @@ class NodePool:
         # TODO: assign dicts for regions and such
         cls._nodes[label] = node
 
+        _log.info("Created node, connecting it...", extra={"label": label})
         await node.connect()
 
         return node

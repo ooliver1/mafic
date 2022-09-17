@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from logging import getLogger
 from typing import TYPE_CHECKING
 
 from .__libraries import VoiceProtocol
@@ -16,6 +17,9 @@ if TYPE_CHECKING:
         VoiceServerUpdatePayload,
     )
     from .node import Node
+
+
+_log = getLogger(__name__)
 
 
 class Player(VoiceProtocol):
@@ -39,6 +43,7 @@ class Player(VoiceProtocol):
 
     async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
         if self._node is None:
+            _log.debug("Getting best node for player", extra={"guild": self._guild_id})
             self._node = NodePool.get_node(
                 guild_id=data["guild_id"], endpoint=data["endpoint"]
             )
@@ -46,6 +51,7 @@ class Player(VoiceProtocol):
         self._server_state = data
 
         if self._guild_id is None or self._session_id is None:
+            _log.warn("Ignoring voice server update as guild and session are unknown.")
             return
 
         await self._node.send_voice_server_update(
@@ -62,6 +68,8 @@ class Player(VoiceProtocol):
     ) -> None:
         if not isinstance(self.channel, GuildChannel):
             raise TypeError("Voice channel must be a GuildChannel.")
+
+        _log.debug("Connecting to voice channel %s", self.channel.id)
 
         await self.channel.guild.change_voice_state(
             channel=self.channel, self_mute=self_mute, self_deaf=self_deaf

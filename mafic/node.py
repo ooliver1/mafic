@@ -55,7 +55,6 @@ class Node:
         self._ws_task: Task[None] | None = None
 
         self._available = False
-        self._backoff = ExponentialBackoff()
 
         self.players: dict[int, Player] = {}
 
@@ -80,6 +79,7 @@ class Node:
         return self._secure
 
     async def connect(self) -> None:
+        _log.info("Waiting for client to be ready...", extra={"label": self._label})
         await self._client.wait_until_ready()
         assert self._client.user is not None
 
@@ -95,45 +95,84 @@ class Node:
             "Resume-Key": self._resume_key,
         }
 
+        _log.info(
+            "Connecting to lavalink at %s...",
+            self._rest_uri,
+            extra={"label": self._label},
+        )
         self._ws = await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
             self._ws_uri,
             timeout=self._timeout,
             heartbeat=self._heartbeat,
             headers=headers,
         )
+        _log.info("Connected to lavalink.", extra={"label": self._label})
+        _log.debug(
+            "Creating task to send configuration to resume with key %s",
+            self._resume_key,
+            extra={"label": self._label},
+        )
+
         create_task(self.send_resume_configuration())
+
+        _log.info(
+            "Creating task for websocket listener...", extra={"label": self._label}
+        )
         self._ws_task = create_task(
             self._ws_listener(), name=f"mafic node {self._label}"
         )
 
+        _log.info(
+            "Node %s is now available.", self._label, extra={"label": self._label}
+        )
         self._available = True
 
-        await sleep(1)
-        if self._available:
-            self._backoff = ExponentialBackoff()
-
     async def _ws_listener(self) -> None:
+        backoff = ExponentialBackoff()
+
         if self._ws is None:
+            _log.error(
+                "No websocket was found, aborting listener.",
+                extra={"label": self._label},
+            )
             raise RuntimeError(
                 "Websocket is not connected but attempted to listen, report this."
             )
 
-        async for message in self._ws:
+        # To catch closing messages, we cannot use async for.
+        while True:
+            msg = await self._ws.receive()
+
+            _log.debug("Received message from websocket.", extra={"label": self._label})
+
             # Please aiohttp, fix your typehints.
-            _type: WSMsgType = message.type  # pyright: ignore[reportUnknownMemberType]
+            _type: WSMsgType = msg.type  # pyright: ignore[reportUnknownMemberType]
 
             if _type is WSMsgType.CLOSED:
                 self._available = False
+                close_code = self._ws.close_code
                 self._ws = None
 
-                wait_time = self._backoff.delay()
-                _log.warning("Websocket closed, reconnecting in %.2f...", wait_time)
+                wait_time = backoff.delay()
+                _log.warn(
+                    "Websocket was closed from host %s port %s with RFC 6455 code %s. "
+                    "Reconnecting in %.2fs",
+                    self._host,
+                    self._port,
+                    close_code,
+                    wait_time,
+                    extra={"label": self._label},
+                )
 
                 await sleep(wait_time)
                 create_task(self.connect())
                 return
             else:
-                create_task(self._handle_msg(message.json(loads=loads)))
+                _log.debug(
+                    "Creating task to handle websocket message.",
+                    extra={"label": self._label},
+                )
+                create_task(self._handle_msg(msg.json(loads=loads)))
 
     async def __send(self, data: OutgoingMessage) -> None:
         if self._ws is None:
@@ -141,6 +180,7 @@ class Node:
                 "Websocket is not connected but attempted to send, report this."
             )
 
+        _log.debug("Sending message to websocket.", extra={"label": self._label})
         await self._ws.send_json(data, dumps=dumps)
 
     async def _handle_msg(self, data: IncomingMessage) -> None:
@@ -164,7 +204,7 @@ class Node:
         else:
             # Of course pyright considers this to be `Never`, so this is to keep types.
             op = cast(str, data["op"])
-            _log.warn("Unknown incoming op code %s", op)
+            _log.warn("Unknown incoming message op code %s", op)
 
     async def _handle_event(self, data: EventPayload) -> None:
         if data["type"] == "WebSocketClosedEvent":
@@ -192,6 +232,12 @@ class Node:
     def send_voice_server_update(
         self, guild_id: int, session_id: str, data: VoiceServerUpdatePayload
     ) -> Coro[None]:
+        _log.debug(
+            "Sending voice server update to lavalink with data %s.",
+            data,
+            extra={"label": self._label, "guild": guild_id},
+        )
+
         return self.__send(
             {
                 "op": "voiceUpdate",
@@ -202,6 +248,12 @@ class Node:
         )
 
     def send_resume_configuration(self) -> Coro[None]:
+        _log.info(
+            "Sending resume configuration to lavalink with resume key %s.",
+            self._resume_key,
+            extra={"label": self._label},
+        )
+
         return self.__send(
             {
                 "op": "configureResuming",
