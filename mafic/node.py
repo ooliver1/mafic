@@ -229,11 +229,14 @@ class Node:
             event_type = cast(str, data["type"])
             _log.warn("Unknown incoming event type %s", event_type)
 
-    def send_voice_server_update(
-        self, guild_id: int, session_id: str, data: VoiceServerUpdatePayload
+    def send_player_update(
+        self,
+        guild_id: int,
+        session_id: str,
+        data: VoiceServerUpdatePayload,
     ) -> Coro[None]:
         _log.debug(
-            "Sending voice server update to lavalink with data %s.",
+            "Sending player update to lavalink with data %s.",
             data,
             extra={"label": self._label, "guild": guild_id},
         )
@@ -259,5 +262,15 @@ class Node:
                 "op": "configureResuming",
                 "key": self._resume_key,
                 "timeout": 60,
+            }
+        )
+
+    def destroy(self, guild_id: int) -> Coro[None]:
+        _log.debug("Sending request to destroy player", extra={"label": self._label})
+
+        return self.__send(
+            {
+                "op": "destroy",
+                "guildId": str(guild_id),
             }
         )

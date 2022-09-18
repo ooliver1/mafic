@@ -13,8 +13,11 @@ __all__ = (
     "Client",
     "Connectable",
     "ExponentialBackoff",
+    "Guild",
     "GuildChannel",
     "GuildVoiceStatePayload",
+    "StageChannel",
+    "VoiceChannel",
     "VoiceProtocol",
     "VoiceServerUpdatePayload",
     "dumps",
@@ -47,7 +50,7 @@ else:
         simplefilter("ignore", RuntimeWarning)
         from nextcord.health_check import DistributionWarning
 
-        simplefilter("ignore", RuntimeWarning)
+        simplefilter("always", RuntimeWarning)
 
         simplefilter("ignore", DistributionWarning)
 
@@ -56,7 +59,7 @@ library = found[0]
 
 
 if library == "nextcord":
-    from nextcord import Client, VoiceProtocol
+    from nextcord import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
     from nextcord.abc import Connectable, GuildChannel
     from nextcord.backoff import ExponentialBackoff
     from nextcord.types.voice import (
@@ -64,7 +67,7 @@ if library == "nextcord":
         VoiceServerUpdate as VoiceServerUpdatePayload,
     )
 elif library == "disnake":
-    from disnake import Client, VoiceProtocol
+    from disnake import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
     from disnake.abc import Connectable, GuildChannel
     from disnake.backoff import ExponentialBackoff
     from disnake.types.voice import (
@@ -72,7 +75,7 @@ elif library == "disnake":
         VoiceServerUpdate as VoiceServerUpdatePayload,
     )
 else:
-    from discord import Client, VoiceProtocol
+    from discord import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
     from discord.abc import Connectable, GuildChannel
     from discord.backoff import ExponentialBackoff
     from discord.types.voice import (
