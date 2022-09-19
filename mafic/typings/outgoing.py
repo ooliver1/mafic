@@ -49,11 +49,11 @@ class VoiceStatePayload(PayloadWithGuild):
 class PlayPayload(PayloadWithGuild):
     op: Literal["play"]
     track: str
-    startTime: str
-    endTime: str
-    volume: str
-    noReplace: bool
-    pause: bool
+    startTime: NotRequired[str]
+    endTime: NotRequired[str]
+    volume: NotRequired[str]
+    noReplace: NotRequired[bool]
+    pause: NotRequired[bool]
 
 
 class StopPayload(PayloadWithGuild):

@@ -17,7 +17,13 @@ if TYPE_CHECKING:
 
     from .__libraries import Client, VoiceServerUpdatePayload
     from .player import Player
-    from .typings import Coro, EventPayload, IncomingMessage, OutgoingMessage
+    from .typings import (
+        Coro,
+        EventPayload,
+        IncomingMessage,
+        OutgoingMessage,
+        PlayPayload,
+    )
 
 _log = getLogger(__name__)
 
@@ -265,7 +271,7 @@ class Node:
             }
         )
 
-    def send_destroy(self, guild_id: int) -> Coro[None]:
+    def destroy(self, guild_id: int) -> Coro[None]:
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
         return self.__send(
@@ -274,6 +280,40 @@ class Node:
                 "guildId": str(guild_id),
             }
         )
+
+    def play(
+        self,
+        *,
+        guild_id: int,
+        track: str,
+        start_time: int | None,
+        end_time: int | None,
+        volume: int | None,
+        no_replace: bool | None,
+        pause: bool | None,
+    ) -> Coro[None]:
+        data: PlayPayload = {
+            "op": "play",
+            "guildId": str(guild_id),
+            "track": track,
+        }
+
+        if start_time is not None:
+            data["startTime"] = str(start_time)
+
+        if end_time is not None:
+            data["endTime"] = str(end_time)
+
+        if volume is not None:
+            data["volume"] = str(volume)
+
+        if no_replace is not None:
+            data["noReplace"] = no_replace
+
+        if pause is not None:
+            data["pause"] = pause
+
+        return self.__send(data)
 
     # TODO: play
     # TODO: stop
