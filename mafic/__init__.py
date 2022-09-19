@@ -20,6 +20,9 @@ from .errors import *
 from .node import *
 from .player import *
 
+# TODO: filters
+# TODO: tracks
+
 del __libraries
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

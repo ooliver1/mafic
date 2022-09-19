@@ -68,7 +68,7 @@ class Player(VoiceProtocol):
             _log.debug("Receieved player update before server state was found")
             return
 
-        await self._node.send_player_update(
+        await self._node.voice_update(
             guild_id=self._guild_id,
             session_id=self._session_id,
             data=self._server_state,
@@ -139,4 +139,4 @@ class Player(VoiceProtocol):
 
         if self._node is not None:
             self._node.players.pop(self.guild.id, None)
-            await self._node.destroy(guild_id=self.guild.id)
+            await self._node.send_destroy(guild_id=self.guild.id)

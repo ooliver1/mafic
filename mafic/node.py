@@ -113,7 +113,7 @@ class Node:
             extra={"label": self._label},
         )
 
-        create_task(self.send_resume_configuration())
+        create_task(self.configure_resuming())
 
         _log.info(
             "Creating task for websocket listener...", extra={"label": self._label}
@@ -229,7 +229,7 @@ class Node:
             event_type = cast(str, data["type"])
             _log.warn("Unknown incoming event type %s", event_type)
 
-    def send_player_update(
+    def voice_update(
         self,
         guild_id: int,
         session_id: str,
@@ -250,7 +250,7 @@ class Node:
             }
         )
 
-    def send_resume_configuration(self) -> Coro[None]:
+    def configure_resuming(self) -> Coro[None]:
         _log.info(
             "Sending resume configuration to lavalink with resume key %s.",
             self._resume_key,
@@ -265,7 +265,7 @@ class Node:
             }
         )
 
-    def destroy(self, guild_id: int) -> Coro[None]:
+    def send_destroy(self, guild_id: int) -> Coro[None]:
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
         return self.__send(
@@ -274,3 +274,17 @@ class Node:
                 "guildId": str(guild_id),
             }
         )
+
+    # TODO: play
+    # TODO: stop
+    # TODO: pause
+    # TODO: seek
+    # TODO: volume
+    # TODO: filter
+    # TODO: API routes:
+    # TODO: fetch tracks
+    # TODO: decode track
+    # TODO: plugins
+    # TODO: route planner status
+    # TODO: unmark failed address
+    # TODO: unmark all failed addresses
