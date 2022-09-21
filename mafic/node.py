@@ -11,6 +11,7 @@ from aiohttp import ClientSession, WSMsgType
 
 from .__libraries import ExponentialBackoff, dumps, loads
 from .errors import TrackLoadException
+from .playlist import Playlist
 from .track import Track
 
 if TYPE_CHECKING:
@@ -368,7 +369,7 @@ class Node:
 
     async def fetch_tracks(
         self, query: str, *, search_type: str
-    ) -> list[Track] | None:  # TODO: | Playlist
+    ) -> list[Track] | Playlist | None:
         if not URL_REGEX.match(query):
             query = f"{search_type}:{query}"
 
@@ -385,7 +386,7 @@ class Node:
             return [Track(**data["tracks"][0])]
         elif data["loadType"] == "PLAYLIST_LOADED":
             # TODO: handle playlists
-            ...
+            return Playlist(info=data["playlistInfo"], tracks=data["tracks"])
         elif data["loadType"] == "SEARCH_RESULT":
             return [Track(**track) for track in data["tracks"]]
         elif data["loadType"] == "LOAD_FAILED":
