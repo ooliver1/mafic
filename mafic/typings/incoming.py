@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
     from typing_extensions import NotRequired
 
+    from .misc import FriendlyWithCause
+
 __all__ = (
     "EventPayload",
     "PlayerUpdatePayload",
@@ -91,17 +93,11 @@ class TrackEndEvent(PayloadWithGuild):
     ]
 
 
-class FriendlyException(TypedDict):
-    message: str
-    cause: str
-    severity: Literal["COMMON", "SUSPICIOUS", "FAULT"]
-
-
 class TrackExceptionEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackExceptionEvent"]
     track: str
-    error: FriendlyException
+    error: FriendlyWithCause
 
 
 class TrackStuckEvent(PayloadWithGuild):

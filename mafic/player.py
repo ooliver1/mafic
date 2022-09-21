@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from .__libraries import GuildChannel, StageChannel, VoiceChannel, VoiceProtocol
 from .pool import NodePool
+from .search_type import SearchType
 
 if TYPE_CHECKING:
     from .__libraries import (
@@ -53,9 +54,7 @@ class Player(VoiceProtocol):
     def is_connected(self):
         return self._connected
 
-    async def _dispatch_player_update(
-        self, data: GuildVoiceStatePayload | VoiceServerUpdatePayload
-    ) -> None:
+    async def _dispatch_player_update(self) -> None:
         if self._node is None:
             _log.debug("Recieved voice update before node was found.")
             return
@@ -85,10 +84,16 @@ class Player(VoiceProtocol):
         self.channel = channel
 
         if self._session_id != before_session_id:
-            await self._dispatch_player_update(data)
+            await self._dispatch_player_update()
 
     async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
-        if self._node is None:
+        # Fetch the best node as we either don't know the best one yet.
+        # Or the node we were using was not the best one (endpoint optimisation).
+        if (
+            self._node is None
+            or self._server_state is None
+            or self._server_state["endpoint"] != data["endpoint"]
+        ):
             _log.debug("Getting best node for player", extra={"guild": self._guild_id})
             self._node = NodePool.get_node(
                 guild_id=data["guild_id"], endpoint=data["endpoint"]
@@ -99,7 +104,7 @@ class Player(VoiceProtocol):
         self._guild_id = int(data["guild_id"])
         self._server_state = data
 
-        await self._dispatch_player_update(data)
+        await self._dispatch_player_update()
 
     async def connect(
         self,
@@ -140,3 +145,18 @@ class Player(VoiceProtocol):
         if self._node is not None:
             self._node.players.pop(self.guild.id, None)
             await self._node.destroy(guild_id=self.guild.id)
+
+    async def fetch_tracks(
+        self, query: str, search_type: SearchType | str = SearchType.YOUTUBE
+    ):  # TODO:-> list[Track] | None:
+        if self._node is None:
+            # TODO: raise proper error
+            raise RuntimeError("No node found.")
+
+        raw_type: str
+        if isinstance(search_type, SearchType):
+            raw_type = search_type.value
+        else:
+            raw_type = search_type
+
+        return await self._node.fetch_tracks(query, search_type=raw_type)

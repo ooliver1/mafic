@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from .node import Node
 
 if TYPE_CHECKING:
-    from typing import ClassVar, Optional
+    from typing import ClassVar
 
     from aiohttp import ClientSession
 
@@ -63,7 +63,7 @@ class NodePool:
         return node
 
     @classmethod
-    def get_node(cls, *, guild_id: str | int, endpoint: Optional[str]) -> Node:
+    def get_node(cls, *, guild_id: str | int, endpoint: str | None) -> Node:
         # TODO: use guild id, endpoint and other stuff like usage to determine node
 
         return choice(list(cls._nodes.values()))

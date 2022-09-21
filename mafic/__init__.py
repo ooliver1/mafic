@@ -19,9 +19,12 @@ from . import __libraries
 from .errors import *
 from .node import *
 from .player import *
+from .pool import *
+from .search_type import *
+from .track import *
 
 # TODO: filters
-# TODO: tracks
+# TODO: playlists
 
 del __libraries
 

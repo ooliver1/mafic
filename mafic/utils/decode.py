@@ -82,7 +82,7 @@ class _TrackDataIterator(Iterator[int]):
         if not exists:
             return None
 
-        if (byte := next(self)) != 0 or (byte := next(self)) != 43:
+        if (byte := next(self)) != 0:
             raise ValueError(
                 "Attempted to traverse a track id "
                 f"and came across an unexpected character: {byte}."
@@ -102,9 +102,21 @@ def decode_track(track: str):
     is_stream = iterator.read_bool()
     if iterator.version >= 2:
         uri = iterator.read_nullable_str()
+        if uri is not None:
+            while not uri.startswith("http"):
+                uri = uri[1:]
     else:
         uri = None
 
     position = iterator.read_int()
+
+    # TODO: remove once tested enough
+    # print("title:".ljust(20), title)
+    # print("author:".ljust(20), author)
+    # print("length:".ljust(20), length)
+    # print("ident:".ljust(20), ident)
+    # print("is_stream:".ljust(20), is_stream)
+    # print("uri:".ljust(20), uri)
+    # print("position:".ljust(20), position)
 
     del title, author, length, ident, is_stream, uri, position

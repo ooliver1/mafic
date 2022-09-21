@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from asyncio import create_task, sleep
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
@@ -9,9 +10,12 @@ from typing import TYPE_CHECKING, cast
 from aiohttp import ClientSession, WSMsgType
 
 from .__libraries import ExponentialBackoff, dumps, loads
+from .errors import TrackLoadException
+from .track import Track
 
 if TYPE_CHECKING:
     from asyncio import Task
+    from typing import Any
 
     from aiohttp import ClientWebSocketResponse
 
@@ -20,12 +24,14 @@ if TYPE_CHECKING:
     from .typings import (
         Coro,
         EventPayload,
+        GetTracks,
         IncomingMessage,
         OutgoingMessage,
         PlayPayload,
     )
 
 _log = getLogger(__name__)
+URL_REGEX = re.compile(r"https?://")
 
 
 class Node:
@@ -90,7 +96,7 @@ class Node:
         assert self._client.user is not None
 
         if self.__session is None:
-            self.__session = ClientSession()
+            self.__session = await self._create_session()
 
         session = self.__session
 
@@ -112,6 +118,8 @@ class Node:
             heartbeat=self._heartbeat,
             headers=headers,
         )
+        # TODO: handle exceptions from ws_connect
+
         _log.info("Connected to lavalink.", extra={"label": self._label})
         _log.debug(
             "Creating task to send configuration to resume with key %s",
@@ -322,7 +330,69 @@ class Node:
     # TODO: volume
     # TODO: filter
     # TODO: API routes:
-    # TODO: fetch tracks
+
+    async def _create_session(self) -> ClientSession:
+        return ClientSession(json_serialize=dumps)
+
+    async def __request(
+        self,
+        method: str,
+        path: str,
+        json: Any | None = None,
+        params: dict[str, str] | None = None,
+    ) -> Any:
+        if self.__session is None:
+            self.__session = await self._create_session()
+
+        session = self.__session
+        uri = self._rest_uri + path
+
+        async with session.request(
+            method,
+            uri,
+            json=json,
+            params=params,
+            headers={"Authorization": self.__password},
+        ) as resp:
+            if not (200 <= resp.status < 300):
+                # TODO: raise proper error
+                raise RuntimeError(f"Got status code {resp.status} from lavalink.")
+
+            _log.debug(
+                "Received status %s from lavalink from path %s", resp.status, path
+            )
+
+            json = await resp.json(loads=loads)
+            _log.debug("Received raw data %s", json)
+            return json
+
+    async def fetch_tracks(
+        self, query: str, *, search_type: str
+    ) -> list[Track] | None:  # TODO: | Playlist
+        if not URL_REGEX.match(query):
+            query = f"{search_type}:{query}"
+
+        # TODO: handle errors from lavalink
+        # TODO: handle playlists
+        # TODO: return actual objects
+        data: GetTracks = await self.__request(
+            "GET", "/loadtracks", params={"identifier": query}
+        )
+
+        if data["loadType"] == "NO_MATCHES":
+            return []
+        elif data["loadType"] == "TRACK_LOADED":
+            return [Track(**data["tracks"][0])]
+        elif data["loadType"] == "PLAYLIST_LOADED":
+            # TODO: handle playlists
+            ...
+        elif data["loadType"] == "SEARCH_RESULT":
+            return [Track(**track) for track in data["tracks"]]
+        elif data["loadType"] == "LOAD_FAILED":
+            raise TrackLoadException(**data["exception"])
+        else:
+            _log.warning("Unknown load type recieved: %s", data["loadType"])
+
     # TODO: decode track
     # TODO: plugins
     # TODO: route planner status
