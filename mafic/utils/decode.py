@@ -17,6 +17,8 @@ def _bytes_to_int(bytes: list[int]) -> int:
 
 
 class _TrackDataIterator(Iterator[int]):
+    __slots__ = ("__previous_null", "flags", "iterable", "size", "version")
+
     TRACK_INFO_VERSIONED = 1
 
     def __init__(self, data: bytes):

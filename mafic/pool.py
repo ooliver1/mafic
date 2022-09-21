@@ -20,6 +20,7 @@ _log = getLogger(__name__)
 
 
 class NodePool:
+    __slots__ = ()
     _nodes: ClassVar[dict[str, Node]] = {}
 
     @property

@@ -11,6 +11,19 @@ __all__ = ("Track",)
 
 
 class Track:
+    __slots__ = (
+        "author",
+        "id",
+        "identifier",
+        "length",
+        "position",
+        "seekable",
+        "source",
+        "stream",
+        "title",
+        "uri",
+    )
+
     def __init__(self, track: str, info: TrackInfo) -> None:
         self.id = track
 

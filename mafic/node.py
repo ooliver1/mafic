@@ -36,6 +36,25 @@ URL_REGEX = re.compile(r"https?://")
 
 
 class Node:
+    __slots__ = (
+        "__password",
+        "__session",
+        "_available",
+        "_client",
+        "_heartbeat",
+        "_host",
+        "_label",
+        "_port",
+        "_resume_key",
+        "_secure",
+        "_timeout",
+        "_rest_uri",
+        "_ws",
+        "_ws_uri",
+        "_ws_task",
+        "players",
+    )
+
     def __init__(
         self,
         *,
