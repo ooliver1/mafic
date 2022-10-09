@@ -5,6 +5,8 @@ from __future__ import annotations
 from base64 import b64decode
 from typing import Iterator
 
+from ..track import Track
+
 __all__ = ("decode_track",)
 
 
@@ -17,27 +19,28 @@ def _bytes_to_int(bytes: list[int]) -> int:
 
 
 class _TrackDataIterator(Iterator[int]):
-    __slots__ = ("__previous_null", "flags", "iterable", "size", "version")
+    __slots__ = ("__previous_null", "flags", "__iterable", "size", "version")
 
-    TRACK_INFO_VERSIONED = 1
+    _TRACK_INFO_VERSIONED = 1
+    _FLAG_MASK = 0xC0000000
 
     def __init__(self, data: bytes):
-        self.iterable = iter(data)
+        self.__iterable = iter(data)
 
         # https://github.com/sedmelluq/lavaplayer/blob/97a8efecfe3cb79da4d7d0422de0179e18c30947/main/src/main/java/com/sedmelluq/discord/lavaplayer/tools/io/MessageInput.java#L37
         value = self.read_int(bit_length=4)
-        self.flags = (value & 0xC0000000) >> 30
+        self.flags = (value & self._FLAG_MASK) >> 30
         self.size = value & 0x3FFFFFFF
         self.version = (
-            self.read_int(bit_length=1)
-            if (self.flags & self.TRACK_INFO_VERSIONED) != 0
+            self.read_int(bit_length=1) & 0xFF
+            if (self.flags & self._TRACK_INFO_VERSIONED) != 0
             else 1
         )
         self.__previous_null = False
         """A value which only bool cares about, string sets it when it leaves."""
 
     def __next__(self) -> int:
-        b = next(self.iterable)
+        b = next(self.__iterable)
 
         try:
             if self.__previous_null and b:
@@ -93,15 +96,17 @@ class _TrackDataIterator(Iterator[int]):
         return self.read_str()
 
 
-def decode_track(track: str):
-    raw = b64decode(track)
+def decode_track(track_id: str) -> Track:
+    raw = b64decode(track_id)
+    print(raw)
     iterator = _TrackDataIterator(raw)
 
+    # https://github.com/sedmelluq/lavaplayer/blob/97a8efecfe3cb79da4d7d0422de0179e18c30947/main/src/main/java/com/sedmelluq/discord/lavaplayer/player/DefaultAudioPlayerManager.java#L268
     title = iterator.read_str()
     author = iterator.read_str()
     length = iterator.read_int()
-    ident = iterator.read_str()
-    is_stream = iterator.read_bool()
+    identifier = iterator.read_str()
+    stream = iterator.read_bool()
     if iterator.version >= 2:
         uri = iterator.read_nullable_str()
         if uri is not None:
@@ -110,15 +115,35 @@ def decode_track(track: str):
     else:
         uri = None
 
-    position = iterator.read_int()
+    source = iterator.read_str()
+
+    # HACK: Needs testing with an encoded track with a position.
+    # Who knows how you get that!?!?!?!?!??!?!?
+    try:
+        position = iterator.read_int()
+    except StopIteration:
+        position = 0
 
     # TODO: remove once tested enough
     # print("title:".ljust(20), title)
     # print("author:".ljust(20), author)
     # print("length:".ljust(20), length)
-    # print("ident:".ljust(20), ident)
-    # print("is_stream:".ljust(20), is_stream)
+    # print("identifier:".ljust(20), identifier)
+    # print("stream:".ljust(20), stream)
     # print("uri:".ljust(20), uri)
+    # print("source:".ljust(20), source)
     # print("position:".ljust(20), position)
 
-    del title, author, length, ident, is_stream, uri, position
+    return Track(
+        track_id=track_id,
+        title=title,
+        author=author,
+        length=length,
+        identifier=identifier,
+        stream=stream,
+        uri=uri,
+        source=source,
+        # https://github.com/sedmelluq/lavaplayer/blob/84f0d36a6b32a40bf9ab290ca5590d578ddc5d24/main/src/main/java/com/sedmelluq/discord/lavaplayer/track/BaseAudioTrack.java#L71
+        seekable=not stream,
+        position=position,
+    )

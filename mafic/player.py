@@ -6,8 +6,10 @@ from logging import getLogger
 from typing import TYPE_CHECKING
 
 from .__libraries import GuildChannel, StageChannel, VoiceChannel, VoiceProtocol
+from .playlist import Playlist
 from .pool import NodePool
 from .search_type import SearchType
+from .track import Track
 
 if TYPE_CHECKING:
     from .__libraries import (
@@ -24,17 +26,6 @@ _log = getLogger(__name__)
 
 
 class Player(VoiceProtocol):
-    __slots__ = (
-        "_connected",
-        "_guild_id",
-        "_node",
-        "_server_state",
-        "_session_id",
-        "channel",
-        "client",
-        "guild",
-    )
-
     def __init__(
         self,
         client: Client,
@@ -159,7 +150,7 @@ class Player(VoiceProtocol):
 
     async def fetch_tracks(
         self, query: str, search_type: SearchType | str = SearchType.YOUTUBE
-    ):  # TODO:-> list[Track] | None:
+    ) -> list[Track] | Playlist | None:
         if self._node is None:
             # TODO: raise proper error
             raise RuntimeError("No node found.")

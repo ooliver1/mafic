@@ -393,8 +393,6 @@ class Node:
             query = f"{search_type}:{query}"
 
         # TODO: handle errors from lavalink
-        # TODO: handle playlists
-        # TODO: return actual objects
         data: GetTracks = await self.__request(
             "GET", "/loadtracks", params={"identifier": query}
         )
@@ -402,12 +400,11 @@ class Node:
         if data["loadType"] == "NO_MATCHES":
             return []
         elif data["loadType"] == "TRACK_LOADED":
-            return [Track(**data["tracks"][0])]
+            return [Track.from_data(**data["tracks"][0])]
         elif data["loadType"] == "PLAYLIST_LOADED":
-            # TODO: handle playlists
             return Playlist(info=data["playlistInfo"], tracks=data["tracks"])
         elif data["loadType"] == "SEARCH_RESULT":
-            return [Track(**track) for track in data["tracks"]]
+            return [Track.from_data(**track) for track in data["tracks"]]
         elif data["loadType"] == "LOAD_FAILED":
             raise TrackLoadException(**data["exception"])
         else:
