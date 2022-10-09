@@ -68,3 +68,7 @@ class NodePool:
         # TODO: use guild id, endpoint and other stuff like usage to determine node
 
         return choice(list(cls._nodes.values()))
+
+    @classmethod
+    def get_random_node(cls) -> Node:
+        return choice(list(cls._nodes.values()))

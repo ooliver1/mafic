@@ -152,8 +152,13 @@ class Player(VoiceProtocol):
         self, query: str, search_type: SearchType | str = SearchType.YOUTUBE
     ) -> list[Track] | Playlist | None:
         if self._node is None:
-            # TODO: raise proper error
-            raise RuntimeError("No node found.")
+            _log.warning(
+                "Unable to use best node, player not connected, finding random node.",
+                extra={"guild": self._guild_id},
+            )
+            node = NodePool.get_random_node()
+        else:
+            node = self._node
 
         raw_type: str
         if isinstance(search_type, SearchType):
@@ -161,4 +166,4 @@ class Player(VoiceProtocol):
         else:
             raw_type = search_type
 
-        return await self._node.fetch_tracks(query, search_type=raw_type)
+        return await node.fetch_tracks(query, search_type=raw_type)
