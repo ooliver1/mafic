@@ -132,13 +132,24 @@ class Node:
             self._rest_uri,
             extra={"label": self._label},
         )
-        self._ws = await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
-            self._ws_uri,
-            timeout=self._timeout,
-            heartbeat=self._heartbeat,
-            headers=headers,
-        )
-        # TODO: handle exceptions from ws_connect
+
+        try:
+            self._ws = (
+                await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
+                    self._ws_uri,
+                    timeout=self._timeout,
+                    heartbeat=self._heartbeat,
+                    headers=headers,
+                )
+            )
+        except Exception as e:
+            _log.error(
+                "Failed to connect to lavalink at %s: %s",
+                self._rest_uri,
+                e,
+                extra={"label": self._label},
+            )
+            raise
 
         _log.info("Connected to lavalink.", extra={"label": self._label})
         _log.debug(
