@@ -24,7 +24,6 @@ from .search_type import *
 from .track import *
 
 # TODO: filters
-# TODO: playlists
 
 del __libraries
 
