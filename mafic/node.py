@@ -354,11 +354,41 @@ class Node:
 
         return self.__send(data)
 
-    # TODO: play
-    # TODO: stop
-    # TODO: pause
-    # TODO: seek
-    # TODO: volume
+    def stop(self, guild_id: int) -> Coro[None]:
+        return self.__send(
+            {
+                "op": "stop",
+                "guildId": str(guild_id),
+            }
+        )
+
+    def pause(self, guild_id: int, pause: bool) -> Coro[None]:
+        return self.__send(
+            {
+                "op": "pause",
+                "guildId": str(guild_id),
+                "pause": pause,
+            }
+        )
+
+    def seek(self, guild_id: int, position: int) -> Coro[None]:
+        return self.__send(
+            {
+                "op": "seek",
+                "guildId": str(guild_id),
+                "position": position,
+            }
+        )
+
+    def volume(self, guild_id: int, volume: int) -> Coro[None]:
+        return self.__send(
+            {
+                "op": "volume",
+                "guildId": str(guild_id),
+                "volume": volume,
+            }
+        )
+
     # TODO: filter
     # TODO: API routes:
 
