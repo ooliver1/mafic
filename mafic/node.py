@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, cast
 
 from aiohttp import ClientSession, WSMsgType
 
+from mafic.typings.http import TrackWithInfo
+
 from .__libraries import ExponentialBackoff, dumps, loads
 from .errors import TrackLoadException
 from .playlist import Playlist
@@ -30,6 +32,7 @@ if TYPE_CHECKING:
         IncomingMessage,
         OutgoingMessage,
         PlayPayload,
+        TrackInfo,
     )
 
 _log = getLogger(__name__)
@@ -461,7 +464,21 @@ class Node:
         else:
             _log.warning("Unknown load type recieved: %s", data["loadType"])
 
-    # TODO: decode track
+    async def decode_track(self, track: str) -> Track:
+        # TODO: handle errors from lavalink
+        info: TrackInfo = await self.__request(
+            "GET", "/decodetrack", params={"track": track}
+        )
+
+        return Track.from_data(track=track, info=info)
+
+    async def decode_tracks(self, tracks: list[str]) -> list[Track]:
+        track_data: list[TrackWithInfo] = await self.__request(
+            "POST", "/decodetracks", json=tracks
+        )
+
+        return [Track.from_data(**track) for track in track_data]
+
     # TODO: plugins
     # TODO: route planner status
     # TODO: unmark failed address
