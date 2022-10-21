@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 __all__ = (
     "GetTracks",
     "PlaylistInfo",
+    "PluginData",
     "Tracks",
     "TrackInfo",
     "TrackWithInfo",
@@ -55,3 +56,8 @@ class TracksFailed(TypedDict):
 
 
 GetTracks = Union[Tracks, TracksFailed]
+
+
+class PluginData(TypedDict):
+    name: str
+    version: str

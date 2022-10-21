@@ -14,6 +14,7 @@ from mafic.typings.http import TrackWithInfo
 from .__libraries import ExponentialBackoff, dumps, loads
 from .errors import TrackLoadException
 from .playlist import Playlist
+from .plugin import Plugin
 from .track import Track
 
 if TYPE_CHECKING:
@@ -32,6 +33,7 @@ if TYPE_CHECKING:
         IncomingMessage,
         OutgoingMessage,
         PlayPayload,
+        PluginData,
         TrackInfo,
     )
 
@@ -479,7 +481,11 @@ class Node:
 
         return [Track.from_data(**track) for track in track_data]
 
-    # TODO: plugins
+    async def fetch_plugins(self) -> list[Plugin]:
+        plugins: list[PluginData] = await self.__request("GET", "/plugins")
+
+        return [Plugin(**plugins) for plugins in plugins]
+
     # TODO: route planner status
     # TODO: unmark failed address
     # TODO: unmark all failed addresses
