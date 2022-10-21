@@ -17,13 +17,12 @@ import logging
 
 from . import __libraries
 from .errors import *
+from .filter import *
 from .node import *
 from .player import *
 from .pool import *
 from .search_type import *
 from .track import *
-
-# TODO: filters
 
 del __libraries
 

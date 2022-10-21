@@ -23,6 +23,7 @@ __all__ = (
     "OutgoingMessage",
     "PausePayload",
     "PlayPayload",
+    "RawFilterPayload",
     "Rotation",
     "SeekPayload",
     "StopPayload",
@@ -129,8 +130,7 @@ class LowPass(TypedDict):
     smoothing: float
 
 
-class FilterPayload(PayloadWithGuild):
-    op: Literal["filters"]
+class RawFilterPayload(TypedDict):
     volume: NotRequired[float]
     equalizer: NotRequired[list[EQBand]]
     karaoke: NotRequired[Karaoke]
@@ -141,6 +141,10 @@ class FilterPayload(PayloadWithGuild):
     distortion: NotRequired[Distortion]
     channelMix: NotRequired[ChannelMix]
     lowPass: NotRequired[LowPass]
+
+
+class FilterPayload(PayloadWithGuild, RawFilterPayload):
+    op: Literal["filters"]
 
 
 class DestroyPayload(PayloadWithGuild):

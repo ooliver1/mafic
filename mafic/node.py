@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from aiohttp import ClientWebSocketResponse
 
     from .__libraries import Client, VoiceServerUpdatePayload
+    from .filter import Filter
     from .player import Player
     from .typings import (
         Coro,
@@ -389,7 +390,16 @@ class Node:
             }
         )
 
-    # TODO: filter
+    def filter(self, guild_id: int, filter: Filter) -> Coro[None]:
+        return self.__send(
+            {
+                "op": "filters",
+                "guildId": str(guild_id),
+                # Lavalink uses inline filter properties, this adds every one of them.
+                **filter.payload,
+            }
+        )
+
     # TODO: API routes:
 
     async def _create_session(self) -> ClientSession:

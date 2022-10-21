@@ -167,3 +167,12 @@ class Player(VoiceProtocol):
             raw_type = search_type
 
         return await node.fetch_tracks(query, search_type=raw_type)
+
+    # TODO: controls:
+    # TODO: play
+    # TODO: pause
+    # TODO: stop
+    # TODO: filter
+    # TODO: volume
+    # TODO: seek
+    # TODO: pause
