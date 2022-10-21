@@ -13,6 +13,12 @@ from mafic.typings.http import TrackWithInfo
 
 from .__libraries import ExponentialBackoff, dumps, loads
 from .errors import TrackLoadException
+from .ip import (
+    BalancingIPRoutePlannerStatus,
+    NanoIPRoutePlannerStatus,
+    RotatingIPRoutePlannerStatus,
+    RotatingNanoIPRoutePlannerStatus,
+)
 from .playlist import Playlist
 from .plugin import Plugin
 from .track import Track
@@ -25,15 +31,21 @@ if TYPE_CHECKING:
 
     from .__libraries import Client, VoiceServerUpdatePayload
     from .filter import Filter
+    from .ip import RoutePlannerStatus
     from .player import Player
     from .typings import (
+        BalancingIPRouteDetails,
         Coro,
         EventPayload,
         GetTracks,
         IncomingMessage,
+        NanoIPRouteDetails,
         OutgoingMessage,
         PlayPayload,
         PluginData,
+        RotatingIPRouteDetails,
+        RotatingNanoIPRouteDetails,
+        RoutePlannerStatus as RoutePlannerStatusPayload,
         TrackInfo,
     )
 
@@ -486,6 +498,34 @@ class Node:
 
         return [Plugin(**plugins) for plugins in plugins]
 
-    # TODO: route planner status
-    # TODO: unmark failed address
-    # TODO: unmark all failed addresses
+    async def fetch_route_planner_status(self) -> RoutePlannerStatus | None:
+        data: RoutePlannerStatusPayload = await self.__request(
+            "GET", "/routeplanner/status"
+        )
+
+        if data["class"] == "RotatingIpRoutePlanner":
+            return RotatingIPRoutePlannerStatus(
+                cast(RotatingIPRouteDetails, data["details"])
+            )
+        elif data["class"] == "NanoIpRoutePlanner":
+            return NanoIPRoutePlannerStatus(cast(NanoIPRouteDetails, data["details"]))
+        elif data["class"] == "RotatingNanoIpRoutePlanner":
+            return RotatingNanoIPRoutePlannerStatus(
+                cast(RotatingNanoIPRouteDetails, data["details"])
+            )
+        elif data["class"] == "BalancingIpRoutePlanner":
+            return BalancingIPRoutePlannerStatus(
+                cast(BalancingIPRouteDetails, data["details"])
+            )
+        elif data["class"] is None:
+            return None
+        else:
+            raise RuntimeError(f"Unknown route planner class {data['class']}.")
+
+    async def unmark_failed_address(self, address: str) -> None:
+        await self.__request(
+            "POST", "/routeplanner/free/address", json={"address": address}
+        )
+
+    async def unmark_all_addresses(self) -> None:
+        await self.__request("POST", "/routeplanner/free/all")

@@ -10,9 +10,22 @@ if TYPE_CHECKING:
     from .misc import FriendlyException
 
 __all__ = (
+    "BalancingIPRouteDetails",
+    "BalancingIPRoutePlanner",
+    "BaseDetails",
+    "EmptyRoutePlanner",
+    "FailingIPAddress",
     "GetTracks",
+    "IPBlock",
+    "NanoIPRouteDetails",
+    "NanoIPRoutePlanner",
     "PlaylistInfo",
     "PluginData",
+    "RotatingIPRouteDetails",
+    "RotatingIPRoutePlanner",
+    "RotatingNanoIPRouteDetails",
+    "RotatingNanoIPRoutePlanner",
+    "RoutePlannerStatus",
     "Tracks",
     "TrackInfo",
     "TrackWithInfo",
@@ -61,3 +74,86 @@ GetTracks = Union[Tracks, TracksFailed]
 class PluginData(TypedDict):
     name: str
     version: str
+
+
+class IPBlock(TypedDict):
+    type: Literal["Inet4Address", "Inet6Address"]
+    size: str
+
+
+class FailingIPAddress(TypedDict):
+    address: str
+    failingTimestamp: int
+    failingTime: str
+
+
+class BaseDetails(TypedDict):
+    ipBlock: IPBlock
+    failingAddresses: list[FailingIPAddress]
+
+
+class RotatingIPRouteDetails(BaseDetails):
+    rotateIndex: str
+    ipIndex: str
+    currentAddress: str
+
+
+# Fields are named class
+RotatingIPRoutePlanner = TypedDict(
+    "RotatingIPRoutePlanner",
+    {
+        "class": Literal["RotatingIpRoutePlanner"],
+        "details": RotatingIPRouteDetails,
+    },
+)
+
+
+class NanoIPRouteDetails(BaseDetails):
+    currentAddressIndex: str
+
+
+NanoIPRoutePlanner = TypedDict(
+    "NanoIPRoutePlanner",
+    {
+        "class": Literal["NanoIpRoutePlanner"],
+        "details": NanoIPRouteDetails,
+    },
+)
+
+
+class RotatingNanoIPRouteDetails(BaseDetails):
+    blockIndex: str
+    currentAddressIndex: str
+
+
+RotatingNanoIPRoutePlanner = TypedDict(
+    "RotatingNanoIPRoutePlanner",
+    {
+        "class": Literal["RotatingNanoIpRoutePlanner"],
+        "details": RotatingNanoIPRouteDetails,
+    },
+)
+
+
+class BalancingIPRouteDetails(BaseDetails):
+    ...
+
+
+BalancingIPRoutePlanner = TypedDict(
+    "BalancingIPRoutePlanner",
+    {
+        "class": Literal["BalancingIpRoutePlanner"],
+        "details": BalancingIPRouteDetails,
+    },
+)
+
+
+EmptyRoutePlanner = TypedDict("EmptyRoutePlanner", {"class": None, "details": None})
+
+RoutePlannerStatus = Union[
+    RotatingIPRoutePlanner,
+    NanoIPRoutePlanner,
+    RotatingNanoIPRoutePlanner,
+    BalancingIPRoutePlanner,
+    EmptyRoutePlanner,
+]
