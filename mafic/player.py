@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from logging import getLogger
+from time import time
 from typing import TYPE_CHECKING
 
 from .__libraries import GuildChannel, StageChannel, VoiceChannel, VoiceProtocol
@@ -65,6 +66,7 @@ class Player(VoiceProtocol):
         self._position: int = 0
         self._last_update: int = 0
         self._ping = 0
+        self._current: Track | None = None
 
     @property
     def connected(self) -> bool:
@@ -72,7 +74,16 @@ class Player(VoiceProtocol):
 
     @property
     def position(self) -> int:
-        return self._position
+        pos = self._position
+
+        if self._connected and self._current is not None:
+            # Add the time since the last update to the position.
+            # If the track total time is less than that, use that.
+            pos = min(
+                self._current.length, pos + int((time() - self._last_update) * 1000)
+            )
+
+        return pos
 
     @property
     def ping(self) -> int:
