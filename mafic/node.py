@@ -257,7 +257,9 @@ class Node:
                 _log.error(
                     "Could not find player for guild %s, discarding event.", guild_id
                 )
+                return
 
+            player.update_state(data["state"])
             # TODO: update player
         elif data["op"] == "stats":
             # TODO

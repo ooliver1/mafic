@@ -20,12 +20,27 @@ if TYPE_CHECKING:
         VoiceServerUpdatePayload,
     )
     from .node import Node
+    from .typings import PlayerUpdateState
 
 
 _log = getLogger(__name__)
 
 
 class Player(VoiceProtocol):
+    __slots__ = (
+        "_connected",
+        "_guild_id",
+        "_last_update",
+        "_node",
+        "_ping",
+        "_position",
+        "_server_state",
+        "_session_id",
+        "channel",
+        "client",
+        "guild",
+    )
+
     def __init__(
         self,
         client: Client,
@@ -47,10 +62,38 @@ class Player(VoiceProtocol):
         self._session_id: str | None = None
         self._server_state: VoiceServerUpdatePayload | None = None
         self._connected: bool = False
+        self._position: int = 0
+        self._last_update: int = 0
+        self._ping = 0
 
     @property
     def connected(self) -> bool:
         return self._connected
+
+    @property
+    def position(self) -> int:
+        return self._position
+
+    @property
+    def ping(self) -> int:
+        return self._ping
+
+    @property
+    def node(self) -> Node:
+        if self._node is None:
+            _log.warning(
+                "Unable to use best node, player not connected, finding random node.",
+                extra={"guild": self._guild_id},
+            )
+            return NodePool.get_random_node()
+
+        return self._node
+
+    def update_state(self, state: PlayerUpdateState) -> None:
+        self._last_update = state["time"]
+        self._position = state.get("position", 0)
+        self._connected = state["connected"]
+        self._ping = state["ping"]
 
     # If people are so in love with the VoiceClient interface
     def is_connected(self):
@@ -151,14 +194,7 @@ class Player(VoiceProtocol):
     async def fetch_tracks(
         self, query: str, search_type: SearchType | str = SearchType.YOUTUBE
     ) -> list[Track] | Playlist | None:
-        if self._node is None:
-            _log.warning(
-                "Unable to use best node, player not connected, finding random node.",
-                extra={"guild": self._guild_id},
-            )
-            node = NodePool.get_random_node()
-        else:
-            node = self._node
+        node = self.node
 
         raw_type: str
         if isinstance(search_type, SearchType):

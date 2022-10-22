@@ -14,8 +14,12 @@ if TYPE_CHECKING:
     from .misc import FriendlyWithCause
 
 __all__ = (
+    "CPU",
     "EventPayload",
+    "FrameStats",
+    "Memory",
     "PlayerUpdatePayload",
+    "PlayerUpdateState",
     "StatsPayload",
     "IncomingMessage",
     "TrackEndEvent",
