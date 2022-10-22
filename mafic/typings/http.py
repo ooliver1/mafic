@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypedDict, Union
 
 if TYPE_CHECKING:
-    from typing import Literal
-
     from .misc import FriendlyException
 
 __all__ = (

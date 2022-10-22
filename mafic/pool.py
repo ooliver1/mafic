@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from logging import getLogger
 from random import choice
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
+from .__libraries import Client
 from .node import Node
 
 if TYPE_CHECKING:
@@ -13,13 +14,14 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientSession
 
-    from .__libraries import Client
+
+ClientT = TypeVar("ClientT", bound=Client)
 
 
 _log = getLogger(__name__)
 
 
-class NodePool:
+class NodePool(Generic[ClientT]):
     __slots__ = ()
     _nodes: ClassVar[dict[str, Node]] = {}
 
@@ -35,7 +37,7 @@ class NodePool:
         port: int,
         label: str,
         password: str,
-        client: Client,
+        client: ClientT,
         secure: bool = False,
         heartbeat: int = 30,
         timeout: float = 10,
