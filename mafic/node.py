@@ -21,6 +21,7 @@ from .ip import (
 )
 from .playlist import Playlist
 from .plugin import Plugin
+from .stats import NodeStats
 from .track import Track
 
 if TYPE_CHECKING:
@@ -67,6 +68,7 @@ class Node:
         "_secure",
         "_timeout",
         "_rest_uri",
+        "_stats",
         "_ws",
         "_ws_uri",
         "_ws_task",
@@ -108,6 +110,8 @@ class Node:
 
         self.players: dict[int, Player] = {}
 
+        self._stats: NodeStats | None = None
+
     @property
     def host(self) -> str:
         return self._host
@@ -127,6 +131,10 @@ class Node:
     @property
     def secure(self) -> bool:
         return self._secure
+
+    @property
+    def stats(self) -> NodeStats | None:
+        return self._stats
 
     async def connect(self) -> None:
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
@@ -260,10 +268,8 @@ class Node:
                 return
 
             player.update_state(data["state"])
-            # TODO: update player
         elif data["op"] == "stats":
-            # TODO
-            ...
+            self._stats = NodeStats(data)
         elif data["op"] == "event":
             await self._handle_event(data)
         else:
@@ -418,8 +424,6 @@ class Node:
                 **filter.payload,
             }
         )
-
-    # TODO: API routes:
 
     async def _create_session(self) -> ClientSession:
         return ClientSession(json_serialize=dumps)
