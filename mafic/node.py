@@ -350,17 +350,17 @@ class Node:
         self,
         *,
         guild_id: int,
-        track: str,
-        start_time: int | None,
-        end_time: int | None,
-        volume: int | None,
-        no_replace: bool | None,
-        pause: bool | None,
+        track: Track,
+        start_time: int | None = None,
+        end_time: int | None = None,
+        volume: int | None = None,
+        no_replace: bool | None = None,
+        pause: bool | None = None,
     ) -> Coro[None]:
         data: PlayPayload = {
             "op": "play",
             "guildId": str(guild_id),
-            "track": track,
+            "track": track.id,
         }
 
         if start_time is not None:

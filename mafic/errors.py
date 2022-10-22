@@ -7,6 +7,7 @@ __all__ = (
     "MaficException",
     "MultipleCompatibleLibraries",
     "NoCompatibleLibraries",
+    "PlayerNotConnected",
     "TrackLoadException",
 )
 
@@ -38,3 +39,8 @@ class MultipleCompatibleLibraries(LibraryCompatibilityError):
 class TrackLoadException(MaficException):
     def __init__(self, *, message: str, severity: str) -> None:
         super().__init__(f"The track could not be loaded: {message} ({severity} error)")
+
+
+class PlayerNotConnected(MaficException):
+    def __init__(self) -> None:
+        super().__init__("The player is not connected to a voice channel.")

@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
+from functools import reduce
 from logging import getLogger
+from operator import or_
 from time import time
 from typing import TYPE_CHECKING
 
 from .__libraries import GuildChannel, StageChannel, VoiceChannel, VoiceProtocol
+from .errors import PlayerNotConnected
+from .filter import Filter
 from .playlist import Playlist
 from .pool import NodePool
 from .search_type import SearchType
@@ -67,6 +72,7 @@ class Player(VoiceProtocol):
         self._last_update: int = 0
         self._ping = 0
         self._current: Track | None = None
+        self._filters: OrderedDict[str, Filter] = OrderedDict()
 
     @property
     def connected(self) -> bool:
@@ -215,11 +221,84 @@ class Player(VoiceProtocol):
 
         return await node.fetch_tracks(query, search_type=raw_type)
 
-    # TODO: controls:
-    # TODO: play
-    # TODO: pause
-    # TODO: stop
-    # TODO: filter
-    # TODO: volume
-    # TODO: seek
-    # TODO: pause
+    async def play(
+        self,
+        track: Track,
+        /,
+        *,
+        start_time: int | None = None,
+        end_time: int | None = None,
+        volume: int | None = None,
+        replace: bool = True,
+        pause: bool | None = None,
+    ) -> None:
+        if self._node is None or not self._connected:
+            raise PlayerNotConnected
+
+        await self._node.play(
+            guild_id=self._guild_id,
+            track=track,
+            start_time=start_time,
+            end_time=end_time,
+            volume=volume,
+            no_replace=not replace,
+            pause=pause,
+        )
+
+        self._current = track
+
+    async def pause(self, pause: bool = True) -> None:
+        if self._node is None or not self._connected:
+            raise PlayerNotConnected
+
+        await self._node.pause(guild_id=self._guild_id, pause=pause)
+
+    async def resume(self) -> None:
+        await self.pause(False)
+
+    async def stop(self) -> None:
+        if self._node is None or not self._connected:
+            raise PlayerNotConnected
+
+        await self._node.stop(guild_id=self._guild_id)
+
+    async def _update_filters(self, *, fast_apply: bool) -> None:
+        if self._node is None or not self._connected:
+            raise PlayerNotConnected
+
+        await self._node.filter(
+            guild_id=self._guild_id, filter=reduce(or_, self._filters.values())
+        )
+
+        if fast_apply:
+            await self.seek(self.position)
+
+    async def add_filter(
+        self, filter: Filter, /, *, label: str, fast_apply: bool = False
+    ) -> None:
+        self._filters[label] = filter
+
+        await self._update_filters(fast_apply=True)
+
+    async def remove_filter(self, label: str, *, fast_apply: bool = False) -> None:
+        self._filters.pop(label, None)
+
+        await self._update_filters(fast_apply=True)
+
+    async def clear_filters(self, *, fast_apply: bool = False) -> None:
+        self._filters.clear()
+
+        await self._update_filters(fast_apply=True)
+
+    async def set_volume(self, volume: int, /) -> None:
+        if self._node is None or not self._connected:
+            raise PlayerNotConnected
+
+        await self._node.volume(guild_id=self._guild_id, volume=volume)
+
+    async def seek(self, position: int, /) -> None:
+        if self._node is None or not self._connected:
+            raise PlayerNotConnected
+
+        await self._node.seek(guild_id=self._guild_id, position=position)
+        self._position = position

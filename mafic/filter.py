@@ -26,6 +26,7 @@ __all__ = (
     "ChannelMix",
     "Distortion",
     "EQBand",
+    "Filter",
     "Karaoke",
     "LowPass",
     "Rotation",
@@ -284,3 +285,6 @@ class Filter:
         self.channel_mix = self.channel_mix or other.channel_mix
         self.low_pass = self.low_pass or other.low_pass
         self.volume = self.volume or other.volume
+
+
+# TODO: people like easy default filters, add some default EQ and combo filters
