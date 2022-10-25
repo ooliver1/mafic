@@ -33,20 +33,6 @@ _log = getLogger(__name__)
 
 
 class Player(VoiceProtocol):
-    __slots__ = (
-        "_connected",
-        "_guild_id",
-        "_last_update",
-        "_node",
-        "_ping",
-        "_position",
-        "_server_state",
-        "_session_id",
-        "channel",
-        "client",
-        "guild",
-    )
-
     def __init__(
         self,
         client: Client,
