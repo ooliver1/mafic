@@ -99,7 +99,7 @@ class Player(VoiceProtocol):
         self._ping = state["ping"]
 
     # If people are so in love with the VoiceClient interface
-    def is_connected(self):
+    def is_connected(self) -> bool:
         return self._connected
 
     async def _dispatch_player_update(self) -> None:
