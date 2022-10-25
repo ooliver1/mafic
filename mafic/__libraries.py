@@ -67,19 +67,11 @@ if library == "nextcord":
         VoiceServerUpdate as VoiceServerUpdatePayload,
     )
 elif library == "disnake":
-    from typing import TypedDict
-
     from disnake import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
     from disnake.abc import Connectable, GuildChannel
     from disnake.backoff import ExponentialBackoff
-    from disnake.types.snowflake import Snowflake
+    from disnake.types.gateway import VoiceServerUpdateEvent as VoiceServerUpdatePayload
     from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload
-
-    class VoiceServerUpdatePayload(TypedDict):
-        token: str
-        guild_id: Snowflake
-        endpoint: str | None
-
 else:
     from discord import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
     from discord.abc import Connectable, GuildChannel
