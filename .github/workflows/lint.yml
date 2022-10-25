@@ -73,7 +73,7 @@ jobs:
         run: echo "PYRIGHT_VERSION=$(poetry run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_ENV
 
       - name: Run pyright (Linux)
-        uses: jakebailey/pyright-action@v1.2.0
+        uses: jakebailey/pyright-action@v1.4.1
         with:
           version: ${{ env.PYRIGHT_VERSION }}
           python-version: ${{ matrix.python-version }}
@@ -84,7 +84,7 @@ jobs:
           verify-types: mafic
 
       - name: Run pyright (Windows)
-        uses: jakebailey/pyright-action@v1.0.3
+        uses: jakebailey/pyright-action@v1.4.1
         # run anyway
         if: success() || failure()
         with:
