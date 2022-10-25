@@ -68,6 +68,7 @@ require-subclass = false
 [tool.pyright]
 typeCheckingMode = "strict"
 pythonVersion = "3.8"
+ignore = ["test_bot"]
 
 [tool.flake8]
 max-line-length = 88

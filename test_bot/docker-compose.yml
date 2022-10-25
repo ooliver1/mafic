@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  bot:
+    env_file: .env
+    depends_on:
+      - lavalink
+    links:
+      - lavalink
+    build: .
+    volumes:
+      - ./logs:/bot/logs
+      - ../mafic:/bot/mafic
+    environment:
+      LAVALINK_HOST: lavalink
+  lavalink:
+    build: lavalink
+    volumes:
+      - ./logs/lava:/opt/Lavalink/logs
