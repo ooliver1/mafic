@@ -5,6 +5,19 @@ description = "A properly typehinted lavalink client for discord.py, nextcord, d
 authors = ["ooliver1 <oliverwilkes2006@icloud.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/ooliver1/mafic"
+homepage = "https://github.com/ooliver1/mafic"
+keywords = ["nextcord", "disnake", "discord", "disnake.py", "lavalink", "lavalink.py"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Framework :: AsyncIO",
+    "Framework :: aiohttp",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
 
 packages = [
     { include = "mafic" },
