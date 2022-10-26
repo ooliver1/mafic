@@ -8,6 +8,7 @@
 [![Open Issues](https://custom-icon-badges.herokuapp.com/github/issues-raw/ooliver1/mafic?logo=issue-opened&color=ffb263)](https://github.com/ooliver1/mafic/issues "Open Issues")
 [![Open PRs](https://custom-icon-badges.herokuapp.com/github/issues-pr-raw/ooliver1/mafic?logo=git-pull-request&color=ffd55f)](https://github.com/ooliver1/mafic/pulls "Open Pull Requests")
 [![Last Commit](https://custom-icon-badges.herokuapp.com/github/last-commit/ooliver1/mafic?logo=git-commit&color=#f9f871)](https://github.com/ooliver1/mafic/commits/master)
+
 A properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord.
 
 ## Installation
