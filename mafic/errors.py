@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+    from .typings import FriendlyException
+
 __all__ = (
     "LibraryCompatibilityError",
     "MaficException",
@@ -39,6 +46,10 @@ class MultipleCompatibleLibraries(LibraryCompatibilityError):
 class TrackLoadException(MaficException):
     def __init__(self, *, message: str, severity: str) -> None:
         super().__init__(f"The track could not be loaded: {message} ({severity} error)")
+
+    @classmethod
+    def from_data(cls, data: FriendlyException) -> Self:
+        return cls(message=data["message"], severity=data["severity"])
 
 
 class PlayerNotConnected(MaficException):

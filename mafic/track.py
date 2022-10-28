@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .typings import TrackInfo
+    from .typings import TrackInfo, TrackWithInfo
 
 __all__ = ("Track",)
 
@@ -57,7 +57,7 @@ class Track:
         self.length: int = length
 
     @classmethod
-    def from_data(cls, track: str, info: TrackInfo) -> Self:
+    def from_data(cls, *, track: str, info: TrackInfo) -> Self:
         return cls(
             track_id=track,
             title=info["title"],
@@ -70,3 +70,7 @@ class Track:
             position=info["position"],
             length=info["length"],
         )
+
+    @classmethod
+    def from_data_with_info(cls, data: TrackWithInfo) -> Self:
+        return cls.from_data(track=data["track"], info=data["info"])

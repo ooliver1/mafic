@@ -7,6 +7,7 @@ from typing import Any, Coroutine, Literal, TypedDict, TypeVar
 __all__ = (
     "Coro",
     "ExceptionSeverity",
+    "FriendlyException",
     "PayloadWithGuild",
 )
 T = TypeVar("T")
