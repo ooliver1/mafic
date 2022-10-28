@@ -22,6 +22,7 @@ __all__ = (
     "VoiceServerUpdatePayload",
     "dumps",
     "loads",
+    "version_info",
 )
 
 libraries = ("nextcord", "disnake", "py-cord", "discord.py", "discord")
@@ -59,7 +60,14 @@ library = found[0]
 
 
 if library == "nextcord":
-    from nextcord import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
+    from nextcord import (
+        Client,
+        Guild,
+        StageChannel,
+        VoiceChannel,
+        VoiceProtocol,
+        version_info,
+    )
     from nextcord.abc import Connectable, GuildChannel
     from nextcord.backoff import ExponentialBackoff
     from nextcord.types.voice import (
@@ -67,13 +75,27 @@ if library == "nextcord":
         VoiceServerUpdate as VoiceServerUpdatePayload,
     )
 elif library == "disnake":
-    from disnake import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
+    from disnake import (
+        Client,
+        Guild,
+        StageChannel,
+        VoiceChannel,
+        VoiceProtocol,
+        version_info,
+    )
     from disnake.abc import Connectable, GuildChannel
     from disnake.backoff import ExponentialBackoff
     from disnake.types.gateway import VoiceServerUpdateEvent as VoiceServerUpdatePayload
     from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload
 else:
-    from discord import Client, Guild, StageChannel, VoiceChannel, VoiceProtocol
+    from discord import (
+        Client,
+        Guild,
+        StageChannel,
+        VoiceChannel,
+        VoiceProtocol,
+        version_info,
+    )
     from discord.abc import Connectable, GuildChannel
     from discord.backoff import ExponentialBackoff
     from discord.types.voice import (
