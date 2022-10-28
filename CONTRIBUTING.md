@@ -8,7 +8,7 @@ For questions and support, please use the [Discussions Page](https://github.com/
 
 ## I Found a Bug
 
-Please report bugs to [The Issues Page](https://github.com/nextcord/nextcord/issues/new/choose). Before reporting a bug, please do the following:
+Please report bugs to the [Issues Page](https://github.com/nextcord/nextcord/issues/new/choose). Before reporting a bug, please do the following:
 
 - Search the issue tracker to see if someone has already reported the bug.
 - If your issue involves a traceback, please include **all** of it. It contains important information that can help us diagnose the problem including where the issue occured.
