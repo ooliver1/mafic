@@ -1,0 +1,36 @@
+name: Feature Request
+description: Suggest a feature for mafic
+body:
+  - type: input
+    attributes:
+      label: Summary
+      description: >
+        A short summary of what your feature request is about.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: The Problem
+      description: >
+        Is there something this feature request is trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: The Ideal Solution
+      description: >
+        What is your ideal solution to the problem?
+        How do you want this feature to be used?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: The Current Solution
+      description: >
+        What is the current solution to the problem, if any?
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Is there anything else related to this feature request that we should know?

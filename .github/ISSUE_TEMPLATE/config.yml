@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ask a question
+    about: Ask questions and discuss with other users of the library.
+    url: https://github.com/ooliver1/mafic/discussions

@@ -55,11 +55,11 @@ py-cord = ["py-cord@^2.0.0"]
 
 [tool.taskipy.tasks]
 pre-commit = "pre-commit install --install-hooks"
-slotscheck = "slotscheck --verbose -m mafic"
 lint = "pre-commit run --all-files"
 black = "task lint black"
 isort = "task lint isort"
 flake8 = "task lint flake8"
+slotscheck = "task lint slotscheck"
 pyright = "dotenv -f task.env run -- pyright"
 
 [tool.black]
