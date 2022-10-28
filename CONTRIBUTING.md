@@ -1,6 +1,6 @@
-# Contributing to Mafic
+# Contributing to mafic
 
-Thank you for your interest in contributing to Mafic! We welcome contributions from the community. This document outlines the process to help get your contribution accepted.
+Thank you for your interest in contributing to mafic! We welcome contributions from the community. This document outlines the process to help get your contribution accepted.
 
 ## I Have a Question
 
@@ -106,7 +106,7 @@ More specifically, we use the [Angular Types List](https://github.com/angular/an
 
 ### Scope
 
-`<scope>` is the name of the module affected (as perceived by the person reading the changelog generated from commit messages). Scope is not required when the change affects multiple modules. Some examples are:
+`[scope]` is the name of the module affected (as perceived by the person reading the changelog generated from commit messages). Scope is not required when the change affects multiple modules. Some examples are:
 
 - `node.py` - `node` is the scope
 - `track.py` - `track` is the scope

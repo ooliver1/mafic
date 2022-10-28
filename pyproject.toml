@@ -59,7 +59,7 @@ lint = "pre-commit run --all-files"
 black = "task lint black"
 isort = "task lint isort"
 flake8 = "task lint flake8"
-slotscheck = "taks lint slotscheck"
+slotscheck = "task lint slotscheck"
 pyright = "dotenv -f task.env run -- pyright"
 
 [tool.black]
