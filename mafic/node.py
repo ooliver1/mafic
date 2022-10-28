@@ -474,13 +474,13 @@ class Node:
         if data["loadType"] == "NO_MATCHES":
             return []
         elif data["loadType"] == "TRACK_LOADED":
-            return [Track.from_data(**data["tracks"][0])]
+            return [Track.from_data_with_info(data["tracks"][0])]
         elif data["loadType"] == "PLAYLIST_LOADED":
             return Playlist(info=data["playlistInfo"], tracks=data["tracks"])
         elif data["loadType"] == "SEARCH_RESULT":
-            return [Track.from_data(**track) for track in data["tracks"]]
+            return [Track.from_data_with_info(track) for track in data["tracks"]]
         elif data["loadType"] == "LOAD_FAILED":
-            raise TrackLoadException(**data["exception"])
+            raise TrackLoadException.from_data(data["exception"])
         else:
             _log.warning("Unknown load type recieved: %s", data["loadType"])
 
@@ -497,12 +497,12 @@ class Node:
             "POST", "/decodetracks", json=tracks
         )
 
-        return [Track.from_data(**track) for track in track_data]
+        return [Track.from_data_with_info(track) for track in track_data]
 
     async def fetch_plugins(self) -> list[Plugin]:
         plugins: list[PluginData] = await self.__request("GET", "/plugins")
 
-        return [Plugin(**plugins) for plugins in plugins]
+        return [Plugin.from_data(plugin) for plugin in plugins]
 
     async def fetch_route_planner_status(self) -> RoutePlannerStatus | None:
         data: RoutePlannerStatusPayload = await self.__request(
