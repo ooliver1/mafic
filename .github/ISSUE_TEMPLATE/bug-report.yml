@@ -1,0 +1,72 @@
+name: Bug Report
+description: Report issues with mafic to help us improve.
+labels:
+  - "t: unconfirmed bug"
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Thank you for taking your time to report a bug.
+        Please make sure to fill out the form below.
+  - type: input
+    attributes:
+      label: Summary
+      description: A short summary of the bug.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction Steps
+      description: >
+        How can others reproduce this bug?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Minimal Reproducible Code
+      description: >
+        The shortest snippet of code that shows this bug.
+      render: Python
+  - type: textarea
+    attributes:
+      label: Expected Results
+      description: >
+        What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Actual Results
+      description: >
+        What actually happened?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Lavalink Information
+      description: >
+        What is your Lavalink version?
+        This can be found in the Lavalink console or `java -jar Lavalink.jar -v`.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: System Information
+      description: >
+        Run `python -m mafic -v` and paste this information below.
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Checklist
+      description: >
+        Please make sure you've completed the following.
+      options:
+        - label: I have searched the open issues for duplicates.
+          required: true
+        - label: I have shown the entire traceback, if possible.
+          required: true
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Is there anything else related to this issue that we should know?
