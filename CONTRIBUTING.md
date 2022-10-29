@@ -57,29 +57,9 @@ Mafic follows the [Conventional Commits](https://www.conventionalcommits.org/en/
 
 Your commit messages should be in the present (imperative, 2nd person) tense, such as `Add`, not `Added`.
 
-Examples include:
-
-```txt
-feat: add support for some feature
-```
-
-```txt
-refactor(track)!: use a different method to get track info
-
-This is a breaking change because the method used to get track info has changed.
-```
-
-```txt
-fix(node): use a different method to connect to the node
-
-This fixes an issue where the node would not connect if the host was an IPV6 address.
-
-Co-Authored-By: Some Person <email@example.com>
-```
-
 More specifically, we use the [Angular Types List](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type) for commit types. This means that your commit messages should be formatted like this:
 
-```txt
+```text
 <type>([scope]): <subject>
 [BLANK LINE]
 [body]
@@ -89,6 +69,26 @@ More specifically, we use the [Angular Types List](https://github.com/angular/an
 
 > **Note**
 > The type and subject are mandatory.
+
+Examples include:
+
+```text
+feat: add support for some feature
+```
+
+```text
+refactor(track)!: use a different method to get track info
+
+This is a breaking change because the method used to get track info has changed.
+```
+
+```text
+fix(node): use a different method to connect to the node
+
+This fixes an issue where the node would not connect if the host was an IPV6 address.
+
+Co-Authored-By: Some Person <email@example.com>
+```
 
 ### Type
 
