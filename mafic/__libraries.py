@@ -85,7 +85,15 @@ elif library == "disnake":
     )
     from disnake.abc import Connectable, GuildChannel
     from disnake.backoff import ExponentialBackoff
-    from disnake.types.gateway import VoiceServerUpdateEvent as VoiceServerUpdatePayload
+
+    if version_info >= (2, 6):
+        from disnake.types.gateway import (
+            VoiceServerUpdateEvent as VoiceServerUpdatePayload,  # pyright: ignore
+        )
+    else:
+        from disnake.types.voice import (
+            VoiceServerUpdate as VoiceServerUpdatePayload,  # pyright: ignore
+        )
     from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload
 else:
     from discord import (

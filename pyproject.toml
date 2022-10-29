@@ -7,7 +7,16 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/ooliver1/mafic"
 homepage = "https://github.com/ooliver1/mafic"
-keywords = ["nextcord", "disnake", "discord", "disnake.py", "lavalink", "lavalink.py"]
+keywords = [
+    "nextcord",
+    "disnake",
+    "discord",
+    "disnake.py",
+    "lavalink",
+    "lavalink.py",
+    "pycord",
+    "py-cord"
+]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Framework :: AsyncIO",
