@@ -24,7 +24,7 @@ repos:
         additional_dependencies: [flake8-isort, Flake8-pyproject]
 
   - repo: https://github.com/ariebovenberg/slotscheck
-    rev: v0.14.1
+    rev: v0.16
     hooks:
       - id: slotscheck
         name: Running slotscheck in all files.
