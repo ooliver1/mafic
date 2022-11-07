@@ -113,14 +113,14 @@ Co-Authored-By: Some Person <email@example.com>
 - `typing/` - `typing` is the scope
 - `utils/` - `utils` is the scope
 
-## Subject
+### Subject
 
 The subject should be a short summary of the commit, the body can be used for more info, so do not cram so much into the subject. Ideally this should be 50 characters or less, but it is not a hard limit, 72 characters is fine if necessary.
 
-## Body
+### Body
 
 The body is an optional long description about the commit, this can be used to explain the motivation for the change, and can be used to give more context about the change. It is not required, but it is recommended.
 
-## Footer
+### Footer
 
 The footer contains optional metadata about the commit. These are sometimes added by git or similar tools, and examples include `Co-authored-by`, `Signed-off-by`, `Fixes`.
