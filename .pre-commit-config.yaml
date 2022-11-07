@@ -28,7 +28,7 @@ repos:
     hooks:
       - id: slotscheck
         name: Running slotscheck in all files.
-        exclude: "^(?!test_bot)"
+        exclude: "^(?!mafic/)"
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.3.0
