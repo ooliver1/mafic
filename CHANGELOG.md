@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0](https://github.com/ooliver1/mafic/compare/v0.1.0...v0.2.0) (2022-11-09)
+
+
+### Features
+
+* add mafic -v for version checking ([#5](https://github.com/ooliver1/mafic/issues/5)) ([3dbf5ab](https://github.com/ooliver1/mafic/commit/3dbf5abfac4753e6ecb7488a83dd2ab13c87b382))
+* add node selection/balancing ([#18](https://github.com/ooliver1/mafic/issues/18)) ([f5fc457](https://github.com/ooliver1/mafic/commit/f5fc457cf8274d4ace042e7cbf4342949ceaf7a7))
+
+
+### Reverts
+
+* "ci: ignore test bot from snyk analysis" ([92c7482](https://github.com/ooliver1/mafic/commit/92c74820b04a0271f4ff81253f3844471c6bd1c2))
+
+
+### Documentation
+
+* add documentation for contributing ([#6](https://github.com/ooliver1/mafic/issues/6)) ([81fde97](https://github.com/ooliver1/mafic/commit/81fde97b32296d109968142fdc13535e6cd56da9))
+* **contributing:** use level 3 headers for commits ([452edf2](https://github.com/ooliver1/mafic/commit/452edf27673f2a5f21cb5b5713fff8f1a6862ac4))
+* **contributing:** what a shambles ([c4be211](https://github.com/ooliver1/mafic/commit/c4be2110c70f0946f6cefab4be5e49b41a1cc0fd))
+* **readme:** add fancy new shields.io badges ([#2](https://github.com/ooliver1/mafic/issues/2)) ([1af8fa1](https://github.com/ooliver1/mafic/commit/1af8fa1f955e0ad307acc0d36838b9fabaf20603))
+
 ## 0.1.0 (2022-10-25)
 
 
