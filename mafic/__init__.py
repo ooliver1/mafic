@@ -23,6 +23,7 @@ from .player import *
 from .pool import *
 from .region import *
 from .search_type import *
+from .strategy import *
 from .track import *
 
 del __libraries
