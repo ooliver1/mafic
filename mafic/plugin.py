@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from .typings import PluginData
 
 
+__all__ = ("Plugin",)
+
+
 @dataclass(repr=True)
 class Plugin:
     name: str
