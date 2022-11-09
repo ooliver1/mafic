@@ -7,37 +7,6 @@ on:
   pull_request:
 
 jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Set up python
-        id: setup-python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Load cached Poetry installation
-        uses: actions/cache@v2
-        with:
-          path: ~/.local
-          key: poetry-0
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install dependencies
-        run: poetry install --no-interaction --with lint
-
-      - name: Use venv
-        run: source "$( poetry env list --full-path | grep Activated | cut -d' ' -f1 )/bin/activate"
-
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.0
-
   pyright:
     runs-on: ubuntu-latest
     strategy:
