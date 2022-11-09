@@ -21,12 +21,13 @@ from .ip import (
 )
 from .playlist import Playlist
 from .plugin import Plugin
+from .region import VOICE_TO_REGION, Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
 
 if TYPE_CHECKING:
     from asyncio import Task
-    from typing import Any
+    from typing import Any, Sequence
 
     from aiohttp import ClientWebSocketResponse
 
@@ -53,6 +54,33 @@ if TYPE_CHECKING:
 _log = getLogger(__name__)
 URL_REGEX = re.compile(r"https?://")
 
+__all__ = ("Node",)
+
+
+def _wrap_regions(
+    regions: Sequence[Group | Region | VoiceRegion] | None,
+) -> list[Region] | None:
+    if not regions:
+        return None
+
+    actual_regions: list[Region] = []
+
+    for item in regions:
+        if isinstance(item, Group):
+            actual_regions.extend(item.value)
+        elif isinstance(item, Region):
+            actual_regions.append(item)
+        elif isinstance(
+            item, VoiceRegion
+        ):  # pyright: ignore[reportUnnecessaryIsInstance]
+            actual_regions.append(VOICE_TO_REGION[item.value])
+        else:
+            raise TypeError(
+                f"Expected Group, Region, or VoiceRegion, got {type(item)!r}."
+            )
+
+    return actual_regions
+
 
 class Node:
     __slots__ = (
@@ -73,6 +101,8 @@ class Node:
         "_ws_uri",
         "_ws_task",
         "players",
+        "regions",
+        "shard_ids",
     )
 
     def __init__(
@@ -88,6 +118,8 @@ class Node:
         timeout: float = 10,
         session: ClientSession | None = None,
         resume_key: str | None = None,
+        regions: Sequence[Group | Region | VoiceRegion] | None = None,
+        shard_ids: Sequence[int] | None = None,
     ) -> None:
         self._host = host
         self._port = port
@@ -98,6 +130,8 @@ class Node:
         self._timeout = timeout
         self._client = client
         self.__session = session
+        self.shard_ids: Sequence[int] | None = shard_ids
+        self.regions: list[Region] | None = _wrap_regions(regions)
 
         self._rest_uri = f"http{'s' if secure else ''}://{host}:{port}"
         self._ws_uri = f"ws{'s' if secure else ''}://{host}:{port}"
@@ -135,6 +169,72 @@ class Node:
     @property
     def stats(self) -> NodeStats | None:
         return self._stats
+
+    @property
+    def available(self) -> bool:
+        return self._available
+
+    @property
+    def weight(self) -> float:
+        if self._stats is None:
+            # Stats haven't been set yet, so we'll just return a high value.
+            # This is so we can properly balance known nodes.
+            # If stats sending is turned off
+            # - that's on the user
+            # - they likely have done it on all if they have multiple, so it is equal
+            return 6.63e34
+
+        stats = self._stats
+
+        players = stats.playing_player_count
+
+        # These are exponential equations.
+
+        # Load is *basically* a percentage (I know it isn't but it is close enough).
+
+        # | cores | load | weight |
+        # |-------|------|--------|
+        # | 1     | 0.1  | 16     |
+        # | 1     | 0.5  | 114    |
+        # | 1     | 0.75 | 388    |
+        # | 1     | 1    | 1315   |
+        # | 3     | 0.1  | 12     |
+        # | 3     | 1    | 51     |
+        # | 3     | 2    | 259    |
+        # | 3     | 3    | 1315   |
+        cpu = 1.05 ** (100 * (stats.cpu.system_load / stats.cpu.cores)) * 10 - 10
+
+        # | null frames | weight |
+        # | ----------- | ------ |
+        # | 10          | 30     |
+        # | 20          | 62     |
+        # | 100         | 382    |
+        # | 250         | 1456   |
+
+        frame_stats = stats.frame_stats
+        if frame_stats is None:
+            null = 0
+            deficit = 0
+        else:
+            null = 1.03 ** (frame_stats.nulled / 6) * 600 - 600
+            deficit = 1.03 ** (frame_stats.deficit / 6) * 600 - 600
+
+        # High memory usage isnt bad, but we generally don't want to overload it.
+        # Especially due to the chance of regular GC pauses.
+
+        # | memory usage | weight |
+        # | ------------ | ------ |
+        # | 96%          | 0      |
+        # | 97%          | 9      |
+        # | 98%          | 99     |
+        # | 99%          | 999    |
+        # | 99.5%        | 3161   |
+        # | 100%         | 9999   |
+
+        mem_stats = stats.memory
+        mem = max(10 ** (100 * (mem_stats.used / mem_stats.reservable) - 96), 1) - 1
+
+        return players + cpu + null + deficit + mem
 
     async def connect(self) -> None:
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
@@ -256,6 +356,7 @@ class Node:
 
     async def _handle_msg(self, data: IncomingMessage) -> None:
         _log.debug("Received event with op %s", data["op"])
+        _log.debug("Event data: %s", data)
 
         if data["op"] == "playerUpdate":
             guild_id = int(data["guildId"])
