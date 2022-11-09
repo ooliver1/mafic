@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from asyncio import sleep
+from logging import DEBUG, getLogger
 from os import getenv
 
 from botbase import BotBase
 from nextcord import Intents, Interaction
 
-from mafic import NodePool, Player
+from mafic import Group, NodePool, Player, Region
+
+getLogger("mafic").setLevel(DEBUG)
 
 
 class TestBot(BotBase):
@@ -14,7 +17,7 @@ class TestBot(BotBase):
         super().__init__(*args, **kwargs)
 
         self.ready_ran = False
-        self.pool = NodePool()
+        self.pool = NodePool(self)
 
     async def on_ready(self):
         if self.ready_ran:
@@ -23,11 +26,91 @@ class TestBot(BotBase):
         # Account for docker still starting up.
         await sleep(5)
         await self.pool.create_node(
-            host=getenv("LAVALINK_HOST"),
-            port=6969,
-            label="main",
+            host="127.0.0.1",
+            port=6962,
+            label="US-noshard",
             password="haha",
-            client=self,
+            regions=[Group.WEST, Region.OCEANIA, Region.EAST_ASIA],
+        )
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=6963,
+            label="EU-noshard",
+            password="haha",
+            regions=[
+                Group.CENTRAL,
+                Region.WEST_ASIA,
+                Region.NORTH_ASIA,
+                Region.SOUTH_ASIA,
+            ],
+        )
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=6964,
+            label="US-shard0",
+            password="haha",
+            regions=[Group.WEST, Region.OCEANIA, Region.EAST_ASIA],
+            shard_ids=[0],
+        )
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=6965,
+            label="US-shard1",
+            password="haha",
+            regions=[Group.WEST, Region.OCEANIA, Region.EAST_ASIA],
+            shard_ids=[1],
+        )
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=6966,
+            label="EU-shard0-1",
+            password="haha",
+            regions=[
+                Group.CENTRAL,
+                Region.WEST_ASIA,
+                Region.NORTH_ASIA,
+                Region.SOUTH_ASIA,
+            ],
+            shard_ids=[0],
+        )
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=6967,
+            label="EU-shard0-2",
+            password="haha",
+            regions=[
+                Group.CENTRAL,
+                Region.WEST_ASIA,
+                Region.NORTH_ASIA,
+                Region.SOUTH_ASIA,
+            ],
+            shard_ids=[0],
+        )
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=6968,
+            label="EU-shard1-1",
+            password="haha",
+            regions=[
+                Group.CENTRAL,
+                Region.WEST_ASIA,
+                Region.NORTH_ASIA,
+                Region.SOUTH_ASIA,
+            ],
+            shard_ids=[1],
+        )
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=6969,
+            label="EU-shard1-2",
+            password="haha",
+            regions=[
+                Group.CENTRAL,
+                Region.WEST_ASIA,
+                Region.NORTH_ASIA,
+                Region.SOUTH_ASIA,
+            ],
+            shard_ids=[1],
         )
 
         self.ready_ran = True
@@ -36,7 +119,7 @@ class TestBot(BotBase):
 intents = Intents.none()
 intents.guilds = True
 intents.voice_states = True
-bot = TestBot(intents=intents)
+bot = TestBot(intents=intents, shard_ids=[0, 1], shard_count=2)
 
 
 @bot.slash_command()

@@ -5,15 +5,16 @@ services:
     env_file: .env
     depends_on:
       - lavalink
-    links:
-      - lavalink
     build: .
     volumes:
       - ./logs:/bot/logs
       - ../mafic:/bot/mafic
-    environment:
-      LAVALINK_HOST: lavalink
+    network_mode: host
   lavalink:
     build: lavalink
     volumes:
-      - ./logs/lava:/opt/Lavalink/logs
+      - ./logs/lava2:/opt/Lavalink/logs
+    deploy:
+      replicas: 8
+    ports:
+      - "6962-6969:6969"
