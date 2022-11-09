@@ -147,6 +147,11 @@ class Player(VoiceProtocol):
             self._node = NodePool.get_node(
                 guild_id=data["guild_id"], endpoint=data["endpoint"]
             )
+            _log.debug(
+                "Got best node for player: %s",
+                self._node.label,
+                extra={"guild": self._guild_id},
+            )
 
         self._node.players[self._guild_id] = self
 
