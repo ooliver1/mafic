@@ -30,6 +30,7 @@ if TYPE_CHECKING:
 
 
 _log = getLogger(__name__)
+__all__ = ("Player",)
 
 
 class Player(VoiceProtocol):
@@ -56,7 +57,7 @@ class Player(VoiceProtocol):
         self._connected: bool = False
         self._position: int = 0
         self._last_update: int = 0
-        self._ping = 0
+        self._ping = -1
         self._current: Track | None = None
         self._filters: OrderedDict[str, Filter] = OrderedDict()
 
@@ -96,7 +97,7 @@ class Player(VoiceProtocol):
         self._last_update = state["time"]
         self._position = state.get("position", 0)
         self._connected = state["connected"]
-        self._ping = state["ping"]
+        self._ping = state.get("ping", -1)
 
     # If people are so in love with the VoiceClient interface
     def is_connected(self) -> bool:
@@ -145,6 +146,11 @@ class Player(VoiceProtocol):
             _log.debug("Getting best node for player", extra={"guild": self._guild_id})
             self._node = NodePool.get_node(
                 guild_id=data["guild_id"], endpoint=data["endpoint"]
+            )
+            _log.debug(
+                "Got best node for player: %s",
+                self._node.label,
+                extra={"guild": self._guild_id},
             )
 
         self._node.players[self._guild_id] = self

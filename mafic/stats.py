@@ -41,7 +41,7 @@ class FrameStats:
 
 class NodeStats:
     def __init__(self, data: StatsPayload) -> None:
-        self.player_coun: int = data["players"]
+        self.player_count: int = data["players"]
         self.playing_player_count: int = data["playingPlayers"]
         self.uptime: timedelta = timedelta(seconds=data["uptime"])
         self.memory: MemoryStats = MemoryStats(data["memory"])
