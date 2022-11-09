@@ -168,8 +168,8 @@ class Player(VoiceProtocol):
         self_mute: bool = False,
         self_deaf: bool = False,
     ) -> None:
-        if not isinstance(self.channel, GuildChannel):
-            raise TypeError("Voice channel must be a GuildChannel.")
+        if not isinstance(self.channel, (VoiceChannel, StageChannel)):
+            raise TypeError("Voice channel must be a VoiceChannel or StageChannel.")
 
         _log.debug("Connecting to voice channel %s", self.channel.id)
 
