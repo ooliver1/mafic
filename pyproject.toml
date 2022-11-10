@@ -38,7 +38,7 @@ aiohttp = "^3.6.0"
 orjson = {version = "^3.8.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
-pyright = "^1.1.270"
+pyright = "1.1.279"
 black = "^22.8.0"
 isort = "^5.10.1"
 taskipy = "^1.10.3"
