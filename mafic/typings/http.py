@@ -5,29 +5,37 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, TypedDict, Union
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
     from .misc import FriendlyException
 
 __all__ = (
     "BalancingIPRouteDetails",
     "BalancingIPRoutePlanner",
     "BaseDetails",
+    "ConfigureResumingResponse",
     "EmptyRoutePlanner",
     "FailingIPAddress",
+    "GenericTracks",
     "GetTracks",
+    "Git",
     "IPBlock",
+    "Info",
+    "NoMatches",
     "NanoIPRouteDetails",
     "NanoIPRoutePlanner",
     "PlaylistInfo",
+    "PlaylistTracks",
     "PluginData",
     "RotatingIPRouteDetails",
     "RotatingIPRoutePlanner",
     "RotatingNanoIPRouteDetails",
     "RotatingNanoIPRoutePlanner",
     "RoutePlannerStatus",
-    "Tracks",
     "TrackInfo",
     "TrackWithInfo",
     "TracksFailed",
+    "Version",
 )
 
 
@@ -49,24 +57,30 @@ class TrackInfo(TypedDict):
 
 
 class TrackWithInfo(TypedDict):
-    track: str
+    encoded: str
     info: TrackInfo
 
 
-class Tracks(TypedDict):
-    loadType: Literal["TRACK_LOADED", "PLAYLIST_LOADED", "SEARCH_RESULT", "NO_MATCHES"]
+class PlaylistTracks(TypedDict):
+    loadType: Literal["PLAYLIST_LOADED"]
     playlistInfo: PlaylistInfo
+
+
+class GenericTracks(TypedDict):
+    loadType: Literal["TRACK_LOADED", "SEARCH_RESULT"]
     tracks: list[TrackWithInfo]
 
 
 class TracksFailed(TypedDict):
     loadType: Literal["LOAD_FAILED"]
-    playlistInfo: PlaylistInfo
-    tracks: list[TrackWithInfo]
-    exception: FriendlyException
+    exception: NotRequired[FriendlyException]
 
 
-GetTracks = Union[Tracks, TracksFailed]
+class NoMatches(TypedDict):
+    loadType: Literal["NO_MATCHES"]
+
+
+GetTracks = Union[PlaylistTracks, GenericTracks, TracksFailed, NoMatches]
 
 
 class PluginData(TypedDict):
@@ -155,3 +169,33 @@ RoutePlannerStatus = Union[
     BalancingIPRoutePlanner,
     EmptyRoutePlanner,
 ]
+
+
+class ConfigureResumingResponse(TypedDict):
+    resumingKey: str | None
+    timeout: int
+
+
+class Version(TypedDict):
+    semver: str
+    major: int
+    minor: int
+    patch: int
+    preRelease: str | None
+
+
+class Git(TypedDict):
+    branch: str
+    commit: str
+    commitTime: int
+
+
+class Info(TypedDict):
+    version: Version
+    buildTime: int
+    git: Git
+    jvm: str
+    lavaplayer: str
+    sourceManagers: list[str]
+    filters: list[str]
+    plugins: list[PluginData]

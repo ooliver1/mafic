@@ -152,9 +152,8 @@ class DestroyPayload(PayloadWithGuild):
 
 
 class ConfigureResumingPayload(TypedDict):
-    op: Literal["configureResuming"]
-    key: str | None
-    timeout: int
+    resumingKey: NotRequired[str | None]
+    timeout: NotRequired[int]
 
 
 OutgoingMessage = Union[
