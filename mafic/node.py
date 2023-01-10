@@ -243,7 +243,7 @@ class Node:
 
         return players + cpu + null + deficit + mem
 
-    async def _check_version(self, headers: dict[str, str]) -> None:
+    async def _check_version(self) -> None:
         if self.__session is None:
             self.__session = await self._create_session()
 
@@ -270,32 +270,9 @@ class Node:
             self._rest_uri /= "/v3"
             self._ws_uri /= "/v3/websocket"
 
-    async def connect(self) -> None:
-        _log.info("Waiting for client to be ready...", extra={"label": self._label})
-        await self._client.wait_until_ready()
-        assert self._client.user is not None
-
-        if self.__session is None:
-            self.__session = await self._create_session()
-
-        session = self.__session
-
-        headers: dict[str, str] = {
-            "Authorization": self.__password,
-            "User-Id": str(self._client.user.id),
-            "Client-Name": f"Mafic/{__import__('mafic').__version__}",
-            "Resume-Key": self._resume_key,
-        }
-
-        _log.debug("Checking lavalink version...", extra={"label": self._label})
-        await self._check_version(headers)
-
-        _log.info(
-            "Connecting to lavalink at %s...",
-            self._rest_uri,
-            extra={"label": self._label},
-        )
-
+    async def _connect_to_websocket(
+        self, headers: dict[str, str], session: ClientSession
+    ) -> None:
         try:
             self._ws = (
                 await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
@@ -314,13 +291,39 @@ class Node:
             )
             raise
 
+    async def connect(self) -> None:
+        _log.info("Waiting for client to be ready...", extra={"label": self._label})
+        await self._client.wait_until_ready()
+        assert self._client.user is not None
+
+        if self.__session is None:
+            self.__session = await self._create_session()
+
+        session = self.__session
+
+        headers: dict[str, str] = {
+            "Authorization": self.__password,
+            "User-Id": str(self._client.user.id),
+            "Client-Name": f"Mafic/{__import__('mafic').__version__}",
+            "Resume-Key": self._resume_key,
+        }
+
+        _log.debug("Checking lavalink version...", extra={"label": self._label})
+        await self._check_version()
+
+        _log.info(
+            "Connecting to lavalink at %s...",
+            self._rest_uri,
+            extra={"label": self._label},
+        )
+        await self._connect_to_websocket(headers=headers, session=session)
         _log.info("Connected to lavalink.", extra={"label": self._label})
+
         _log.debug(
             "Creating task to send configuration to resume with key %s",
             self._resume_key,
             extra={"label": self._label},
         )
-
         create_task(self.configure_resuming())
 
         _log.info(
@@ -331,6 +334,7 @@ class Node:
         )
 
         try:
+            _log.debug("Waiting for ready", extra={"label": self._label})
             await wait_for(self._ready.wait(), timeout=self._timeout)
         except TimeoutError:
             _log.error(
