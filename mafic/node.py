@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import re
+import warnings
 from asyncio import create_task, sleep
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
 
 from aiohttp import ClientSession, WSMsgType
+from yarl import URL
 
 from mafic.typings.http import TrackWithInfo
 
@@ -24,6 +26,7 @@ from .plugin import Plugin
 from .region import VOICE_TO_REGION, Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
+from .warnings import UnsupportedVersionWarning
 
 if TYPE_CHECKING:
     from asyncio import Task
@@ -133,8 +136,8 @@ class Node:
         self.shard_ids: Sequence[int] | None = shard_ids
         self.regions: list[Region] | None = _wrap_regions(regions)
 
-        self._rest_uri = f"http{'s' if secure else ''}://{host}:{port}"
-        self._ws_uri = f"ws{'s' if secure else ''}://{host}:{port}"
+        self._rest_uri = URL.build(scheme=f"http{'s'*secure}", host=host, port=port)
+        self._ws_uri = URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)
         self._resume_key = resume_key or f"{host}:{port}:{label}"
 
         self._ws: ClientWebSocketResponse | None = None
@@ -236,6 +239,33 @@ class Node:
 
         return players + cpu + null + deficit + mem
 
+    async def _check_version(self, headers: dict[str, str]) -> None:
+        if self.__session is None:
+            self.__session = await self._create_session()
+
+        async with self.__session.get(self._rest_uri / "version") as resp:
+            # Only the major and minor are needed.
+            json = await resp.json()
+            version: str = json["version"]
+            major, minor, _ = version.split(".", maxsplit=2)
+            major = int(major)
+            minor = int(minor)
+
+            if major != 3:
+                raise RuntimeError(
+                    f"Unsupported lavalink version {version} (expected 3.7.x)"
+                )
+            elif minor < 7:
+                raise RuntimeError(
+                    f"Unsupported lavalink version {version} (expected 3.7.x)"
+                )
+            elif minor > 7:
+                message = UnsupportedVersionWarning.message
+                warnings.warn(message, UnsupportedVersionWarning)
+
+            self._rest_uri /= "/v3"
+            self._ws_uri /= "/v3/websocket"
+
     async def connect(self) -> None:
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
         await self._client.wait_until_ready()
@@ -252,6 +282,9 @@ class Node:
             "Client-Name": f"Mafic/{__import__('mafic').__version__}",
             "Resume-Key": self._resume_key,
         }
+
+        _log.debug("Checking lavalink version...", extra={"label": self._label})
+        await self._check_version(headers)
 
         _log.info(
             "Connecting to lavalink at %s...",
@@ -540,7 +573,7 @@ class Node:
             self.__session = await self._create_session()
 
         session = self.__session
-        uri = self._rest_uri + path
+        uri = self._rest_uri / path
 
         async with session.request(
             method,
