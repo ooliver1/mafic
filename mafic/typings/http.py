@@ -9,33 +9,35 @@ if TYPE_CHECKING:
 
     from .misc import FriendlyException
 
+
 __all__ = (
-    "BalancingIPRouteDetails",
-    "BalancingIPRoutePlanner",
-    "BaseDetails",
-    "ConfigureResumingResponse",
-    "EmptyRoutePlanner",
-    "FailingIPAddress",
     "GenericTracks",
-    "GetTracks",
-    "Git",
-    "IPBlock",
-    "Info",
     "NoMatches",
-    "NanoIPRouteDetails",
-    "NanoIPRoutePlanner",
     "PlaylistInfo",
     "PlaylistTracks",
-    "PluginData",
-    "RotatingIPRouteDetails",
-    "RotatingIPRoutePlanner",
-    "RotatingNanoIPRouteDetails",
-    "RotatingNanoIPRoutePlanner",
-    "RoutePlannerStatus",
     "TrackInfo",
     "TrackWithInfo",
     "TracksFailed",
+    "PluginData",
+    "IPBlock",
+    "FailingIPAddress",
+    "BaseDetails",
+    "RotatingIPRouteDetails",
+    "NanoIPRouteDetails",
+    "RotatingNanoIPRouteDetails",
+    "BalancingIPRouteDetails",
+    "ConfigureResumingResponse",
     "Version",
+    "Git",
+    "Info",
+    "VoiceState",
+    "GetTracks",
+    "RotatingIPRoutePlanner",
+    "NanoIPRoutePlanner",
+    "RotatingNanoIPRoutePlanner",
+    "BalancingIPRoutePlanner",
+    "EmptyRoutePlanner",
+    "RoutePlannerStatus",
 )
 
 
@@ -199,3 +201,11 @@ class Info(TypedDict):
     sourceManagers: list[str]
     filters: list[str]
     plugins: list[PluginData]
+
+
+class VoiceState(TypedDict):
+    token: str
+    endpoint: str
+    sessionId: str
+    connected: bool
+    ping: int

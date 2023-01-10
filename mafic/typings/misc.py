@@ -8,16 +8,12 @@ __all__ = (
     "Coro",
     "ExceptionSeverity",
     "FriendlyException",
-    "PayloadWithGuild",
+    "VoiceState",
 )
 T = TypeVar("T")
 
 Coro = Coroutine[Any, Any, T]
 ExceptionSeverity = Literal["COMMON", "SUSPICIOUS", "FAULT"]
-
-
-class PayloadWithGuild(TypedDict):
-    guildId: str
 
 
 class FriendlyException(TypedDict):
@@ -27,3 +23,9 @@ class FriendlyException(TypedDict):
 
 class FriendlyWithCause(FriendlyException):
     cause: str
+
+
+class VoiceState(TypedDict):
+    token: str
+    endpoint: str
+    sessionId: str

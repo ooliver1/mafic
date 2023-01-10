@@ -19,7 +19,6 @@ __all__ = (
     "StageChannel",
     "VoiceChannel",
     "VoiceProtocol",
-    "VoiceServerUpdatePayload",
     "dumps",
     "loads",
     "version_info",
@@ -70,10 +69,7 @@ if library == "nextcord":
     )
     from nextcord.abc import Connectable, GuildChannel
     from nextcord.backoff import ExponentialBackoff
-    from nextcord.types.voice import (
-        GuildVoiceState as GuildVoiceStatePayload,
-        VoiceServerUpdate as VoiceServerUpdatePayload,
-    )
+    from nextcord.types.voice import GuildVoiceState as GuildVoiceStatePayload
 elif library == "disnake":
     from disnake import (
         Client,
@@ -85,15 +81,6 @@ elif library == "disnake":
     )
     from disnake.abc import Connectable, GuildChannel
     from disnake.backoff import ExponentialBackoff
-
-    if version_info >= (2, 6):
-        from disnake.types.gateway import (
-            VoiceServerUpdateEvent as VoiceServerUpdatePayload,  # pyright: ignore
-        )
-    else:
-        from disnake.types.voice import (
-            VoiceServerUpdate as VoiceServerUpdatePayload,  # pyright: ignore
-        )
     from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload
 else:
     from discord import (
@@ -106,10 +93,7 @@ else:
     )
     from discord.abc import Connectable, GuildChannel
     from discord.backoff import ExponentialBackoff
-    from discord.types.voice import (
-        GuildVoiceState as GuildVoiceStatePayload,
-        VoiceServerUpdate as VoiceServerUpdatePayload,
-    )
+    from discord.types.voice import GuildVoiceState as GuildVoiceStatePayload
 
 
 try:
