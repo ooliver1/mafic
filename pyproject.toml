@@ -36,6 +36,7 @@ packages = [
 python = "^3.8"
 aiohttp = "^3.6.0"
 orjson = {version = "^3.8.0", optional = true}
+yarl = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pyright = "1.1.279"
