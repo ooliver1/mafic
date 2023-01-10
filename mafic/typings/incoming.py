@@ -111,6 +111,12 @@ class TrackStuckEvent(PayloadWithGuild):
     thresholdMs: int
 
 
+class ReadyPayload(TypedDict):
+    op: Literal["ready"]
+    resumed: bool
+    sessionId: str
+
+
 EventPayload = Union[
     WebSocketClosedEvent,
     TrackStartEvent,
@@ -124,4 +130,5 @@ IncomingMessage = Union[
     PlayerUpdatePayload,
     StatsPayload,
     EventPayload,
+    ReadyPayload,
 ]

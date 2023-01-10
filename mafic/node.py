@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import warnings
-from asyncio import create_task, sleep
+from asyncio import Event, TimeoutError, create_task, sleep, wait_for
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
 
@@ -98,7 +98,9 @@ class Node:
         "_resume_key",
         "_secure",
         "_timeout",
+        "_ready",
         "_rest_uri",
+        "_session_id",
         "_stats",
         "_ws",
         "_ws_uri",
@@ -144,10 +146,12 @@ class Node:
         self._ws_task: Task[None] | None = None
 
         self._available = False
+        self._ready = Event()
 
         self.players: dict[int, Player] = {}
 
         self._stats: NodeStats | None = None
+        self._session_id: str | None = None
 
     @property
     def host(self) -> str:
@@ -326,10 +330,19 @@ class Node:
             self._ws_listener(), name=f"mafic node {self._label}"
         )
 
-        _log.info(
-            "Node %s is now available.", self._label, extra={"label": self._label}
-        )
-        self._available = True
+        try:
+            await wait_for(self._ready.wait(), timeout=self._timeout)
+        except TimeoutError:
+            _log.error(
+                "Timed out waiting for node to become ready.",
+                extra={"label": self._label},
+            )
+            raise
+        else:
+            _log.info(
+                "Node %s is now available.", self._label, extra={"label": self._label}
+            )
+            self._available = True
 
     async def _ws_listener(self) -> None:
         backoff = ExponentialBackoff()
@@ -406,6 +419,21 @@ class Node:
             self._stats = NodeStats(data)
         elif data["op"] == "event":
             await self._handle_event(data)
+        elif data["op"] == "ready":
+            resumed = data["resumed"]
+            session_id = data["sessionId"]
+
+            if resumed:
+                _log.info(
+                    "Successfully resumed connection with lavalink.",
+                    extra={"label": self._label},
+                )
+
+            _log.debug(
+                "Received session ID %s", session_id, extra={"label": self._label}
+            )
+            self._session_id = session_id
+            self._ready.set()
         else:
             # Of course pyright considers this to be `Never`, so this is to keep types.
             op = cast(str, data["op"])
@@ -432,7 +460,7 @@ class Node:
             # Nobody expects the Spanish Inquisition, neither does pyright.
 
             event_type = cast(str, data["type"])
-            _log.warn("Unknown incoming event type %s", event_type)
+            _log.warning("Unknown incoming event type %s", event_type)
 
     def voice_update(
         self,
