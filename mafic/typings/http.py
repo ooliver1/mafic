@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
+
+from .common import PlaylistInfo, TrackWithInfo
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
@@ -11,27 +13,32 @@ if TYPE_CHECKING:
 
 
 __all__ = (
-    "GenericTracks",
-    "NoMatches",
-    "PlaylistInfo",
-    "PlaylistTracks",
-    "TrackInfo",
-    "TrackWithInfo",
-    "TracksFailed",
-    "PluginData",
-    "IPBlock",
-    "FailingIPAddress",
-    "BaseDetails",
-    "RotatingIPRouteDetails",
-    "NanoIPRouteDetails",
-    "RotatingNanoIPRouteDetails",
     "BalancingIPRouteDetails",
+    "BalancingIPRoutePlanner",
+    "BaseDetails",
     "ConfigureResumingResponse",
+    "FailingIPAddress",
+    "EmptyRoutePlanner",
+    "Error",
+    "GenericTracks",
+    "Git",
+    "IPBlock",
+    "Info",
+    "NanoIPRouteDetails",
+    "NanoIPRoutePlanner",
+    "NoMatches",
+    "PlaylistTracks",
+    "PluginData",
+    "RotatingIPRouteDetails",
+    "RotatingIPRoutePlanner",
+    "RotatingNanoIPRouteDetails",
+    "RotatingNanoIPRoutePlanner",
+    "RoutePlannerStatus",
+    "TrackLoadingResult",
+    "TracksFailed",
     "Version",
     "Git",
     "Info",
-    "VoiceState",
-    "GetTracks",
     "RotatingIPRoutePlanner",
     "NanoIPRoutePlanner",
     "RotatingNanoIPRoutePlanner",
@@ -41,31 +48,10 @@ __all__ = (
 )
 
 
-class PlaylistInfo(TypedDict):
-    name: str
-    selectedTrack: int
-
-
-class TrackInfo(TypedDict):
-    identifier: str
-    isSeekable: bool
-    author: str
-    length: int
-    isStream: bool
-    position: int
-    sourceName: str
-    title: str
-    uri: str
-
-
-class TrackWithInfo(TypedDict):
-    encoded: str
-    info: TrackInfo
-
-
 class PlaylistTracks(TypedDict):
     loadType: Literal["PLAYLIST_LOADED"]
     playlistInfo: PlaylistInfo
+    tracks: list[TrackWithInfo]
 
 
 class GenericTracks(TypedDict):
@@ -82,7 +68,7 @@ class NoMatches(TypedDict):
     loadType: Literal["NO_MATCHES"]
 
 
-GetTracks = Union[PlaylistTracks, GenericTracks, TracksFailed, NoMatches]
+TrackLoadingResult = Union[PlaylistTracks, GenericTracks, TracksFailed, NoMatches]
 
 
 class PluginData(TypedDict):
@@ -129,8 +115,8 @@ class NanoIPRouteDetails(BaseDetails):
 NanoIPRoutePlanner = TypedDict(
     "NanoIPRoutePlanner",
     {
-        "class": Literal["NanoIpRoutePlanner"],
-        "details": NanoIPRouteDetails,
+        "class": Optional[Literal["NanoIpRoutePlanner"]],
+        "details": Optional[NanoIPRouteDetails],
     },
 )
 
@@ -143,8 +129,8 @@ class RotatingNanoIPRouteDetails(BaseDetails):
 RotatingNanoIPRoutePlanner = TypedDict(
     "RotatingNanoIPRoutePlanner",
     {
-        "class": Literal["RotatingNanoIpRoutePlanner"],
-        "details": RotatingNanoIPRouteDetails,
+        "class": Optional[Literal["RotatingNanoIpRoutePlanner"]],
+        "details": Optional[RotatingNanoIPRouteDetails],
     },
 )
 
@@ -156,8 +142,8 @@ class BalancingIPRouteDetails(BaseDetails):
 BalancingIPRoutePlanner = TypedDict(
     "BalancingIPRoutePlanner",
     {
-        "class": Literal["BalancingIpRoutePlanner"],
-        "details": BalancingIPRouteDetails,
+        "class": Optional[Literal["BalancingIpRoutePlanner"]],
+        "details": Optional[BalancingIPRouteDetails],
     },
 )
 
@@ -203,9 +189,10 @@ class Info(TypedDict):
     plugins: list[PluginData]
 
 
-class VoiceState(TypedDict):
-    token: str
-    endpoint: str
-    sessionId: str
-    connected: bool
-    ping: int
+class Error(TypedDict):
+    timestamp: int
+    status: int
+    error: str
+    trace: NotRequired[str]
+    message: str
+    path: str

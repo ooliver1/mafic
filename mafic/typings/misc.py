@@ -8,7 +8,7 @@ __all__ = (
     "Coro",
     "ExceptionSeverity",
     "FriendlyException",
-    "VoiceState",
+    "PayloadWithGuild",
 )
 T = TypeVar("T")
 
@@ -25,7 +25,5 @@ class FriendlyWithCause(FriendlyException):
     cause: str
 
 
-class VoiceState(TypedDict):
-    token: str
-    endpoint: str
-    sessionId: str
+class PayloadWithGuild(TypedDict):
+    guildId: str

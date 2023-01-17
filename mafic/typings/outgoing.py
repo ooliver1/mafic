@@ -2,80 +2,20 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict, Union
+from typing import List, TypedDict, Union
 
-if TYPE_CHECKING:
-    from typing_extensions import NotRequired
+from .common import Filters, VoiceState
+from .http import UnmarkAddress
 
-
-class EQBand(TypedDict):
-    band: int
-    gain: float
-
-
-class Karaoke(TypedDict):
-    level: float
-    monoLevel: float
-    filterBand: float
-    filterWidth: float
+__all__ = (
+    "OutgoingMessage",
+    "UpdatePlayerPayload",
+    "UpdateSessionPayload",
+    "UnmarkAddressPayload",
+)
 
 
-class Timescale(TypedDict):
-    speed: float
-    pitch: float
-    rate: float
-
-
-class Tremolo(TypedDict):
-    frequency: float
-    depth: float
-
-
-class Vibrato(TypedDict):
-    frequency: float
-    depth: float
-
-
-class Rotation(TypedDict):
-    rotationHz: float
-
-
-class Distortion(TypedDict):
-    sinOffset: float
-    sinScale: float
-    cosOffset: float
-    cosScale: float
-    tanOffset: float
-    tanScale: float
-    offset: float
-    scale: float
-
-
-class ChannelMix(TypedDict):
-    leftToLeft: float
-    leftToRight: float
-    rightToLeft: float
-    rightToRight: float
-
-
-class LowPass(TypedDict):
-    smoothing: float
-
-
-class Filters(TypedDict, total=False):
-    volume: float
-    equalizer: list[EQBand]
-    karaoke: Karaoke
-    timescale: Timescale
-    tremolo: Tremolo
-    vibrato: Vibrato
-    rotation: Rotation
-    distortion: Distortion
-    channelMix: ChannelMix
-    lowPass: LowPass
-
-
-class ConfigureResumingPayload(TypedDict, total=False):
+class UpdateSessionPayload(TypedDict, total=False):
     resumingKey: str | None
     timeout: int
 
@@ -91,7 +31,10 @@ class UpdatePlayerPayload(TypedDict, total=False):
     voice: VoiceState
 
 
+class UnmarkAddressPayload(TypedDict):
+    address: str
+
+
 OutgoingMessage = Union[
-    UpdatePlayerPayload,
-    ConfigureResumingPayload,
+    UpdatePlayerPayload, UpdateSessionPayload, List[str], UnmarkAddressPayload
 ]
