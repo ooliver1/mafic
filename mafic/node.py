@@ -13,7 +13,7 @@ from yarl import URL
 
 from mafic.typings.http import TrackWithInfo
 
-from .__libraries import ExponentialBackoff, dumps, loads
+from .__libraries import MISSING, ExponentialBackoff, dumps, loads
 from .errors import TrackLoadException
 from .ip import (
     BalancingIPRoutePlannerStatus,
@@ -512,7 +512,7 @@ class Node:
         self,
         *,
         guild_id: int,
-        track: Track | None = None,
+        track: Track | None = MISSING,
         position: int | None = None,
         end_time: int | None = None,
         volume: int | None = None,
@@ -522,8 +522,8 @@ class Node:
     ) -> Coro[None]:
         data: UpdatePlayerPayload = {}
 
-        if track is not None:
-            data["encodedTrack"] = track.identifier
+        if track is not MISSING:
+            data["encodedTrack"] = track.identifier if track is not None else None
 
         if position is not None:
             data["position"] = position
@@ -538,8 +538,7 @@ class Node:
             data["paused"] = pause
 
         if filter is not None:
-            # Pyright disagrees that filters is not fully defined, well tough luck.
-            data.update(filter.payload)  # pyright: ignore[reportGeneralTypeIssues]
+            data["filters"] = filter.payload
 
         if no_replace is not None:
             query: UpdatePlayerParams | None = {"noReplace": no_replace}

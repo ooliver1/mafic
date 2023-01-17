@@ -16,6 +16,7 @@ __all__ = (
     "Guild",
     "GuildChannel",
     "GuildVoiceStatePayload",
+    "MISSING",
     "StageChannel",
     "VoiceChannel",
     "VoiceProtocol",
@@ -74,6 +75,7 @@ if library == "nextcord":
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceServerUpdate as VoiceServerUpdatePayload,
     )
+    from nextcord.utils import MISSING
 elif library == "disnake":
     from disnake import (
         Client,
@@ -95,6 +97,7 @@ elif library == "disnake":
             VoiceServerUpdate as VoiceServerUpdatePayload,  # pyright: ignore
         )
     from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload
+    from disnake.utils import MISSING
 else:
     from discord import (
         Client,
@@ -110,6 +113,7 @@ else:
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceServerUpdate as VoiceServerUpdatePayload,
     )
+    from discord.utils import MISSING
 
 
 try:
