@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import List, TypedDict, Union
 
 from .common import Filters, VoiceState
-from .http import UnmarkAddress
 
 __all__ = (
     "OutgoingMessage",
