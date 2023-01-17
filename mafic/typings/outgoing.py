@@ -55,5 +55,4 @@ OutgoingMessage = Union[
 ]
 
 
-# Will be Union when more added.
 OutgoingParams = Union[UpdatePlayerParams, TrackLoadParams, DecodeTrackParams]
