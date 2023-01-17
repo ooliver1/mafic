@@ -12,9 +12,9 @@ if TYPE_CHECKING:
         ChannelMix as ChannelMixPayload,
         Distortion as DistortionPayload,
         EQBand as EQBandPayload,
+        Filters,
         Karaoke as KaraokePayload,
         LowPass as LowPassPayload,
-        RawFilterPayload as FilterPayload,
         Rotation as RotationPayload,
         Timescale as TimescalePayload,
         Tremolo as TremoloPayload,
@@ -187,8 +187,8 @@ class Filter:
     volume: Optional[float]
 
     @property
-    def payload(self) -> FilterPayload:
-        payload: FilterPayload = {}
+    def payload(self) -> Filters:
+        payload: Filters = {}
 
         if self.equalizer:
             payload["equalizer"] = self.equalizer.payload

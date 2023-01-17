@@ -2,12 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from .misc import PayloadWithGuild
-
-if TYPE_CHECKING:
-    from typing_extensions import NotRequired
 
 __all__ = (
     "Filters",
@@ -26,6 +23,7 @@ __all__ = (
     "Tremolo",
     "Vibrato",
     "VoiceState",
+    "VoiceStateRequest",
     "Memory",
     "CPU",
     "FrameStats",
@@ -108,12 +106,15 @@ class Player(PayloadWithGuild):
     filters: Filters
 
 
-class VoiceState(TypedDict):
+class VoiceStateRequest(TypedDict):
     token: str
     endpoint: str
     sessionId: str
-    connected: NotRequired[bool]
-    ping: NotRequired[int]
+
+
+class VoiceState(TypedDict):
+    connected: bool
+    ping: int
 
 
 class PlaylistInfo(TypedDict):

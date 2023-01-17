@@ -42,16 +42,18 @@ if TYPE_CHECKING:
         BalancingIPRouteDetails,
         Coro,
         EventPayload,
-        GetTracks,
         IncomingMessage,
         NanoIPRouteDetails,
         OutgoingMessage,
-        PlayPayload,
+        OutgoingParams,
         PluginData,
         RotatingIPRouteDetails,
         RotatingNanoIPRouteDetails,
         RoutePlannerStatus as RoutePlannerStatusPayload,
         TrackInfo,
+        TrackLoadingResult,
+        UpdatePlayerParams,
+        UpdatePlayerPayload,
     )
 
 _log = getLogger(__name__)
@@ -395,15 +397,6 @@ class Node:
                 )
                 create_task(self._handle_msg(msg.json(loads=loads)))
 
-    async def __send(self, data: OutgoingMessage) -> None:
-        if self._ws is None:
-            raise RuntimeError(
-                "Websocket is not connected but attempted to send, report this."
-            )
-
-        _log.debug("Sending message to websocket.", extra={"label": self._label})
-        await self._ws.send_json(data, dumps=dumps)
-
     async def _handle_msg(self, data: IncomingMessage) -> None:
         _log.debug("Received event with op %s", data["op"])
         _log.debug("Event data: %s", data)
@@ -477,14 +470,19 @@ class Node:
             data,
             extra={"label": self._label, "guild": guild_id},
         )
+        if data["endpoint"] is None:
+            raise ValueError("Discord did not provide an endpoint.")
 
-        return self.__send(
+        return self.__request(
+            "PATCH",
+            f"/sessions/{self._session_id}/players/{guild_id}",
             {
-                "op": "voiceUpdate",
-                "guildId": str(guild_id),
-                "sessionId": session_id,
-                "event": data,
-            }
+                "voice": {
+                    "sessionId": session_id,
+                    "endpoint": data["endpoint"],
+                    "token": data["token"],
+                },
+            },
         )
 
     def configure_resuming(self) -> Coro[None]:
@@ -494,101 +492,71 @@ class Node:
             extra={"label": self._label},
         )
 
-        return self.__send(
+        return self.__request(
+            "PATCH",
+            f"/sessions/{self._session_id}",
             {
-                "op": "configureResuming",
-                "key": self._resume_key,
+                "resumingKey": self._resume_key,
                 "timeout": 60,
-            }
+            },
         )
 
     def destroy(self, guild_id: int) -> Coro[None]:
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
-        return self.__send(
-            {
-                "op": "destroy",
-                "guildId": str(guild_id),
-            }
+        return self.__request(
+            "DELETE", f"/sessions/{self._session_id}/players/{guild_id}"
         )
 
-    def play(
+    def update(
         self,
         *,
         guild_id: int,
-        track: Track,
-        start_time: int | None = None,
+        track: Track | None = None,
+        position: int | None = None,
         end_time: int | None = None,
         volume: int | None = None,
         no_replace: bool | None = None,
         pause: bool | None = None,
+        filter: Filter | None = None,
     ) -> Coro[None]:
-        data: PlayPayload = {
-            "op": "play",
-            "guildId": str(guild_id),
-            "track": track.id,
-        }
+        data: UpdatePlayerPayload = {}
 
-        if start_time is not None:
-            data["startTime"] = str(start_time)
+        if track is not None:
+            data["encodedTrack"] = track.identifier
+
+        if position is not None:
+            data["position"] = position
 
         if end_time is not None:
-            data["endTime"] = str(end_time)
+            data["endTime"] = end_time
 
         if volume is not None:
-            data["volume"] = str(volume)
-
-        if no_replace is not None:
-            data["noReplace"] = no_replace
+            data["volume"] = volume
 
         if pause is not None:
-            data["pause"] = pause
+            data["paused"] = pause
 
-        return self.__send(data)
+        if filter is not None:
+            # Pyright disagrees that filters is not fully defined, well tough luck.
+            data.update(filter.payload)  # pyright: ignore[reportGeneralTypeIssues]
 
-    def stop(self, guild_id: int) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "stop",
-                "guildId": str(guild_id),
-            }
+        if no_replace is not None:
+            query: UpdatePlayerParams | None = {"noReplace": no_replace}
+        else:
+            query = None
+
+        _log.debug(
+            "Sending player update to lavalink with data %s.",
+            data,
+            extra={"label": self._label, "guild": guild_id},
         )
 
-    def pause(self, guild_id: int, pause: bool) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "pause",
-                "guildId": str(guild_id),
-                "pause": pause,
-            }
-        )
-
-    def seek(self, guild_id: int, position: int) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "seek",
-                "guildId": str(guild_id),
-                "position": position,
-            }
-        )
-
-    def volume(self, guild_id: int, volume: int) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "volume",
-                "guildId": str(guild_id),
-                "volume": volume,
-            }
-        )
-
-    def filter(self, guild_id: int, filter: Filter) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "filters",
-                "guildId": str(guild_id),
-                # Lavalink uses inline filter properties, this adds every one of them.
-                **filter.payload,
-            }
+        return self.__request(
+            "PATCH",
+            f"/sessions/{self._session_id}/players/{guild_id}",
+            data,
+            query,
         )
 
     async def _create_session(self) -> ClientSession:
@@ -598,8 +566,8 @@ class Node:
         self,
         method: str,
         path: str,
-        json: Any | None = None,
-        params: dict[str, str] | None = None,
+        json: OutgoingMessage | None = None,
+        params: OutgoingParams | None = None,
     ) -> Any:
         if self.__session is None:
             self.__session = await self._create_session()
@@ -633,7 +601,7 @@ class Node:
             query = f"{search_type}:{query}"
 
         # TODO: handle errors from lavalink
-        data: GetTracks = await self.__request(
+        data: TrackLoadingResult = await self.__request(
             "GET", "/loadtracks", params={"identifier": query}
         )
 
@@ -653,7 +621,7 @@ class Node:
     async def decode_track(self, track: str) -> Track:
         # TODO: handle errors from lavalink
         info: TrackInfo = await self.__request(
-            "GET", "/decodetrack", params={"track": track}
+            "GET", "/decodetrack", params={"encodedTrack": track}
         )
 
         return Track.from_data(track=track, info=info)

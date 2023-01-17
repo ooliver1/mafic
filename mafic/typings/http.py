@@ -61,7 +61,7 @@ class GenericTracks(TypedDict):
 
 class TracksFailed(TypedDict):
     loadType: Literal["LOAD_FAILED"]
-    exception: NotRequired[FriendlyException]
+    exception: FriendlyException
 
 
 class NoMatches(TypedDict):
