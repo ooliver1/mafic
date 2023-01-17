@@ -1,17 +1,21 @@
 # SPDX-License-Identifier: MIT
+# pyright: reportImportCycles=false
+# Player import.
 
 from __future__ import annotations
 
 import re
-from asyncio import create_task, sleep
+import warnings
+from asyncio import Event, TimeoutError, create_task, sleep, wait_for
 from logging import getLogger
 from typing import TYPE_CHECKING, cast
 
 from aiohttp import ClientSession, WSMsgType
+from yarl import URL
 
 from mafic.typings.http import TrackWithInfo
 
-from .__libraries import ExponentialBackoff, dumps, loads
+from .__libraries import MISSING, ExponentialBackoff, dumps, loads
 from .errors import TrackLoadException
 from .ip import (
     BalancingIPRoutePlannerStatus,
@@ -24,6 +28,7 @@ from .plugin import Plugin
 from .region import VOICE_TO_REGION, Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
+from .warnings import UnsupportedVersionWarning
 
 if TYPE_CHECKING:
     from asyncio import Task
@@ -39,16 +44,18 @@ if TYPE_CHECKING:
         BalancingIPRouteDetails,
         Coro,
         EventPayload,
-        GetTracks,
         IncomingMessage,
         NanoIPRouteDetails,
         OutgoingMessage,
-        PlayPayload,
+        OutgoingParams,
         PluginData,
         RotatingIPRouteDetails,
         RotatingNanoIPRouteDetails,
         RoutePlannerStatus as RoutePlannerStatusPayload,
         TrackInfo,
+        TrackLoadingResult,
+        UpdatePlayerParams,
+        UpdatePlayerPayload,
     )
 
 _log = getLogger(__name__)
@@ -95,7 +102,9 @@ class Node:
         "_resume_key",
         "_secure",
         "_timeout",
+        "_ready",
         "_rest_uri",
+        "_session_id",
         "_stats",
         "_ws",
         "_ws_uri",
@@ -133,18 +142,20 @@ class Node:
         self.shard_ids: Sequence[int] | None = shard_ids
         self.regions: list[Region] | None = _wrap_regions(regions)
 
-        self._rest_uri = f"http{'s' if secure else ''}://{host}:{port}"
-        self._ws_uri = f"ws{'s' if secure else ''}://{host}:{port}"
+        self._rest_uri = URL.build(scheme=f"http{'s'*secure}", host=host, port=port)
+        self._ws_uri = URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)
         self._resume_key = resume_key or f"{host}:{port}:{label}"
 
         self._ws: ClientWebSocketResponse | None = None
         self._ws_task: Task[None] | None = None
 
         self._available = False
+        self._ready = Event()
 
         self.players: dict[int, Player] = {}
 
         self._stats: NodeStats | None = None
+        self._session_id: str | None = None
 
     @property
     def host(self) -> str:
@@ -236,29 +247,36 @@ class Node:
 
         return players + cpu + null + deficit + mem
 
-    async def connect(self) -> None:
-        _log.info("Waiting for client to be ready...", extra={"label": self._label})
-        await self._client.wait_until_ready()
-        assert self._client.user is not None
-
+    async def _check_version(self) -> None:
         if self.__session is None:
             self.__session = await self._create_session()
 
-        session = self.__session
+        async with self.__session.get(self._rest_uri / "version") as resp:
+            # Only the major and minor are needed.
+            json = await resp.json()
+            version: str = json["version"]
+            major, minor, _ = version.split(".", maxsplit=2)
+            major = int(major)
+            minor = int(minor)
 
-        headers: dict[str, str] = {
-            "Authorization": self.__password,
-            "User-Id": str(self._client.user.id),
-            "Client-Name": f"Mafic/{__import__('mafic').__version__}",
-            "Resume-Key": self._resume_key,
-        }
+            if major != 3:
+                raise RuntimeError(
+                    f"Unsupported lavalink version {version} (expected 3.7.x)"
+                )
+            elif minor < 7:
+                raise RuntimeError(
+                    f"Unsupported lavalink version {version} (expected 3.7.x)"
+                )
+            elif minor > 7:
+                message = UnsupportedVersionWarning.message
+                warnings.warn(message, UnsupportedVersionWarning)
 
-        _log.info(
-            "Connecting to lavalink at %s...",
-            self._rest_uri,
-            extra={"label": self._label},
-        )
+            self._rest_uri /= "/v3"
+            self._ws_uri /= "/v3/websocket"
 
+    async def _connect_to_websocket(
+        self, headers: dict[str, str], session: ClientSession
+    ) -> None:
         try:
             self._ws = (
                 await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
@@ -277,13 +295,39 @@ class Node:
             )
             raise
 
+    async def connect(self) -> None:
+        _log.info("Waiting for client to be ready...", extra={"label": self._label})
+        await self._client.wait_until_ready()
+        assert self._client.user is not None
+
+        if self.__session is None:
+            self.__session = await self._create_session()
+
+        session = self.__session
+
+        headers: dict[str, str] = {
+            "Authorization": self.__password,
+            "User-Id": str(self._client.user.id),
+            "Client-Name": f"Mafic/{__import__('mafic').__version__}",
+            "Resume-Key": self._resume_key,
+        }
+
+        _log.debug("Checking lavalink version...", extra={"label": self._label})
+        await self._check_version()
+
+        _log.info(
+            "Connecting to lavalink at %s...",
+            self._rest_uri,
+            extra={"label": self._label},
+        )
+        await self._connect_to_websocket(headers=headers, session=session)
         _log.info("Connected to lavalink.", extra={"label": self._label})
+
         _log.debug(
             "Creating task to send configuration to resume with key %s",
             self._resume_key,
             extra={"label": self._label},
         )
-
         create_task(self.configure_resuming())
 
         _log.info(
@@ -293,10 +337,20 @@ class Node:
             self._ws_listener(), name=f"mafic node {self._label}"
         )
 
-        _log.info(
-            "Node %s is now available.", self._label, extra={"label": self._label}
-        )
-        self._available = True
+        try:
+            _log.debug("Waiting for ready", extra={"label": self._label})
+            await wait_for(self._ready.wait(), timeout=self._timeout)
+        except TimeoutError:
+            _log.error(
+                "Timed out waiting for node to become ready.",
+                extra={"label": self._label},
+            )
+            raise
+        else:
+            _log.info(
+                "Node %s is now available.", self._label, extra={"label": self._label}
+            )
+            self._available = True
 
     async def _ws_listener(self) -> None:
         backoff = ExponentialBackoff()
@@ -345,15 +399,6 @@ class Node:
                 )
                 create_task(self._handle_msg(msg.json(loads=loads)))
 
-    async def __send(self, data: OutgoingMessage) -> None:
-        if self._ws is None:
-            raise RuntimeError(
-                "Websocket is not connected but attempted to send, report this."
-            )
-
-        _log.debug("Sending message to websocket.", extra={"label": self._label})
-        await self._ws.send_json(data, dumps=dumps)
-
     async def _handle_msg(self, data: IncomingMessage) -> None:
         _log.debug("Received event with op %s", data["op"])
         _log.debug("Event data: %s", data)
@@ -373,6 +418,21 @@ class Node:
             self._stats = NodeStats(data)
         elif data["op"] == "event":
             await self._handle_event(data)
+        elif data["op"] == "ready":
+            resumed = data["resumed"]
+            session_id = data["sessionId"]
+
+            if resumed:
+                _log.info(
+                    "Successfully resumed connection with lavalink.",
+                    extra={"label": self._label},
+                )
+
+            _log.debug(
+                "Received session ID %s", session_id, extra={"label": self._label}
+            )
+            self._session_id = session_id
+            self._ready.set()
         else:
             # Of course pyright considers this to be `Never`, so this is to keep types.
             op = cast(str, data["op"])
@@ -399,7 +459,7 @@ class Node:
             # Nobody expects the Spanish Inquisition, neither does pyright.
 
             event_type = cast(str, data["type"])
-            _log.warn("Unknown incoming event type %s", event_type)
+            _log.warning("Unknown incoming event type %s", event_type)
 
     def voice_update(
         self,
@@ -412,14 +472,19 @@ class Node:
             data,
             extra={"label": self._label, "guild": guild_id},
         )
+        if data["endpoint"] is None:
+            raise ValueError("Discord did not provide an endpoint.")
 
-        return self.__send(
+        return self.__request(
+            "PATCH",
+            f"/sessions/{self._session_id}/players/{guild_id}",
             {
-                "op": "voiceUpdate",
-                "guildId": str(guild_id),
-                "sessionId": session_id,
-                "event": data,
-            }
+                "voice": {
+                    "sessionId": session_id,
+                    "endpoint": data["endpoint"],
+                    "token": data["token"],
+                },
+            },
         )
 
     def configure_resuming(self) -> Coro[None]:
@@ -429,101 +494,70 @@ class Node:
             extra={"label": self._label},
         )
 
-        return self.__send(
+        return self.__request(
+            "PATCH",
+            f"/sessions/{self._session_id}",
             {
-                "op": "configureResuming",
-                "key": self._resume_key,
+                "resumingKey": self._resume_key,
                 "timeout": 60,
-            }
+            },
         )
 
     def destroy(self, guild_id: int) -> Coro[None]:
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
-        return self.__send(
-            {
-                "op": "destroy",
-                "guildId": str(guild_id),
-            }
+        return self.__request(
+            "DELETE", f"/sessions/{self._session_id}/players/{guild_id}"
         )
 
-    def play(
+    def update(
         self,
         *,
         guild_id: int,
-        track: Track,
-        start_time: int | None = None,
+        track: Track | None = MISSING,
+        position: int | None = None,
         end_time: int | None = None,
         volume: int | None = None,
         no_replace: bool | None = None,
         pause: bool | None = None,
+        filter: Filter | None = None,
     ) -> Coro[None]:
-        data: PlayPayload = {
-            "op": "play",
-            "guildId": str(guild_id),
-            "track": track.id,
-        }
+        data: UpdatePlayerPayload = {}
 
-        if start_time is not None:
-            data["startTime"] = str(start_time)
+        if track is not MISSING:
+            data["encodedTrack"] = track.identifier if track is not None else None
+
+        if position is not None:
+            data["position"] = position
 
         if end_time is not None:
-            data["endTime"] = str(end_time)
+            data["endTime"] = end_time
 
         if volume is not None:
-            data["volume"] = str(volume)
-
-        if no_replace is not None:
-            data["noReplace"] = no_replace
+            data["volume"] = volume
 
         if pause is not None:
-            data["pause"] = pause
+            data["paused"] = pause
 
-        return self.__send(data)
+        if filter is not None:
+            data["filters"] = filter.payload
 
-    def stop(self, guild_id: int) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "stop",
-                "guildId": str(guild_id),
-            }
+        if no_replace is not None:
+            query: UpdatePlayerParams | None = {"noReplace": no_replace}
+        else:
+            query = None
+
+        _log.debug(
+            "Sending player update to lavalink with data %s.",
+            data,
+            extra={"label": self._label, "guild": guild_id},
         )
 
-    def pause(self, guild_id: int, pause: bool) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "pause",
-                "guildId": str(guild_id),
-                "pause": pause,
-            }
-        )
-
-    def seek(self, guild_id: int, position: int) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "seek",
-                "guildId": str(guild_id),
-                "position": position,
-            }
-        )
-
-    def volume(self, guild_id: int, volume: int) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "volume",
-                "guildId": str(guild_id),
-                "volume": volume,
-            }
-        )
-
-    def filter(self, guild_id: int, filter: Filter) -> Coro[None]:
-        return self.__send(
-            {
-                "op": "filters",
-                "guildId": str(guild_id),
-                # Lavalink uses inline filter properties, this adds every one of them.
-                **filter.payload,
-            }
+        return self.__request(
+            "PATCH",
+            f"/sessions/{self._session_id}/players/{guild_id}",
+            data,
+            query,
         )
 
     async def _create_session(self) -> ClientSession:
@@ -533,14 +567,14 @@ class Node:
         self,
         method: str,
         path: str,
-        json: Any | None = None,
-        params: dict[str, str] | None = None,
+        json: OutgoingMessage | None = None,
+        params: OutgoingParams | None = None,
     ) -> Any:
         if self.__session is None:
             self.__session = await self._create_session()
 
         session = self.__session
-        uri = self._rest_uri + path
+        uri = self._rest_uri / path
 
         async with session.request(
             method,
@@ -568,7 +602,7 @@ class Node:
             query = f"{search_type}:{query}"
 
         # TODO: handle errors from lavalink
-        data: GetTracks = await self.__request(
+        data: TrackLoadingResult = await self.__request(
             "GET", "/loadtracks", params={"identifier": query}
         )
 
@@ -588,7 +622,7 @@ class Node:
     async def decode_track(self, track: str) -> Track:
         # TODO: handle errors from lavalink
         info: TrackInfo = await self.__request(
-            "GET", "/decodetrack", params={"track": track}
+            "GET", "/decodetrack", params={"encodedTrack": track}
         )
 
         return Track.from_data(track=track, info=info)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict, Union
 
+from .common import Stats
 from .misc import PayloadWithGuild
 
 if TYPE_CHECKING:
@@ -14,13 +15,9 @@ if TYPE_CHECKING:
     from .misc import FriendlyWithCause
 
 __all__ = (
-    "CPU",
     "EventPayload",
-    "FrameStats",
-    "Memory",
     "PlayerUpdatePayload",
     "PlayerUpdateState",
-    "StatsPayload",
     "IncomingMessage",
     "TrackEndEvent",
     "TrackExceptionEvent",
@@ -41,35 +38,6 @@ class PlayerUpdatePayload(PayloadWithGuild):
     state: PlayerUpdateState
 
 
-class Memory(TypedDict):
-    free: int
-    used: int
-    allocated: int
-    reservable: int
-
-
-class CPU(TypedDict):
-    cores: int
-    systemLoad: int
-    lavalinkLoad: int
-
-
-class FrameStats(TypedDict):
-    sent: int
-    nulled: int
-    deficit: int
-
-
-class StatsPayload(TypedDict):
-    op: Literal["stats"]
-    players: int
-    playingPlayers: int
-    uptime: int
-    memory: Memory
-    cpu: CPU
-    frameStats: NotRequired[FrameStats]
-
-
 class WebSocketClosedEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["WebSocketClosedEvent"]
@@ -81,13 +49,13 @@ class WebSocketClosedEvent(PayloadWithGuild):
 class TrackStartEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackStartEvent"]
-    track: str
+    encodedTrack: str
 
 
 class TrackEndEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackEndEvent"]
-    track: str
+    encodedTrack: str
     reason: Literal[
         "FINISHED",
         "LOAD_FAILED",
@@ -100,15 +68,21 @@ class TrackEndEvent(PayloadWithGuild):
 class TrackExceptionEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackExceptionEvent"]
-    track: str
+    encodedTrack: str
     error: FriendlyWithCause
 
 
 class TrackStuckEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackStuckEvent"]
-    track: str
+    encodedTrack: str
     thresholdMs: int
+
+
+class ReadyPayload(TypedDict):
+    op: Literal["ready"]
+    resumed: bool
+    sessionId: str
 
 
 EventPayload = Union[
@@ -122,6 +96,7 @@ EventPayload = Union[
 
 IncomingMessage = Union[
     PlayerUpdatePayload,
-    StatsPayload,
+    Stats,
     EventPayload,
+    ReadyPayload,
 ]

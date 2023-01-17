@@ -9,7 +9,13 @@ from operator import or_
 from time import time
 from typing import TYPE_CHECKING
 
-from .__libraries import GuildChannel, StageChannel, VoiceChannel, VoiceProtocol
+from .__libraries import (
+    MISSING,
+    GuildChannel,
+    StageChannel,
+    VoiceChannel,
+    VoiceProtocol,
+)
 from .errors import PlayerNotConnected
 from .filter import Filter
 from .playlist import Playlist
@@ -213,6 +219,31 @@ class Player(VoiceProtocol):
 
         return await node.fetch_tracks(query, search_type=raw_type)
 
+    async def update(
+        self,
+        *,
+        track: Track | None = MISSING,
+        position: int | None = None,
+        end_time: int | None = None,
+        volume: int | None = None,
+        pause: bool | None = None,
+        filter: Filter | None = None,
+        replace: bool = False,
+    ) -> None:
+        if self._node is None or not self._connected:
+            raise PlayerNotConnected
+
+        await self._node.update(
+            guild_id=self._guild_id,
+            track=track,
+            position=position,
+            end_time=end_time,
+            volume=volume,
+            pause=pause,
+            filter=filter,
+            no_replace=not replace,
+        )
+
     async def play(
         self,
         track: Track,
@@ -227,40 +258,30 @@ class Player(VoiceProtocol):
         if self._node is None or not self._connected:
             raise PlayerNotConnected
 
-        await self._node.play(
-            guild_id=self._guild_id,
+        self._current = track
+        return await self.update(
             track=track,
-            start_time=start_time,
+            position=start_time,
             end_time=end_time,
             volume=volume,
-            no_replace=not replace,
+            replace=replace,
             pause=pause,
         )
 
-        self._current = track
-
     async def pause(self, pause: bool = True) -> None:
-        if self._node is None or not self._connected:
-            raise PlayerNotConnected
-
-        await self._node.pause(guild_id=self._guild_id, pause=pause)
+        return await self.update(pause=pause)
 
     async def resume(self) -> None:
-        await self.pause(False)
+        return await self.pause(False)
 
     async def stop(self) -> None:
-        if self._node is None or not self._connected:
-            raise PlayerNotConnected
-
-        await self._node.stop(guild_id=self._guild_id)
+        await self.update(track=None)
 
     async def _update_filters(self, *, fast_apply: bool) -> None:
         if self._node is None or not self._connected:
             raise PlayerNotConnected
 
-        await self._node.filter(
-            guild_id=self._guild_id, filter=reduce(or_, self._filters.values())
-        )
+        await self.update(filter=reduce(or_, self._filters.values()))
 
         if fast_apply:
             await self.seek(self.position)
@@ -270,27 +291,21 @@ class Player(VoiceProtocol):
     ) -> None:
         self._filters[label] = filter
 
-        await self._update_filters(fast_apply=True)
+        await self._update_filters(fast_apply=fast_apply)
 
     async def remove_filter(self, label: str, *, fast_apply: bool = False) -> None:
-        self._filters.pop(label, None)
+        self._filters.pop(label)
 
-        await self._update_filters(fast_apply=True)
+        await self._update_filters(fast_apply=fast_apply)
 
     async def clear_filters(self, *, fast_apply: bool = False) -> None:
         self._filters.clear()
 
-        await self._update_filters(fast_apply=True)
+        await self._update_filters(fast_apply=fast_apply)
 
     async def set_volume(self, volume: int, /) -> None:
-        if self._node is None or not self._connected:
-            raise PlayerNotConnected
-
-        await self._node.volume(guild_id=self._guild_id, volume=volume)
+        await self.update(volume=volume)
 
     async def seek(self, position: int, /) -> None:
-        if self._node is None or not self._connected:
-            raise PlayerNotConnected
-
-        await self._node.seek(guild_id=self._guild_id, position=position)
         self._position = position
+        return await self.update(position=position)

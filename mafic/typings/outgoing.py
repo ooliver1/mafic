@@ -2,169 +2,58 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict, Union
+from typing import List, TypedDict, Union
 
-from ..__libraries import VoiceServerUpdatePayload
-from .misc import PayloadWithGuild
-
-if TYPE_CHECKING:
-    from typing_extensions import NotRequired
+from .common import Filters, VoiceStateRequest
 
 __all__ = (
-    "ChannelMix",
-    "ConfigureResumingPayload",
-    "DestroyPayload",
-    "Distortion",
-    "EQBand",
-    "FilterPayload",
-    "Karaoke",
-    "LavalinkVoiceState",
-    "LowPass",
+    "DecodeTrackParams",
     "OutgoingMessage",
-    "PausePayload",
-    "PlayPayload",
-    "RawFilterPayload",
-    "Rotation",
-    "SeekPayload",
-    "StopPayload",
-    "Timescale",
-    "Tremolo",
-    "Vibrato",
-    "VoiceStatePayload",
-    "VolumePayload",
+    "OutgoingParams",
+    "TrackLoadParams",
+    "UnmarkAddressPayload",
+    "UpdatePlayerPayload",
+    "UpdatePlayerParams",
+    "UpdateSessionPayload",
 )
 
 
-class LavalinkVoiceState(TypedDict, total=False):
-    guildId: str
-    sessionId: str
-    event: VoiceServerUpdatePayload
-
-
-class VoiceStatePayload(PayloadWithGuild):
-    op: Literal["voiceUpdate"]
-    sessionId: str
-    event: VoiceServerUpdatePayload
-
-
-class PlayPayload(PayloadWithGuild):
-    op: Literal["play"]
-    track: str
-    startTime: NotRequired[str]
-    endTime: NotRequired[str]
-    volume: NotRequired[str]
-    noReplace: NotRequired[bool]
-    pause: NotRequired[bool]
-
-
-class StopPayload(PayloadWithGuild):
-    op: Literal["stop"]
-
-
-class PausePayload(PayloadWithGuild):
-    op: Literal["pause"]
-    pause: bool
-
-
-class SeekPayload(PayloadWithGuild):
-    op: Literal["seek"]
-    position: int
-
-
-class VolumePayload(PayloadWithGuild):
-    op: Literal["volume"]
-    volume: int
-
-
-class EQBand(TypedDict):
-    band: int
-    gain: float
-
-
-class Karaoke(TypedDict):
-    level: float
-    monoLevel: float
-    filterBand: float
-    filterWidth: float
-
-
-class Timescale(TypedDict):
-    speed: float
-    pitch: float
-    rate: float
-
-
-class Tremolo(TypedDict):
-    frequency: float
-    depth: float
-
-
-class Vibrato(TypedDict):
-    frequency: float
-    depth: float
-
-
-class Rotation(TypedDict):
-    rotationHz: float
-
-
-class Distortion(TypedDict):
-    sinOffset: float
-    sinScale: float
-    cosOffset: float
-    cosScale: float
-    tanOffset: float
-    tanScale: float
-    offset: float
-    scale: float
-
-
-class ChannelMix(TypedDict):
-    leftToLeft: float
-    leftToRight: float
-    rightToLeft: float
-    rightToRight: float
-
-
-class LowPass(TypedDict):
-    smoothing: float
-
-
-class RawFilterPayload(TypedDict):
-    volume: NotRequired[float]
-    equalizer: NotRequired[list[EQBand]]
-    karaoke: NotRequired[Karaoke]
-    timescale: NotRequired[Timescale]
-    tremolo: NotRequired[Tremolo]
-    vibrato: NotRequired[Vibrato]
-    rotation: NotRequired[Rotation]
-    distortion: NotRequired[Distortion]
-    channelMix: NotRequired[ChannelMix]
-    lowPass: NotRequired[LowPass]
-
-
-class FilterPayload(PayloadWithGuild, RawFilterPayload):
-    op: Literal["filters"]
-
-
-class DestroyPayload(PayloadWithGuild):
-    op: Literal["destroy"]
-
-
-class ConfigureResumingPayload(TypedDict):
-    op: Literal["configureResuming"]
-    key: str | None
+class UpdateSessionPayload(TypedDict, total=False):
+    resumingKey: str | None
     timeout: int
 
 
+class UpdatePlayerPayload(TypedDict, total=False):
+    encodedTrack: str | None
+    identifier: str
+    position: int
+    endTime: int
+    volume: int
+    paused: bool
+    filters: Filters
+    voice: VoiceStateRequest
+
+
+class UnmarkAddressPayload(TypedDict):
+    address: str
+
+
+class UpdatePlayerParams(TypedDict):
+    noReplace: bool
+
+
+class TrackLoadParams(TypedDict):
+    identifier: str
+
+
+class DecodeTrackParams(TypedDict):
+    encodedTrack: str
+
+
 OutgoingMessage = Union[
-    VoiceStatePayload,
-    PlayPayload,
-    StopPayload,
-    PausePayload,
-    SeekPayload,
-    VolumePayload,
-    FilterPayload,
-    DestroyPayload,
-    ConfigureResumingPayload,
+    UpdatePlayerPayload, UpdateSessionPayload, List[str], UnmarkAddressPayload
 ]
+
+
+# Will be Union when more added.
+OutgoingParams = Union[UpdatePlayerParams, TrackLoadParams, DecodeTrackParams]

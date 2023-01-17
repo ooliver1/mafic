@@ -16,10 +16,6 @@ Coro = Coroutine[Any, Any, T]
 ExceptionSeverity = Literal["COMMON", "SUSPICIOUS", "FAULT"]
 
 
-class PayloadWithGuild(TypedDict):
-    guildId: str
-
-
 class FriendlyException(TypedDict):
     severity: ExceptionSeverity
     message: str
@@ -27,3 +23,7 @@ class FriendlyException(TypedDict):
 
 class FriendlyWithCause(FriendlyException):
     cause: str
+
+
+class PayloadWithGuild(TypedDict):
+    guildId: str

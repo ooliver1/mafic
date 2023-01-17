@@ -6,7 +6,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .typings import CPU, FrameStats as FrameStatsPayload, Memory, StatsPayload
+    from .typings import CPU, FrameStats as FrameStatsPayload, Memory, Stats
 
 
 __all__ = (
@@ -40,12 +40,12 @@ class FrameStats:
 
 
 class NodeStats:
-    def __init__(self, data: StatsPayload) -> None:
+    def __init__(self, data: Stats) -> None:
         self.player_count: int = data["players"]
         self.playing_player_count: int = data["playingPlayers"]
         self.uptime: timedelta = timedelta(seconds=data["uptime"])
         self.memory: MemoryStats = MemoryStats(data["memory"])
         self.cpu: CPUStats = CPUStats(data["cpu"])
         self.frame_stats: FrameStats | None = (
-            FrameStats(data["frameStats"]) if "frameStats" in data else None
+            FrameStats(data["frameStats"]) if data["frameStats"] is not None else None
         )

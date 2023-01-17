@@ -2,71 +2,73 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
+
+from .common import PlaylistInfo, TrackWithInfo
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
     from .misc import FriendlyException
+
 
 __all__ = (
     "BalancingIPRouteDetails",
     "BalancingIPRoutePlanner",
     "BaseDetails",
-    "EmptyRoutePlanner",
+    "ConfigureResumingResponse",
     "FailingIPAddress",
-    "GetTracks",
+    "EmptyRoutePlanner",
+    "Error",
+    "GenericTracks",
+    "Git",
     "IPBlock",
+    "Info",
     "NanoIPRouteDetails",
     "NanoIPRoutePlanner",
-    "PlaylistInfo",
+    "NoMatches",
+    "PlaylistTracks",
     "PluginData",
     "RotatingIPRouteDetails",
     "RotatingIPRoutePlanner",
     "RotatingNanoIPRouteDetails",
     "RotatingNanoIPRoutePlanner",
     "RoutePlannerStatus",
-    "Tracks",
-    "TrackInfo",
-    "TrackWithInfo",
+    "TrackLoadingResult",
     "TracksFailed",
+    "Version",
+    "Git",
+    "Info",
+    "RotatingIPRoutePlanner",
+    "NanoIPRoutePlanner",
+    "RotatingNanoIPRoutePlanner",
+    "BalancingIPRoutePlanner",
+    "EmptyRoutePlanner",
+    "RoutePlannerStatus",
 )
 
 
-class PlaylistInfo(TypedDict):
-    name: str
-    selectedTrack: int
-
-
-class TrackInfo(TypedDict):
-    identifier: str
-    isSeekable: bool
-    author: str
-    length: int
-    isStream: bool
-    position: int
-    sourceName: str
-    title: str
-    uri: str
-
-
-class TrackWithInfo(TypedDict):
-    track: str
-    info: TrackInfo
-
-
-class Tracks(TypedDict):
-    loadType: Literal["TRACK_LOADED", "PLAYLIST_LOADED", "SEARCH_RESULT", "NO_MATCHES"]
+class PlaylistTracks(TypedDict):
+    loadType: Literal["PLAYLIST_LOADED"]
     playlistInfo: PlaylistInfo
+    tracks: list[TrackWithInfo]
+
+
+class GenericTracks(TypedDict):
+    loadType: Literal["TRACK_LOADED", "SEARCH_RESULT"]
     tracks: list[TrackWithInfo]
 
 
 class TracksFailed(TypedDict):
     loadType: Literal["LOAD_FAILED"]
-    playlistInfo: PlaylistInfo
-    tracks: list[TrackWithInfo]
     exception: FriendlyException
 
 
-GetTracks = Union[Tracks, TracksFailed]
+class NoMatches(TypedDict):
+    loadType: Literal["NO_MATCHES"]
+
+
+TrackLoadingResult = Union[PlaylistTracks, GenericTracks, TracksFailed, NoMatches]
 
 
 class PluginData(TypedDict):
@@ -113,8 +115,8 @@ class NanoIPRouteDetails(BaseDetails):
 NanoIPRoutePlanner = TypedDict(
     "NanoIPRoutePlanner",
     {
-        "class": Literal["NanoIpRoutePlanner"],
-        "details": NanoIPRouteDetails,
+        "class": Optional[Literal["NanoIpRoutePlanner"]],
+        "details": Optional[NanoIPRouteDetails],
     },
 )
 
@@ -127,8 +129,8 @@ class RotatingNanoIPRouteDetails(BaseDetails):
 RotatingNanoIPRoutePlanner = TypedDict(
     "RotatingNanoIPRoutePlanner",
     {
-        "class": Literal["RotatingNanoIpRoutePlanner"],
-        "details": RotatingNanoIPRouteDetails,
+        "class": Optional[Literal["RotatingNanoIpRoutePlanner"]],
+        "details": Optional[RotatingNanoIPRouteDetails],
     },
 )
 
@@ -140,8 +142,8 @@ class BalancingIPRouteDetails(BaseDetails):
 BalancingIPRoutePlanner = TypedDict(
     "BalancingIPRoutePlanner",
     {
-        "class": Literal["BalancingIpRoutePlanner"],
-        "details": BalancingIPRouteDetails,
+        "class": Optional[Literal["BalancingIpRoutePlanner"]],
+        "details": Optional[BalancingIPRouteDetails],
     },
 )
 
@@ -155,3 +157,42 @@ RoutePlannerStatus = Union[
     BalancingIPRoutePlanner,
     EmptyRoutePlanner,
 ]
+
+
+class ConfigureResumingResponse(TypedDict):
+    resumingKey: str | None
+    timeout: int
+
+
+class Version(TypedDict):
+    semver: str
+    major: int
+    minor: int
+    patch: int
+    preRelease: str | None
+
+
+class Git(TypedDict):
+    branch: str
+    commit: str
+    commitTime: int
+
+
+class Info(TypedDict):
+    version: Version
+    buildTime: int
+    git: Git
+    jvm: str
+    lavaplayer: str
+    sourceManagers: list[str]
+    filters: list[str]
+    plugins: list[PluginData]
+
+
+class Error(TypedDict):
+    timestamp: int
+    status: int
+    error: str
+    trace: NotRequired[str]
+    message: str
+    path: str
