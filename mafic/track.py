@@ -73,4 +73,4 @@ class Track:
 
     @classmethod
     def from_data_with_info(cls, data: TrackWithInfo) -> Self:
-        return cls.from_data(track=data["track"], info=data["info"])
+        return cls.from_data(track=data["encoded"], info=data["info"])

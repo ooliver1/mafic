@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: MIT
+# pyright: reportImportCycles=false
+# Player import.
 
 from __future__ import annotations
 

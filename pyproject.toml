@@ -39,7 +39,7 @@ orjson = {version = "^3.8.0", optional = true}
 yarl = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.279"
+pyright = "1.1.289"
 black = "^22.8.0"
 isort = "^5.10.1"
 taskipy = "^1.10.3"
