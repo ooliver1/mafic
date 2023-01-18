@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .typings import FriendlyException
+    from .typings import ExceptionSeverity, FriendlyException
 
 __all__ = (
     "LibraryCompatibilityError",
@@ -21,14 +21,20 @@ __all__ = (
 
 
 class MaficException(Exception):
+    """The base exception class for custom exceptions raised by Mafic."""
+
     ...
 
 
 class LibraryCompatibilityError(MaficException):
+    """An issue occured when trying to find a compatible library."""
+
     ...
 
 
 class NoCompatibleLibraries(LibraryCompatibilityError):
+    """No compatible library was found."""
+
     def __init__(self) -> None:
         super().__init__(
             "No compatible libraries were found. Please install one of the following: "
@@ -37,6 +43,11 @@ class NoCompatibleLibraries(LibraryCompatibilityError):
 
 
 class MultipleCompatibleLibraries(LibraryCompatibilityError):
+    """Multiple compatible libraries were found.
+
+    Mafic makes no attempt to assume which library you are using.
+    """
+
     def __init__(self, libraries: list[str]) -> None:
         super().__init__(
             f"Multiple compatible libraries were found: {', '.join(libraries)}. "
@@ -45,19 +56,49 @@ class MultipleCompatibleLibraries(LibraryCompatibilityError):
 
 
 class TrackLoadException(MaficException):
-    def __init__(self, *, message: str, severity: str) -> None:
+    """This is raised when a track could not be loaded.
+
+    Attributes
+    ----------
+    message:
+        The message returned by the node.
+    severity:
+        The severity of the error. Either ``COMMON``, ``SUSPICIOUS`` or ``FATAL``.
+    """
+
+    def __init__(self, *, message: str, severity: ExceptionSeverity) -> None:
         super().__init__(f"The track could not be loaded: {message} ({severity} error)")
+
+        self.message = message
+        self.severity = severity
 
     @classmethod
     def from_data(cls, data: FriendlyException) -> Self:
+        """Construct a new TrackLoadException from raw Lavalink data.
+
+        Parameters
+        ----------
+        data:
+            The raw data from Lavalink.
+
+        Returns
+        -------
+        TrackLoadException:
+            The constructed exception.
+        """
+
         return cls(message=data["message"], severity=data["severity"])
 
 
 class PlayerNotConnected(MaficException):
+    """This is raised when a player is not connected to a voice channel."""
+
     def __init__(self) -> None:
         super().__init__("The player is not connected to a voice channel.")
 
 
 class NoNodesAvailable(MaficException):
+    """This is raised when no nodes are available to handle a player."""
+
     def __init__(self) -> None:
         super().__init__("No nodes are available to handle this player.")
