@@ -4,30 +4,33 @@ from __future__ import annotations
 
 from logging import getLogger
 from random import choice
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, Sequence, TypeVar, Union
 
 from .__libraries import Client
 from .errors import NoNodesAvailable
 from .node import Node
-from .strategy import STRATEGIES, Strategy
+from .strategy import STRATEGIES, Strategy, StrategyCallable
+from .utils import classproperty
 
 if TYPE_CHECKING:
-    from typing import ClassVar, Sequence, Union
+    from typing import ClassVar
 
     from aiohttp import ClientSession
 
     from .region import Group, Region, VoiceRegion
-    from .strategy import StrategyCallable
 
-    StrategyList = Union[
-        Sequence[Strategy],
-        StrategyCallable,
-        Sequence[StrategyCallable],
-        Sequence[Union[Strategy, StrategyCallable]],
-    ]
+StrategyList = Union[
+    Sequence[Strategy],
+    StrategyCallable,
+    Sequence[StrategyCallable],
+    Sequence[Union[Strategy, StrategyCallable]],
+]
+"""A type hint for a list of strategies to select the best node."""
 
 
 ClientT = TypeVar("ClientT", bound=Client)
+T = TypeVar("T")
+TT = TypeVar("TT")
 __all__ = ("NodePool",)
 
 
@@ -35,16 +38,23 @@ _log = getLogger(__name__)
 
 
 class NodePool(Generic[ClientT]):
+    """A class that manages nodes and chooses them based on strategies.
+
+    Parameters
+    ----------
+    client:
+        The client to use to connect to the nodes.
+    default_strategies:
+        The default strategies to use when selecting a node. Defaults to
+        ``[Strategy.SHARD, Strategy.LOCATION, Strategy.USAGE]``.
+    """
+
     __slots__ = ()
     _nodes: ClassVar[dict[str, Node]] = {}
     _node_regions: ClassVar[dict[Region, set[Node]]] = {}
     _node_shards: ClassVar[dict[int, set[Node]]] = {}
     _client: ClientT | None = None
-    _default_strategies: StrategyList = [
-        Strategy.SHARD,
-        Strategy.LOCATION,
-        Strategy.USAGE,
-    ]
+    _default_strategies: ClassVar[StrategyList] = []
 
     def __init__(
         self,
@@ -53,12 +63,27 @@ class NodePool(Generic[ClientT]):
     ) -> None:
         NodePool._client = client
 
-        if default_strategies is not None:
-            NodePool._default_strategies = default_strategies
+        NodePool._default_strategies = (
+            [
+                Strategy.SHARD,
+                Strategy.LOCATION,
+                Strategy.USAGE,
+            ]
+            if default_strategies is None
+            else default_strategies
+        )
 
-    @property
-    def nodes(self) -> dict[str, Node]:
-        return self._nodes
+    @classproperty
+    def label_to_node(cls) -> dict[str, Node]:
+        """A dictionary mapping node labels to nodes."""
+
+        return cls._nodes
+
+    @classproperty
+    def nodes(cls) -> list[Node]:
+        """A list of all nodes."""
+
+        return list(cls._nodes.values())
 
     async def create_node(
         self,
@@ -75,7 +100,54 @@ class NodePool(Generic[ClientT]):
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
     ) -> Node:
-        assert self._client is not None, "NodePool has not been initialized."
+        """Create a node and connect it.
+
+        The parameters here relate to :class:`Node`.
+
+        Parameters
+        ----------
+        host:
+            The host of the node to connect to.
+        port:
+            The port of the node to connect to.
+        label:
+            The label of the node used to identify it.
+        password:
+            The password of the node to authenticate.
+        secure:
+            Whether to use SSL (TLS) or not.
+        heartbeat:
+            The interval to send heartbeats to the node websocket connection.
+        timeout:
+            The timeout to use for the node websocket connection.
+        session:
+            The session to use for the node websocket connection.
+        resume_key:
+            The key to use to resume the node websocket connection.
+            This is used to resume a connection if the connection is lost.
+            Defaults to using the `host`, `port` and `label`.
+        regions:
+            The regions this node is best to connect to.
+            This is used to determine if this is the best node for a connection
+            with :attr:`Strategy.LOCATION`.
+        shard_ids:
+            The shard IDs this node is best to connect to.
+            This is used to determine if this is the best node for a connection
+            with :attr:`Strategy.SHARD`.
+
+        Returns
+        -------
+        :class:`Node`
+            The created node.
+
+        Raises
+        ------
+        RuntimeError
+            If the node pool has not been initialized.
+        """
+
+        if self._client is None:
+            raise RuntimeError("NodePool has not been initialized.")
 
         node = Node(
             host=host,
@@ -122,7 +194,31 @@ class NodePool(Generic[ClientT]):
         endpoint: str | None,
         strategies: StrategyList | None = None,
     ) -> Node:
-        assert cls._client is not None, "NodePool has not been initialized."
+        """Get a node based on the given strategies.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to get a node for.
+        endpoint:
+            The endpoint to get a node for.
+        strategies:
+            The strategies to use to get a node. If not provided, the default
+            strategies will be used.
+
+        Returns
+        -------
+        :class:`Node`
+            The node to use.
+
+        Raises
+        ------
+        RuntimeError
+            If the node pool has not been initialized.
+        """
+
+        if cls._client is None:
+            raise RuntimeError("NodePool has not been initialized.")
 
         actual_strategies: Sequence[StrategyCallable | Strategy]
 
@@ -133,15 +229,13 @@ class NodePool(Generic[ClientT]):
         else:
             actual_strategies = strategies
 
-        nodes = cls._nodes.values()
+        nodes = cls.nodes
 
         for strategy in actual_strategies:
             if isinstance(strategy, Strategy):
                 strategy = STRATEGIES[strategy]
 
-            nodes = strategy(
-                list(nodes), int(guild_id), cls._client.shard_count, endpoint
-            )
+            nodes = strategy(nodes, int(guild_id), cls._client.shard_count, endpoint)
 
             _log.debug(
                 "Strategy %s returned nodes %s.",
@@ -154,8 +248,21 @@ class NodePool(Generic[ClientT]):
             elif len(nodes) == 0:
                 raise NoNodesAvailable
 
-        return choice(list(nodes))
+        return choice(nodes)
 
     @classmethod
     def get_random_node(cls) -> Node:
+        """Get a random node.
+
+        Returns
+        -------
+        :class:`Node`
+            The random node.
+
+        Raises
+        ------
+        ValueError
+            If there are no nodes.
+        """
+
         return choice(list(cls._nodes.values()))

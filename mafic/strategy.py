@@ -6,18 +6,14 @@ import re
 from enum import Enum, auto
 from logging import getLogger
 from random import choice
-from typing import TYPE_CHECKING
+from typing import Callable, List, Union
 
+from .node import Node
 from .region import VOICE_TO_REGION
 
-if TYPE_CHECKING:
-    from typing import Callable, List, Union
-
-    from .node import Node
-
-    StrategyCallable = Callable[
-        [List[Node], int, Union[int, None], Union[str, None]], List[Node]
-    ]
+StrategyCallable = Callable[
+    [List[Node], int, Union[int, None], Union[str, None]], List[Node]
+]
 
 _log = getLogger(__name__)
 __all__ = ("Strategy", "STRATEGIES")
