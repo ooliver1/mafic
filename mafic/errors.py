@@ -15,6 +15,7 @@ __all__ = (
     "MultipleCompatibleLibraries",
     "NoCompatibleLibraries",
     "NoNodesAvailable",
+    "NodeAlreadyConnected",
     "PlayerNotConnected",
     "TrackLoadException",
 )
@@ -95,6 +96,13 @@ class PlayerNotConnected(MaficException):
 
     def __init__(self) -> None:
         super().__init__("The player is not connected to a voice channel.")
+
+
+class NodeAlreadyConnected(MaficException):
+    """This is raised when a node is already connected to Mafic."""
+
+    def __init__(self) -> None:
+        super().__init__("The node is already connected to Mafic.")
 
 
 class NoNodesAvailable(MaficException):

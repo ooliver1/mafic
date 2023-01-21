@@ -16,7 +16,7 @@ from yarl import URL
 from mafic.typings.http import TrackWithInfo
 
 from .__libraries import MISSING, ExponentialBackoff, dumps, loads
-from .errors import TrackLoadException
+from .errors import NodeAlreadyConnected, TrackLoadException
 from .ip import (
     BalancingIPRoutePlannerStatus,
     NanoIPRoutePlannerStatus,
@@ -67,6 +67,19 @@ __all__ = ("Node",)
 def _wrap_regions(
     regions: Sequence[Group | Region | VoiceRegion] | None,
 ) -> list[Region] | None:
+    """Converts a list of voice regions, regions and groups into a list of regions.
+
+    Parameters
+    ----------
+    regions:
+        The list of regions to convert.
+
+    Returns
+    -------
+    list[Region] | None
+        The converted list of regions.
+    """
+
     if not regions:
         return None
 
@@ -90,6 +103,58 @@ def _wrap_regions(
 
 
 class Node:
+    """Represents a Lavalink node.
+
+    .. warning::
+
+        This class should not be instantiated manually.
+        Instead, use :meth:`NodePool.create_node`.
+
+    Parameters
+    ----------
+    host:
+        The host of the node, used to connect.
+    port:
+        The port of the node, used to connect.
+    label:
+        The label of the node, used to identify the node.
+    password:
+        The password of the node, used to authenticate the connection.
+    client:
+        The client that the node is attached to.
+    secure:
+        Whether the node is using a secure connection.
+        This determines whether the node uses HTTP or HTTPS, WS or WSS.
+    heartbeat:
+        The interval at which the node will send a heartbeat to the client.
+    timeout:
+        The amount of time the node will wait for a response before raising a timeout
+        error.
+    session:
+        The session to use for the node.
+        If not provided, a new session will be created.
+    resume_key:
+        The key to use when resuming the node.
+        If not provided, the key will be generated from the host, port and label.
+    regions:
+        The regions that the node can be used in.
+        This is used to determine when to use this node.
+    shard_ids:
+        The shard IDs that the node can be used in.
+        This is used to determine when to use this node.
+
+    Attributes
+    ----------
+    players:
+        The players that are currently connected to the node.
+    regions:
+        The regions that the node can be used in.
+        This is used to determine when to use this node.
+    shard_ids:
+        The shard IDs that the node can be used in.
+        This is used to determine when to use this node.
+    """
+
     __slots__ = (
         "__password",
         "__session",
@@ -159,34 +224,74 @@ class Node:
 
     @property
     def host(self) -> str:
+        """The host of the node."""
+
         return self._host
 
     @property
     def port(self) -> int:
+        """The port of the node."""
+
         return self._port
 
     @property
     def label(self) -> str:
+        """The label of the node."""
+
         return self._label
 
     @property
     def client(self) -> Client:
+        """The client that the node is attached to."""
+
         return self._client
 
     @property
     def secure(self) -> bool:
+        """Whether the node is using a secure connection."""
+
         return self._secure
 
     @property
     def stats(self) -> NodeStats | None:
+        """The stats of the node.
+
+        This will be ``None`` if the node has not sent stats yet.
+        This could be if it is not connected, or if stats sending is disabled on the
+        node.
+        """
         return self._stats
 
     @property
     def available(self) -> bool:
+        """Whether the node is available.
+
+        This is ``False`` if the node is not connected, or if it is not ready.
+        """
+
         return self._available
 
     @property
     def weight(self) -> float:
+        """The weight of the node.
+
+        This is used to determine which node to use when multiple nodes are available.
+
+        Notes
+        -----
+        The weight is calculated based on the following:
+
+        - The number of players connected to the node.
+        - The load of the node.
+        - The number of UDP frames nulled.
+        - The number of UDP frames that are lost.
+        - If the node memory is very close to full.
+
+        If the node has not sent stats yet, then a high value will be returned.
+        This is so that the node will be used if it is the only one available,
+        or if stats sending is disabled on the node.
+        """
+
         if self._stats is None:
             # Stats haven't been set yet, so we'll just return a high value.
             # This is so we can properly balance known nodes.
@@ -248,6 +353,24 @@ class Node:
         return players + cpu + null + deficit + mem
 
     async def _check_version(self) -> None:
+        """Check the version of the node.
+
+        Raises
+        ------
+        RuntimeError
+            If the
+            - major version is not 3
+            - minor version is less than 7
+
+            This is because the rest api is in 3.7, and v4 will have breaking changes.
+
+        Warnings
+        --------
+        UnsupportedVersionWarning
+            If the minor version is greater than 7.
+            Some features may not work.
+        """
+
         if self.__session is None:
             self.__session = await self._create_session()
 
@@ -277,6 +400,16 @@ class Node:
     async def _connect_to_websocket(
         self, headers: dict[str, str], session: ClientSession
     ) -> None:
+        """Connect to the websocket of the node.
+
+        Parameters
+        ----------
+        headers:
+            The headers to use for the websocket connection.
+        session:
+            The session to use for the websocket connection.
+        """
+
         try:
             self._ws = (
                 await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
@@ -296,6 +429,20 @@ class Node:
             raise
 
     async def connect(self) -> None:
+        """Connect to the node.
+
+        Raises
+        ------
+        NodeAlreadyConnected
+            If the node is already connected.
+        asyncio.TimeoutError
+            If the connection times out.
+            You can change the timeout with the `timeout` parameter.
+        """
+
+        if self._ws is not None:
+            raise NodeAlreadyConnected()
+
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
         await self._client.wait_until_ready()
         assert self._client.user is not None
@@ -353,6 +500,8 @@ class Node:
             self._available = True
 
     async def _ws_listener(self) -> None:
+        """Listen for messages from the websocket."""
+
         backoff = ExponentialBackoff()
 
         if self._ws is None:
@@ -400,6 +549,14 @@ class Node:
                 create_task(self._handle_msg(msg.json(loads=loads)))
 
     async def _handle_msg(self, data: IncomingMessage) -> None:
+        """Handle a message from the websocket.
+
+        Parameters
+        ----------
+        data:
+            The data to handle.
+        """
+
         _log.debug("Received event with op %s", data["op"])
         _log.debug("Event data: %s", data)
 
@@ -439,6 +596,14 @@ class Node:
             _log.warn("Unknown incoming message op code %s", op)
 
     async def _handle_event(self, data: EventPayload) -> None:
+        """Handle an event from the websocket.
+
+        Parameters
+        ----------
+        data:
+            The data to handle.
+        """
+
         if data["type"] == "WebSocketClosedEvent":
             # TODO:
             ...
@@ -467,6 +632,23 @@ class Node:
         session_id: str,
         data: VoiceServerUpdatePayload,
     ) -> Coro[None]:
+        """Send a voice update to the node.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to send the update for.
+        session_id:
+            The **Discord** session ID to send.
+        data:
+            The voice server update payload to send.
+
+        Raises
+        ------
+        ValueError
+            If the endpoint in the payload is ``None``.
+        """
+
         _log.debug(
             "Sending player update to lavalink with data %s.",
             data,
@@ -488,6 +670,8 @@ class Node:
         )
 
     def configure_resuming(self) -> Coro[None]:
+        """Configure the node to resume."""
+
         _log.info(
             "Sending resume configuration to lavalink with resume key %s.",
             self._resume_key,
@@ -504,6 +688,14 @@ class Node:
         )
 
     def destroy(self, guild_id: int) -> Coro[None]:
+        """Destroy a player.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to destroy the player for.
+        """
+
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
         return self.__request(
@@ -522,6 +714,29 @@ class Node:
         pause: bool | None = None,
         filter: Filter | None = None,
     ) -> Coro[None]:
+        """Update a player.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to update the player for.
+        track:
+            The track to update the player with.
+            Setting this to ``None`` will clear the track.
+        position:
+            The position to update the player with.
+        end_time:
+            The position in the track to stop playing.
+        volume:
+            The volume to set.
+        no_replace:
+            Whether to replace the current track or leave it playing.
+        pause:
+            Whether to pause the player.
+        filter:
+            The filter to apply to the player.
+        """
+
         data: UpdatePlayerPayload = {}
 
         if track is not MISSING:
@@ -561,6 +776,8 @@ class Node:
         )
 
     async def _create_session(self) -> ClientSession:
+        """Create a new session for the node."""
+
         return ClientSession(json_serialize=dumps)
 
     async def __request(
@@ -570,6 +787,25 @@ class Node:
         json: OutgoingMessage | None = None,
         params: OutgoingParams | None = None,
     ) -> Any:
+        """Send a request to the node.
+
+        Parameters
+        ----------
+        method:
+            The HTTP method to use.
+        path:
+            The path to send the request to, without ``/v3``
+        json:
+            The JSON to send.
+        params:
+            The query parameters to send.
+
+        Returns
+        -------
+        Any
+            The JSON response from the node.
+        """
+
         if self.__session is None:
             self.__session = await self._create_session()
 
@@ -598,6 +834,27 @@ class Node:
     async def fetch_tracks(
         self, query: str, *, search_type: str
     ) -> list[Track] | Playlist | None:
+        """Fetch tracks from the node.
+
+        Parameters
+        ----------
+        query:
+            The query to search for.
+        search_type:
+            The search type to use.
+
+        Returns
+        -------
+        list[:class:`Track`]
+            A list of tracks if the load type is ``TRACK_LOADED``.
+        :class:`Playlist`
+            A playlist if the load type is ``PLAYLIST_LOADED``.
+        list[:class:`Track`]
+            A list of tracks if the load type is ``SEARCH_RESULT``.
+        None
+            If the load type is ``NO_MATCHES``.
+        """
+
         if not URL_REGEX.match(query):
             query = f"{search_type}:{query}"
 
@@ -620,6 +877,23 @@ class Node:
             _log.warning("Unknown load type recieved: %s", data["loadType"])
 
     async def decode_track(self, track: str) -> Track:
+        """Decode a track from the encoded base64 data.
+
+        Parameters
+        ----------
+        track:
+            The encoded track data.
+
+        Returns
+        -------
+        :class:`Track`
+            The decoded track.
+
+        See Also
+        --------
+        :meth:`decode_tracks`
+        """
+
         # TODO: handle errors from lavalink
         info: TrackInfo = await self.__request(
             "GET", "/decodetrack", params={"encodedTrack": track}
@@ -628,6 +902,23 @@ class Node:
         return Track.from_data(track=track, info=info)
 
     async def decode_tracks(self, tracks: list[str]) -> list[Track]:
+        """Decode a list of tracks from the encoded base64 data.
+
+        Parameters
+        ----------
+        tracks:
+            The encoded track data.
+
+        Returns
+        -------
+        list[:class:`Track`]
+            The decoded tracks.
+
+        See Also
+        --------
+        :meth:`decode_track`
+        """
+
         track_data: list[TrackWithInfo] = await self.__request(
             "POST", "/decodetracks", json=tracks
         )
@@ -635,11 +926,27 @@ class Node:
         return [Track.from_data_with_info(track) for track in track_data]
 
     async def fetch_plugins(self) -> list[Plugin]:
+        """Fetch the plugins from the node.
+
+        Returns
+        -------
+        list[:class:`Plugin`]
+            The plugins from the node.
+        """
+
         plugins: list[PluginData] = await self.__request("GET", "/plugins")
 
         return [Plugin.from_data(plugin) for plugin in plugins]
 
     async def fetch_route_planner_status(self) -> RoutePlannerStatus | None:
+        """Fetch the route planner status from the node.
+
+        Returns
+        -------
+        :class:`RoutePlannerStatus`
+            The route planner status from the node.
+        """
+
         data: RoutePlannerStatusPayload = await self.__request(
             "GET", "/routeplanner/status"
         )
@@ -664,9 +971,19 @@ class Node:
             raise RuntimeError(f"Unknown route planner class {data['class']}.")
 
     async def unmark_failed_address(self, address: str) -> None:
+        """Unmark a failed address so it can be used again.
+
+        Parameters
+        ----------
+        address:
+            The address to unmark.
+        """
+
         await self.__request(
             "POST", "/routeplanner/free/address", json={"address": address}
         )
 
     async def unmark_all_addresses(self) -> None:
+        """Unmark all failed addresses so they can be used again."""
+
         await self.__request("POST", "/routeplanner/free/all")
