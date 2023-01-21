@@ -364,8 +364,8 @@ class Node:
 
             This is because the rest api is in 3.7, and v4 will have breaking changes.
 
-        Warnings
-        --------
+        Warns
+        -----
         UnsupportedVersionWarning
             If the minor version is greater than 7.
             Some features may not work.
