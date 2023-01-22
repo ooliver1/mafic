@@ -13,6 +13,53 @@ __all__ = ("Track",)
 
 
 class Track:
+    """Represents a track.
+
+    Parameters
+    ----------
+    track_id:
+        The ID of the track.
+    title:
+        The title of the track.
+    identifier:
+        The identifier of the track.
+    uri:
+        The URI of the track.
+    source:
+        The source of the track.
+    stream:
+        Whether the track is a stream.
+    seekable:
+        Whether the track is seekable.
+    position:
+        The current position of the track.
+    length:
+        The length of the track.
+
+    Attributes
+    ----------
+    id:
+        The ID of the track. This is base64 encoded data used by Lavalink.
+    title:
+        The title of the track.
+    author:
+        The author of the track.
+    identifier:
+        The identifier of the track. This is the ID of the track on the source.
+    uri:
+        The URI of the track.
+    source:
+        The source of the track.
+    stream:
+        Whether the track is a stream.
+    seekable:
+        Whether the track is seekable.
+    position:
+        The current position of the track.
+    length:
+        The length of the track.
+    """
+
     __slots__ = (
         "author",
         "id",
@@ -58,6 +105,21 @@ class Track:
 
     @classmethod
     def from_data(cls, *, track: str, info: TrackInfo) -> Self:
+        """Create a track from the raw data.
+
+        Parameters
+        ----------
+        track:
+            The ID of the track.
+        info:
+            The track info.
+
+        Returns
+        -------
+        Track:
+            The track.
+        """
+
         return cls(
             track_id=track,
             title=info["title"],
@@ -73,4 +135,17 @@ class Track:
 
     @classmethod
     def from_data_with_info(cls, data: TrackWithInfo) -> Self:
+        """Create a track from the raw data, bundled with the track and info.
+
+        Parameters
+        ----------
+        data:
+            The track and info.
+
+        Returns
+        -------
+        Track:
+            The track.
+        """
+
         return cls.from_data(track=data["encoded"], info=data["info"])
