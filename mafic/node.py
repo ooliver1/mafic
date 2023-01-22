@@ -25,7 +25,7 @@ from .ip import (
 )
 from .playlist import Playlist
 from .plugin import Plugin
-from .region import VOICE_TO_REGION, Group, Region, VoiceRegion
+from .region import Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
 from .warnings import UnsupportedVersionWarning
@@ -66,7 +66,7 @@ __all__ = ("Node",)
 
 def _wrap_regions(
     regions: Sequence[Group | Region | VoiceRegion] | None,
-) -> list[Region] | None:
+) -> list[VoiceRegion] | None:
     """Converts a list of voice regions, regions and groups into a list of regions.
 
     Parameters
@@ -83,17 +83,18 @@ def _wrap_regions(
     if not regions:
         return None
 
-    actual_regions: list[Region] = []
+    actual_regions: list[VoiceRegion] = []
 
     for item in regions:
         if isinstance(item, Group):
-            actual_regions.extend(item.value)
+            for region in item.value:
+                actual_regions.append(region.value)
         elif isinstance(item, Region):
-            actual_regions.append(item)
+            actual_regions.append(item.value)
         elif isinstance(
             item, VoiceRegion
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
-            actual_regions.append(VOICE_TO_REGION[item.value])
+            actual_regions.append(item)
         else:
             raise TypeError(
                 f"Expected Group, Region, or VoiceRegion, got {type(item)!r}."
@@ -137,7 +138,7 @@ class Node:
         The key to use when resuming the node.
         If not provided, the key will be generated from the host, port and label.
     regions:
-        The regions that the node can be used in.
+        The voice regions that the node can be used in.
         This is used to determine when to use this node.
     shard_ids:
         The shard IDs that the node can be used in.
@@ -205,7 +206,7 @@ class Node:
         self._client = client
         self.__session = session
         self.shard_ids: Sequence[int] | None = shard_ids
-        self.regions: list[Region] | None = _wrap_regions(regions)
+        self.regions: list[VoiceRegion] | None = _wrap_regions(regions)
 
         self._rest_uri = URL.build(scheme=f"http{'s'*secure}", host=host, port=port)
         self._ws_uri = URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)

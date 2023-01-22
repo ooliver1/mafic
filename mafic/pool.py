@@ -51,7 +51,7 @@ class NodePool(Generic[ClientT]):
 
     __slots__ = ()
     _nodes: ClassVar[dict[str, Node]] = {}
-    _node_regions: ClassVar[dict[Region, set[Node]]] = {}
+    _node_regions: ClassVar[dict[VoiceRegion, set[Node]]] = {}
     _node_shards: ClassVar[dict[int, set[Node]]] = {}
     _client: ClientT | None = None
     _default_strategies: ClassVar[StrategyList] = []

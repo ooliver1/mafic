@@ -4,12 +4,18 @@ from __future__ import annotations
 
 from enum import Enum
 
-__all__ = ("VOICE_TO_REGION", "Group", "Region", "VoiceRegion")
+__all__ = ("Group", "Region", "VoiceRegion")
 
 
 # This is taken from Vibr logs, javacord and nextcord enums and may not be complete.
 # Discord only documents and exposes 13 of these regions, but there are more.
 class VoiceRegion(Enum):
+    """Represents a Discord voice region.
+
+    All the attributes here are best effort but may not be complete.
+    The value is what you find in ``region[number].discord.media`` endpoints.
+    """
+
     OREGON = "oregon"
     MONTREAL = "montreal"
     SOUTH_AFRICA = "southafrica"
@@ -46,6 +52,11 @@ class VoiceRegion(Enum):
 
 
 class Region(Enum):
+    """Represents a region of voice regions.
+
+    This groups voice regions by geographical location.
+    """
+
     EAST_NA = (VoiceRegion.MONTREAL, VoiceRegion.US_EAST, VoiceRegion.ATLANTA)
     CENTRAL_NA = (VoiceRegion.US_CENTRAL,)
     WEST_NA = (
@@ -76,6 +87,12 @@ class Region(Enum):
 
 
 class Group(Enum):
+    """Represents a group of regions.
+
+    This groups regions by geographical location. These are very generic and should
+    be used rarely.
+    """
+
     WEST = (
         Region.EAST_NA,
         Region.WEST_NA,
@@ -97,9 +114,3 @@ class Group(Enum):
         Region.WEST_ASIA,
         Region.OCEANIA,
     )
-
-
-# Iterate Region, and set each of its value to itself.
-VOICE_TO_REGION: dict[str, Region] = {
-    voice_region.value: region for region in Region for voice_region in region.value
-}

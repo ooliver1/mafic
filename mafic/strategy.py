@@ -9,7 +9,6 @@ from random import choice
 from typing import Callable, List, Union
 
 from .node import Node
-from .region import VOICE_TO_REGION
 
 StrategyCallable = Callable[
     [List[Node], int, Union[int, None], Union[str, None]], List[Node]
@@ -54,9 +53,9 @@ def location_strategy(
         _log.error("Failed to find the region in an endpoint, defaulting to all nodes.")
         return nodes
 
-    region = VOICE_TO_REGION.get(match.group("region"))
+    voice_region = match.group("region")
 
-    if not region:
+    if not voice_region:
         _log.error(
             "Failed to match endpoint %s (match: %s) to a region, "
             "defaulting to all nodes.",
@@ -66,7 +65,10 @@ def location_strategy(
         return nodes
 
     regional_nodes = list(
-        filter(lambda node: node.regions is not None and region in node.regions, nodes)
+        filter(
+            lambda node: node.regions is not None and voice_region in node.regions,
+            nodes,
+        )
     )
 
     if not regional_nodes:
