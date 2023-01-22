@@ -13,21 +13,49 @@ from .node import Node
 StrategyCallable = Callable[
     [List[Node], int, Union[int, None], Union[str, None]], List[Node]
 ]
+"""Represents a strategy callable.
+
+This accepts ``nodes``, ``guild_id``, ``shard_count`` and ``endpoint`` and returns
+a list of nodes.
+"""
 
 _log = getLogger(__name__)
 __all__ = ("Strategy", "STRATEGIES")
 
 
 class Strategy(Enum):
+    """Represents a strategy for selecting a node."""
+
     SHARD = auto()
+    """Selects a node based on the shard ID of the guild."""
+
     LOCATION = auto()
+    """Selects a node based on the region the guild is in."""
+
     USAGE = auto()
+    """Selects a node based on the least used node."""
+
     RANDOM = auto()
+    """Selects a random node."""
 
 
 def shard_strategy(
     nodes: list[Node], guild_id: int, shard_count: int | None, _: str | None
 ) -> list[Node]:
+    """Selects a node based on the shard ID of the guild.
+
+    Parameters
+    ----------
+    nodes:
+        The nodes to select from.
+    guild_id:
+        The ID of the guild to select a node for.
+    shard_count:
+        The number of shards the bot is using.
+    _:
+        Unused parameter.
+    """
+
     if shard_count is None:
         shard_count = 1
 
@@ -44,6 +72,20 @@ _REGION_REGEX = re.compile(r"(?:vip-)?(?P<region>[a-z-]{1,15})\d{1,5}\.discord\.
 def location_strategy(
     nodes: list[Node], _: int, __: int | None, endpoint: str | None
 ) -> list[Node]:
+    """Selects a node based on the region the guild is in.
+
+    Parameters
+    ----------
+    nodes:
+        The nodes to select from.
+    _:
+        Unused parameter.
+    __:
+        Unused parameter.
+    endpoint:
+        The endpoint of the guild to select a node for.
+    """
+
     if endpoint is None:
         return nodes
 
@@ -81,6 +123,22 @@ def location_strategy(
 def usage_strategy(
     nodes: list[Node], _: int, __: int | None, ___: str | None
 ) -> list[Node]:
+    """Selects a node based on the least used node.
+
+    This is calculated using :attr:`Node.weight`.
+
+    Parameters
+    ----------
+    nodes:
+        The nodes to select from.
+    _:
+        Unused parameter.
+    __:
+        Unused parameter.
+    ___:
+        Unused parameter.
+    """
+
     # max() would be nice, however if all nodes have no stats, it returns the first.
 
     lowest = None
@@ -105,3 +163,4 @@ STRATEGIES: dict[Strategy, StrategyCallable] = {
     # Since it is usually to filter out lists at the end of a chain.
     Strategy.RANDOM: lambda nodes, _, __, ___: [choice(nodes)],
 }
+"""A mapping of strategies to their functions."""
