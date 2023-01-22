@@ -8,6 +8,8 @@ __all__ = ("SearchType",)
 
 
 class SearchType(Enum):
+    """Represents a search type for Lavalink."""
+
     YOUTUBE = "ytsearch"
     YOUTUBE_MUSIC = "ytmsearch"
     SOUNDCLOUD = "scsearch"
