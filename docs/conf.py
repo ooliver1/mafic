@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any
+from typing import Any, Optional
 
 from sphinx.config import Config
 
@@ -57,18 +57,6 @@ html_theme = "furo"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
-# html_theme_options = {
-#     "light_css_variables": {
-#         "color-brand-primary": "#4C8CBF",
-#         "color-brand-content": "#306998",
-#         "color-admonition-background": "blue",
-#     },
-#     "dark_css_variables": {
-#         "color-brand-primary": "#306998",
-#         "color-brand-content": "#FFE871",
-#         "color-admonition-background": "yellow",
-#     },
-# }
 default_dark_mode = True
 
 
@@ -92,6 +80,9 @@ aliases = {
     StrategyCallable: ":data:`~mafic.strategy.StrategyCallable`",
     StrategyList: ":data:`~mafic.pool.StrategyList`",
     StrategyList[ClientT]: ":data:`~mafic.pool.StrategyList`",
+    Optional[
+        StrategyList[ClientT]
+    ]: ":data:`~typing.Optional`\\[:data:`~mafic.pool.StrategyList`]",
     RoutePlannerStatus: ":data:`~mafic.ip.RoutePlannerStatus`",
 }
 
