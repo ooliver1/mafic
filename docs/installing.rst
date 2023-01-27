@@ -10,7 +10,7 @@ Installing Mafic
 ----------------
 
 Mafic is on PyPI, so it can be installed via pip.
-he command varies depending on your system,
+The command varies depending on your system,
 generally use what you used to install your Discord library.
 
 .. warning::
