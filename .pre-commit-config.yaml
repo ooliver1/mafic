@@ -48,6 +48,7 @@ repos:
         name: Check for debug statements.
       - id: end-of-file-fixer
         name: Check for only one newline character at EOL.
+        exclude: "^(test_bot/logs/)"
       - id: trailing-whitespace
         name: Check for trailing whitespace.
         args: [--markdown-linebreak-ext=md]

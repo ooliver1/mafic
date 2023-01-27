@@ -33,7 +33,7 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Export dependencies
-        run: poetry export --no-interaction -f requirements.txt --output requirements.txt --with lint
+        run: poetry export --no-interaction -f requirements.txt --output requirements.txt --with lint,docs
 
       - name: Install dependencies
         run: pip install -r requirements.txt

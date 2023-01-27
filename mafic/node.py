@@ -8,15 +8,15 @@ import re
 import warnings
 from asyncio import Event, TimeoutError, create_task, sleep, wait_for
 from logging import getLogger
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Generic, cast
 
-from aiohttp import ClientSession, WSMsgType
-from yarl import URL
+import aiohttp
+import yarl
 
 from mafic.typings.http import TrackWithInfo
 
 from .__libraries import MISSING, ExponentialBackoff, dumps, loads
-from .errors import TrackLoadException
+from .errors import NodeAlreadyConnected, TrackLoadException
 from .ip import (
     BalancingIPRoutePlannerStatus,
     NanoIPRoutePlannerStatus,
@@ -25,9 +25,10 @@ from .ip import (
 )
 from .playlist import Playlist
 from .plugin import Plugin
-from .region import VOICE_TO_REGION, Group, Region, VoiceRegion
+from .region import Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
+from .type_variables import ClientT
 from .warnings import UnsupportedVersionWarning
 
 if TYPE_CHECKING:
@@ -36,7 +37,7 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientWebSocketResponse
 
-    from .__libraries import Client, VoiceServerUpdatePayload
+    from .__libraries import VoiceServerUpdatePayload
     from .filter import Filter
     from .ip import RoutePlannerStatus
     from .player import Player
@@ -66,21 +67,35 @@ __all__ = ("Node",)
 
 def _wrap_regions(
     regions: Sequence[Group | Region | VoiceRegion] | None,
-) -> list[Region] | None:
+) -> list[VoiceRegion] | None:
+    """Converts a list of voice regions, regions and groups into a list of regions.
+
+    Parameters
+    ----------
+    regions:
+        The list of regions to convert.
+
+    Returns
+    -------
+    :class:`list`\\[:class:`Region`] | None
+        The converted list of regions.
+    """
+
     if not regions:
         return None
 
-    actual_regions: list[Region] = []
+    actual_regions: list[VoiceRegion] = []
 
     for item in regions:
         if isinstance(item, Group):
-            actual_regions.extend(item.value)
+            for region in item.value:
+                actual_regions.append(region.value)
         elif isinstance(item, Region):
-            actual_regions.append(item)
+            actual_regions.append(item.value)
         elif isinstance(
             item, VoiceRegion
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
-            actual_regions.append(VOICE_TO_REGION[item.value])
+            actual_regions.append(item)
         else:
             raise TypeError(
                 f"Expected Group, Region, or VoiceRegion, got {type(item)!r}."
@@ -89,7 +104,59 @@ def _wrap_regions(
     return actual_regions
 
 
-class Node:
+class Node(Generic[ClientT]):
+    """Represents a Lavalink node.
+
+    .. warning::
+
+        This class should not be instantiated manually.
+        Instead, use :meth:`NodePool.create_node`.
+
+    Parameters
+    ----------
+    host:
+        The host of the node, used to connect.
+    port:
+        The port of the node, used to connect.
+    label:
+        The label of the node, used to identify the node.
+    password:
+        The password of the node, used to authenticate the connection.
+    client:
+        The client that the node is attached to.
+    secure:
+        Whether the node is using a secure connection.
+        This determines whether the node uses HTTP or HTTPS, WS or WSS.
+    heartbeat:
+        The interval at which the node will send a heartbeat to the client.
+    timeout:
+        The amount of time the node will wait for a response before raising a timeout
+        error.
+    session: :data:`~typing.Optional`\\[:class:`aiohttp.ClientSession`]
+        The session to use for the node.
+        If not provided, a new session will be created.
+    resume_key:
+        The key to use when resuming the node.
+        If not provided, the key will be generated from the host, port and label.
+    regions:
+        The voice regions that the node can be used in.
+        This is used to determine when to use this node.
+    shard_ids:
+        The shard IDs that the node can be used in.
+        This is used to determine when to use this node.
+
+    Attributes
+    ----------
+    players: :class:`dict`\\[:class:`int`, :class:`~mafic.player.Player`]
+        The players that are currently connected to the node.
+    regions: :data:`~typing.Optional`\\[:class:`list`\\[:class:`~mafic.region.VoiceRegion`]]
+        The regions that the node can be used in.
+        This is used to determine when to use this node.
+    shard_ids: :data:`~typing.Optional`\\[:class:`list`\\[:class:`int`]]
+        The shard IDs that the node can be used in.
+        This is used to determine when to use this node.
+    """
+
     __slots__ = (
         "__password",
         "__session",
@@ -121,11 +188,11 @@ class Node:
         port: int,
         label: str,
         password: str,
-        client: Client,
+        client: ClientT,
         secure: bool = False,
         heartbeat: int = 30,
         timeout: float = 10,
-        session: ClientSession | None = None,
+        session: aiohttp.ClientSession | None = None,
         resume_key: str | None = None,
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
@@ -140,10 +207,12 @@ class Node:
         self._client = client
         self.__session = session
         self.shard_ids: Sequence[int] | None = shard_ids
-        self.regions: list[Region] | None = _wrap_regions(regions)
+        self.regions: list[VoiceRegion] | None = _wrap_regions(regions)
 
-        self._rest_uri = URL.build(scheme=f"http{'s'*secure}", host=host, port=port)
-        self._ws_uri = URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)
+        self._rest_uri = yarl.URL.build(
+            scheme=f"http{'s'*secure}", host=host, port=port
+        )
+        self._ws_uri = yarl.URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)
         self._resume_key = resume_key or f"{host}:{port}:{label}"
 
         self._ws: ClientWebSocketResponse | None = None
@@ -152,41 +221,81 @@ class Node:
         self._available = False
         self._ready = Event()
 
-        self.players: dict[int, Player] = {}
+        self.players: dict[int, Player[ClientT]] = {}
 
         self._stats: NodeStats | None = None
         self._session_id: str | None = None
 
     @property
     def host(self) -> str:
+        """The host of the node."""
+
         return self._host
 
     @property
     def port(self) -> int:
+        """The port of the node."""
+
         return self._port
 
     @property
     def label(self) -> str:
+        """The label of the node."""
+
         return self._label
 
     @property
-    def client(self) -> Client:
+    def client(self) -> ClientT:
+        """The client that the node is attached to."""
+
         return self._client
 
     @property
     def secure(self) -> bool:
+        """Whether the node is using a secure connection."""
+
         return self._secure
 
     @property
     def stats(self) -> NodeStats | None:
+        """The stats of the node.
+
+        This will be ``None`` if the node has not sent stats yet.
+        This could be if it is not connected, or if stats sending is disabled on the
+        node.
+        """
         return self._stats
 
     @property
     def available(self) -> bool:
+        """Whether the node is available.
+
+        This is ``False`` if the node is not connected, or if it is not ready.
+        """
+
         return self._available
 
     @property
     def weight(self) -> float:
+        """The weight of the node.
+
+        This is used to determine which node to use when multiple nodes are available.
+
+        Notes
+        -----
+        The weight is calculated based on the following:
+
+        - The number of players connected to the node.
+        - The load of the node.
+        - The number of UDP frames nulled.
+        - The number of UDP frames that are lost.
+        - If the node memory is very close to full.
+
+        If the node has not sent stats yet, then a high value will be returned.
+        This is so that the node will be used if it is the only one available,
+        or if stats sending is disabled on the node.
+        """
+
         if self._stats is None:
             # Stats haven't been set yet, so we'll just return a high value.
             # This is so we can properly balance known nodes.
@@ -247,7 +356,41 @@ class Node:
 
         return players + cpu + null + deficit + mem
 
+    def get_player(self, guild_id: int) -> Player[ClientT] | None:
+        """Get a player from the node.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to get the player for.
+
+        Returns
+        -------
+        :data:`~typing.Optional`\\[:class:`Player`]
+            The player for the guild, if found.
+        """
+
+        return self.players.get(guild_id)
+
     async def _check_version(self) -> None:
+        """Check the version of the node.
+
+        Raises
+        ------
+        :exc:`RuntimeError`
+            If the
+            - major version is not 3
+            - minor version is less than 7
+
+            This is because the rest api is in 3.7, and v4 will have breaking changes.
+
+        Warns
+        -----
+        :class:`UnsupportedVersionWarning`
+            If the minor version is greater than 7.
+            Some features may not work.
+        """
+
         if self.__session is None:
             self.__session = await self._create_session()
 
@@ -275,8 +418,18 @@ class Node:
             self._ws_uri /= "/v3/websocket"
 
     async def _connect_to_websocket(
-        self, headers: dict[str, str], session: ClientSession
+        self, headers: dict[str, str], session: aiohttp.ClientSession
     ) -> None:
+        """Connect to the websocket of the node.
+
+        Parameters
+        ----------
+        headers:
+            The headers to use for the websocket connection.
+        session:
+            The session to use for the websocket connection.
+        """
+
         try:
             self._ws = (
                 await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
@@ -296,6 +449,20 @@ class Node:
             raise
 
     async def connect(self) -> None:
+        """Connect to the node.
+
+        Raises
+        ------
+        NodeAlreadyConnected
+            If the node is already connected.
+        asyncio.TimeoutError
+            If the connection times out.
+            You can change the timeout with the `timeout` parameter.
+        """
+
+        if self._ws is not None:
+            raise NodeAlreadyConnected()
+
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
         await self._client.wait_until_ready()
         assert self._client.user is not None
@@ -353,6 +520,8 @@ class Node:
             self._available = True
 
     async def _ws_listener(self) -> None:
+        """Listen for messages from the websocket."""
+
         backoff = ExponentialBackoff()
 
         if self._ws is None:
@@ -371,9 +540,11 @@ class Node:
             _log.debug("Received message from websocket.", extra={"label": self._label})
 
             # Please aiohttp, fix your typehints.
-            _type: WSMsgType = msg.type  # pyright: ignore[reportUnknownMemberType]
+            _type: aiohttp.WSMsgType = (
+                msg.type
+            )  # pyright: ignore[reportUnknownMemberType]
 
-            if _type is WSMsgType.CLOSED:
+            if _type is aiohttp.WSMsgType.CLOSED:
                 self._available = False
                 close_code = self._ws.close_code
                 self._ws = None
@@ -400,6 +571,14 @@ class Node:
                 create_task(self._handle_msg(msg.json(loads=loads)))
 
     async def _handle_msg(self, data: IncomingMessage) -> None:
+        """Handle a message from the websocket.
+
+        Parameters
+        ----------
+        data:
+            The data to handle.
+        """
+
         _log.debug("Received event with op %s", data["op"])
         _log.debug("Event data: %s", data)
 
@@ -439,6 +618,14 @@ class Node:
             _log.warn("Unknown incoming message op code %s", op)
 
     async def _handle_event(self, data: EventPayload) -> None:
+        """Handle an event from the websocket.
+
+        Parameters
+        ----------
+        data:
+            The data to handle.
+        """
+
         if data["type"] == "WebSocketClosedEvent":
             # TODO:
             ...
@@ -467,6 +654,23 @@ class Node:
         session_id: str,
         data: VoiceServerUpdatePayload,
     ) -> Coro[None]:
+        """Send a voice update to the node.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to send the update for.
+        session_id:
+            The **Discord** session ID to send.
+        data:
+            The voice server update payload to send.
+
+        Raises
+        ------
+        :exc:`ValueError`
+            If the endpoint in the payload is ``None``.
+        """
+
         _log.debug(
             "Sending player update to lavalink with data %s.",
             data,
@@ -488,6 +692,8 @@ class Node:
         )
 
     def configure_resuming(self) -> Coro[None]:
+        """Configure the node to resume."""
+
         _log.info(
             "Sending resume configuration to lavalink with resume key %s.",
             self._resume_key,
@@ -504,6 +710,14 @@ class Node:
         )
 
     def destroy(self, guild_id: int) -> Coro[None]:
+        """Destroy a player.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to destroy the player for.
+        """
+
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
         return self.__request(
@@ -522,6 +736,29 @@ class Node:
         pause: bool | None = None,
         filter: Filter | None = None,
     ) -> Coro[None]:
+        """Update a player.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to update the player for.
+        track:
+            The track to update the player with.
+            Setting this to ``None`` will clear the track.
+        position:
+            The position to update the player with.
+        end_time:
+            The position in the track to stop playing.
+        volume:
+            The volume to set.
+        no_replace:
+            Whether to replace the current track or leave it playing.
+        pause:
+            Whether to pause the player.
+        filter:
+            The filter to apply to the player.
+        """
+
         data: UpdatePlayerPayload = {}
 
         if track is not MISSING:
@@ -560,8 +797,10 @@ class Node:
             query,
         )
 
-    async def _create_session(self) -> ClientSession:
-        return ClientSession(json_serialize=dumps)
+    async def _create_session(self) -> aiohttp.ClientSession:
+        """Create a new session for the node."""
+
+        return aiohttp.ClientSession(json_serialize=dumps)
 
     async def __request(
         self,
@@ -570,6 +809,25 @@ class Node:
         json: OutgoingMessage | None = None,
         params: OutgoingParams | None = None,
     ) -> Any:
+        """Send a request to the node.
+
+        Parameters
+        ----------
+        method:
+            The HTTP method to use.
+        path:
+            The path to send the request to, without ``/v3``
+        json:
+            The JSON to send.
+        params:
+            The query parameters to send.
+
+        Returns
+        -------
+        :data:`~typing.Any`
+            The JSON response from the node.
+        """
+
         if self.__session is None:
             self.__session = await self._create_session()
 
@@ -598,6 +856,25 @@ class Node:
     async def fetch_tracks(
         self, query: str, *, search_type: str
     ) -> list[Track] | Playlist | None:
+        """Fetch tracks from the node.
+
+        Parameters
+        ----------
+        query:
+            The query to search for.
+        search_type:
+            The search type to use.
+
+        Returns
+        -------
+        :class:`list`\\[:class:`Track`]
+            A list of tracks if the load type is ``TRACK_LOADED`` or ``SEARCH_RESULT``.
+        :class:`Playlist`
+            A playlist if the load type is ``PLAYLIST_LOADED``.
+        None
+            If the load type is ``NO_MATCHES``.
+        """
+
         if not URL_REGEX.match(query):
             query = f"{search_type}:{query}"
 
@@ -620,6 +897,23 @@ class Node:
             _log.warning("Unknown load type recieved: %s", data["loadType"])
 
     async def decode_track(self, track: str) -> Track:
+        """Decode a track from the encoded base64 data.
+
+        Parameters
+        ----------
+        track:
+            The encoded track data.
+
+        Returns
+        -------
+        :class:`Track`
+            The decoded track.
+
+        See Also
+        --------
+        :meth:`decode_tracks`
+        """
+
         # TODO: handle errors from lavalink
         info: TrackInfo = await self.__request(
             "GET", "/decodetrack", params={"encodedTrack": track}
@@ -628,6 +922,23 @@ class Node:
         return Track.from_data(track=track, info=info)
 
     async def decode_tracks(self, tracks: list[str]) -> list[Track]:
+        """Decode a list of tracks from the encoded base64 data.
+
+        Parameters
+        ----------
+        tracks:
+            The encoded track data.
+
+        Returns
+        -------
+        :class:`list`\\[:class:`Track`]
+            The decoded tracks.
+
+        See Also
+        --------
+        :meth:`decode_track`
+        """
+
         track_data: list[TrackWithInfo] = await self.__request(
             "POST", "/decodetracks", json=tracks
         )
@@ -635,11 +946,27 @@ class Node:
         return [Track.from_data_with_info(track) for track in track_data]
 
     async def fetch_plugins(self) -> list[Plugin]:
+        """Fetch the plugins from the node.
+
+        Returns
+        -------
+        :class:`list`\\[:class:`Plugin`]
+            The plugins from the node.
+        """
+
         plugins: list[PluginData] = await self.__request("GET", "/plugins")
 
-        return [Plugin.from_data(plugin) for plugin in plugins]
+        return [Plugin(plugin) for plugin in plugins]
 
     async def fetch_route_planner_status(self) -> RoutePlannerStatus | None:
+        """Fetch the route planner status from the node.
+
+        Returns
+        -------
+        :data:`.RoutePlannerStatus`
+            The route planner status from the node.
+        """
+
         data: RoutePlannerStatusPayload = await self.__request(
             "GET", "/routeplanner/status"
         )
@@ -664,9 +991,19 @@ class Node:
             raise RuntimeError(f"Unknown route planner class {data['class']}.")
 
     async def unmark_failed_address(self, address: str) -> None:
+        """Unmark a failed address so it can be used again.
+
+        Parameters
+        ----------
+        address:
+            The address to unmark.
+        """
+
         await self.__request(
             "POST", "/routeplanner/free/address", json={"address": address}
         )
 
     async def unmark_all_addresses(self) -> None:
+        """Unmark all failed addresses so they can be used again."""
+
         await self.__request("POST", "/routeplanner/free/all")

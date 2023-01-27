@@ -13,6 +13,18 @@ __all__ = ("Playlist",)
 
 
 class Playlist:
+    """Represents a playlist.
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The name of the playlist.
+    selected_track: :class:`int`
+        The index of the selected track, if any.
+    tracks: :class:`list`\\[:class:`Track`]
+        A list of tracks in the playlist.
+    """
+
     __slots__ = ("name", "selected_track", "tracks")
 
     def __init__(self, *, info: PlaylistInfo, tracks: list[TrackWithInfo]):

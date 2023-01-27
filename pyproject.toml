@@ -37,6 +37,10 @@ python = "^3.8"
 aiohttp = "^3.6.0"
 orjson = {version = "^3.8.0", optional = true}
 yarl = "^1.0.0"
+nextcord = {version = "^2.0.0", optional = true}
+disnake = {version = "^2.0.0", optional = true}
+py-cord = {version = "^2.0.0", optional = true}
+"discord.py" = {version = "^2.0.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 pyright = "1.1.289"
@@ -57,8 +61,18 @@ py-cord = "^2.0.0"
 "discord.py" = "^2.0.0"
 orjson = "^3.8.0"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "^6.1.3"
+sphinx-autobuild = "^2021.3.14"
+sphinxcontrib-trio = "^1.1.2"
+furo = "^2022.12.7"
+sphinx-inline-tabs = "^2022.1.2b11"
+# autodoc-typehints is much better than the default sphinx autodoc typehints
+# properly searching for typehints in the code, and using `code` elements to display them
+sphinx-autodoc-typehints = "^1.21.8"
+
 [tool.poetry.extras]
-nextcord = ["nextcord@^2.0.0"]
+nextcord = [""]
 disnake = ["disnake@^2.0.0"]
 py-cord = ["py-cord@^2.0.0"]
 "discord.py" = ["discord.py@^2.0.0"]
@@ -71,6 +85,7 @@ isort = "task lint isort"
 flake8 = "task lint flake8"
 slotscheck = "task lint slotscheck"
 pyright = "dotenv -f task.env run -- pyright"
+docs = "cd docs && sphinx-autobuild . _build/html --ignore _build --watch ../mafic --port 8069"
 
 [tool.black]
 line-length = 88
@@ -92,12 +107,6 @@ require-subclass = false
 typeCheckingMode = "strict"
 pythonVersion = "3.8"
 ignore = ["test_bot"]
-
-[tool.flake8]
-max-line-length = 88
-per-file-ignores = [
-    '__init__.py:F401,F403',
-]
 
 [build-system]
 requires = ["poetry-core"]

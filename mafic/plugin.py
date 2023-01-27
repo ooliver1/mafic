@@ -2,23 +2,33 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from .typings import PluginData
 
 
 __all__ = ("Plugin",)
 
 
-@dataclass(repr=True)
 class Plugin:
-    name: str
-    version: str
+    """Represents a plugin.
 
-    @classmethod
-    def from_data(cls, data: PluginData) -> Self:
-        return cls(name=data["name"], version=data["version"])
+    Parameters
+    ----------
+    data:
+        The raw data to use to create the plugin.
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The name of the plugin.
+    version: :class:`str`
+        The version of the plugin.
+    """
+
+    __slots__ = ("name", "version")
+
+    def __init__(self, data: PluginData) -> None:
+        self.name: str = data["name"]
+        self.version: str = data["version"]
