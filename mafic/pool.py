@@ -2,39 +2,47 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from functools import partial
 from logging import getLogger
 from random import choice
-from typing import TYPE_CHECKING, Generic, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union
 
-from .__libraries import Client
 from .errors import NoNodesAvailable
 from .node import Node
-from .strategy import STRATEGIES, Strategy, StrategyCallable
+from .strategy import Strategy, StrategyCallable, call_strategy
+from .type_variables import ClientT
 from .utils import classproperty
 
 if TYPE_CHECKING:
     from typing import ClassVar
 
-    from aiohttp import ClientSession
+    import aiohttp
 
     from .region import Group, Region, VoiceRegion
 
-StrategyList = Union[
-    Sequence[Strategy],
-    StrategyCallable,
-    Sequence[StrategyCallable],
-    Sequence[Union[Strategy, StrategyCallable]],
-]
-"""A type hint for a list of strategies to select the best node."""
 
-
-ClientT = TypeVar("ClientT", bound=Client)
 T = TypeVar("T")
-TT = TypeVar("TT")
 __all__ = ("NodePool",)
 
-
 _log = getLogger(__name__)
+
+
+StrategyList = Union[
+    StrategyCallable[ClientT],
+    Sequence[Strategy],
+    Sequence[StrategyCallable[ClientT]],
+    Sequence[Union[Strategy, StrategyCallable[ClientT]]],
+]
+"""A type hint for a list of strategies to select the best node.
+
+This can either be:
+
+- A single :data:`.StrategyCallable`.
+- A sequence of :class:`.Strategy`\\s.
+- A sequence of :data:`.StrategyCallable`\\s.
+- A sequence of :class:`.Strategy`\\s and :data:`.StrategyCallable`\\s.
+"""
 
 
 class NodePool(Generic[ClientT]):
@@ -46,20 +54,22 @@ class NodePool(Generic[ClientT]):
         The client to use to connect to the nodes.
     default_strategies:
         The default strategies to use when selecting a node. Defaults to
-        ``[Strategy.SHARD, Strategy.LOCATION, Strategy.USAGE]``.
+        [:attr:`Strategy.SHARD`, :attr:`Strategy.LOCATION`, :attr:`Strategy.USAGE`].
     """
 
     __slots__ = ()
-    _nodes: ClassVar[dict[str, Node]] = {}
-    _node_regions: ClassVar[dict[VoiceRegion, set[Node]]] = {}
-    _node_shards: ClassVar[dict[int, set[Node]]] = {}
+
+    # Generics as expected, do not work in class variables.
+    # Don't fear, the public methods using this are typed well.
+    _nodes: ClassVar[dict[str, Node[Any]]] = {}
+    _node_regions: ClassVar[dict[VoiceRegion, set[Node[Any]]]] = {}
+    _node_shards: ClassVar[dict[int, set[Node[Any]]]] = {}
     _client: ClientT | None = None
-    _default_strategies: ClassVar[StrategyList] = []
 
     def __init__(
         self,
         client: ClientT,
-        default_strategies: StrategyList | None = None,
+        default_strategies: StrategyList[ClientT] | None = None,
     ) -> None:
         NodePool._client = client
 
@@ -74,13 +84,13 @@ class NodePool(Generic[ClientT]):
         )
 
     @classproperty
-    def label_to_node(cls) -> dict[str, Node]:
+    def label_to_node(cls) -> dict[str, Node[ClientT]]:
         """A dictionary mapping node labels to nodes."""
 
         return cls._nodes
 
     @classproperty
-    def nodes(cls) -> list[Node]:
+    def nodes(cls) -> list[Node[ClientT]]:
         """A list of all nodes."""
 
         return list(cls._nodes.values())
@@ -95,11 +105,11 @@ class NodePool(Generic[ClientT]):
         secure: bool = False,
         heartbeat: int = 30,
         timeout: float = 10,
-        session: ClientSession | None = None,
+        session: aiohttp.ClientSession | None = None,
         resume_key: str | None = None,
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
-    ) -> Node:
+    ) -> Node[ClientT]:
         """Create a node and connect it.
 
         The parameters here relate to :class:`Node`.
@@ -120,7 +130,7 @@ class NodePool(Generic[ClientT]):
             The interval to send heartbeats to the node websocket connection.
         timeout:
             The timeout to use for the node websocket connection.
-        session:
+        session: :data:`~typing.Optional`\\ [:class:`aiohttp.ClientSession`]
             The session to use for the node websocket connection.
         resume_key:
             The key to use to resume the node websocket connection.
@@ -192,8 +202,8 @@ class NodePool(Generic[ClientT]):
         *,
         guild_id: str | int,
         endpoint: str | None,
-        strategies: StrategyList | None = None,
-    ) -> Node:
+        strategies: StrategyList[ClientT] | None = None,
+    ) -> Node[ClientT]:
         """Get a node based on the given strategies.
 
         Parameters
@@ -220,7 +230,7 @@ class NodePool(Generic[ClientT]):
         if cls._client is None:
             raise RuntimeError("NodePool has not been initialized.")
 
-        actual_strategies: Sequence[StrategyCallable | Strategy]
+        actual_strategies: Sequence[StrategyCallable[ClientT] | Strategy]
 
         strategies = strategies or cls._default_strategies
 
@@ -233,13 +243,17 @@ class NodePool(Generic[ClientT]):
 
         for strategy in actual_strategies:
             if isinstance(strategy, Strategy):
-                strategy = STRATEGIES[strategy]
+                strategy_callable = partial(call_strategy, strategy)
+            else:
+                strategy_callable = strategy
 
-            nodes = strategy(nodes, int(guild_id), cls._client.shard_count, endpoint)
+            nodes = strategy_callable(
+                nodes, int(guild_id), cls._client.shard_count, endpoint
+            )
 
             _log.debug(
                 "Strategy %s returned nodes %s.",
-                strategy.__name__,
+                strategy.__name__ if callable(strategy) else strategy.name,
                 ", ".join(n.label for n in nodes),
             )
 
@@ -251,7 +265,7 @@ class NodePool(Generic[ClientT]):
         return choice(nodes)
 
     @classmethod
-    def get_random_node(cls) -> Node:
+    def get_random_node(cls) -> Node[ClientT]:
         """Get a random node.
 
         Returns

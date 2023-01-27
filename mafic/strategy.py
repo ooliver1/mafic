@@ -6,12 +6,13 @@ import re
 from enum import Enum, auto
 from logging import getLogger
 from random import choice
-from typing import Callable, List, Union
+from typing import Callable, List, Optional
 
 from .node import Node
+from .type_variables import ClientT
 
 StrategyCallable = Callable[
-    [List[Node], int, Union[int, None], Union[str, None]], List[Node]
+    [List[Node[ClientT]], int, Optional[int], Optional[str]], List[Node[ClientT]]
 ]
 """Represents a strategy callable.
 
@@ -20,28 +21,28 @@ a list of nodes.
 """
 
 _log = getLogger(__name__)
-__all__ = ("Strategy", "STRATEGIES")
+__all__ = ("Strategy", "call_strategy")
 
 
 class Strategy(Enum):
     """Represents a strategy for selecting a node."""
 
-    SHARD = auto()
-    """Selects a node based on the shard ID of the guild."""
-
     LOCATION = auto()
     """Selects a node based on the region the guild is in."""
-
-    USAGE = auto()
-    """Selects a node based on the least used node."""
 
     RANDOM = auto()
     """Selects a random node."""
 
+    SHARD = auto()
+    """Selects a node based on the shard ID of the guild."""
+
+    USAGE = auto()
+    """Selects a node based on the least used node."""
+
 
 def shard_strategy(
-    nodes: list[Node], guild_id: int, shard_count: int | None, _: str | None
-) -> list[Node]:
+    nodes: list[Node[ClientT]], guild_id: int, shard_count: int | None, _: str | None
+) -> list[Node[ClientT]]:
     """Selects a node based on the shard ID of the guild.
 
     Parameters
@@ -70,8 +71,8 @@ _REGION_REGEX = re.compile(r"(?:vip-)?(?P<region>[a-z-]{1,15})\d{1,5}\.discord\.
 
 
 def location_strategy(
-    nodes: list[Node], _: int, __: int | None, endpoint: str | None
-) -> list[Node]:
+    nodes: list[Node[ClientT]], _: int, __: int | None, endpoint: str | None
+) -> list[Node[ClientT]]:
     """Selects a node based on the region the guild is in.
 
     Parameters
@@ -121,8 +122,8 @@ def location_strategy(
 
 
 def usage_strategy(
-    nodes: list[Node], _: int, __: int | None, ___: str | None
-) -> list[Node]:
+    nodes: list[Node[ClientT]], _: int, __: int | None, ___: str | None
+) -> list[Node[ClientT]]:
     """Selects a node based on the least used node.
 
     This is calculated using :attr:`Node.weight`.
@@ -155,12 +156,57 @@ def usage_strategy(
     return list(filter(lambda node: node.weight == lowest, nodes))
 
 
-STRATEGIES: dict[Strategy, StrategyCallable] = {
-    Strategy.SHARD: shard_strategy,
-    Strategy.LOCATION: location_strategy,
-    Strategy.USAGE: usage_strategy,
-    # Random should return one.
-    # Since it is usually to filter out lists at the end of a chain.
-    Strategy.RANDOM: lambda nodes, _, __, ___: [choice(nodes)],
-}
-"""A mapping of strategies to their functions."""
+def random_strategy(
+    nodes: list[Node[ClientT]], _: int, __: int | None, ___: str | None
+) -> list[Node[ClientT]]:
+    """Selects a random node.
+
+    Parameters
+    ----------
+    nodes:
+        The nodes to select from.
+    _:
+        Unused parameter.
+    __:
+        Unused parameter.
+    ___:
+        Unused parameter.
+    """
+
+    return [choice(nodes)]
+
+
+# Used for ClientT preservation.
+def call_strategy(
+    strategy: Strategy,
+    nodes: list[Node[ClientT]],
+    guild_id: int,
+    shard_count: int | None,
+    endpoint: str | None,
+) -> list[Node[ClientT]]:
+    """Calls a strategy.
+
+    Parameters
+    ----------
+    strategy:
+        The strategy to call.
+    nodes:
+        The nodes to select from.
+    guild_id:
+        The ID of the guild to select a node for.
+    shard_count:
+        The number of shards the bot is using.
+    endpoint:
+        The endpoint of the voice client to select a node for.
+    """
+
+    if strategy is Strategy.LOCATION:
+        return location_strategy(nodes, guild_id, shard_count, endpoint)
+    elif strategy is Strategy.RANDOM:
+        return random_strategy(nodes, guild_id, shard_count, endpoint)
+    elif strategy is Strategy.SHARD:
+        return shard_strategy(nodes, guild_id, shard_count, endpoint)
+    elif strategy is Strategy.USAGE:
+        return usage_strategy(nodes, guild_id, shard_count, endpoint)
+    else:
+        raise ValueError(f"Unknown strategy {strategy}")

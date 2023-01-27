@@ -13,11 +13,14 @@ import logging
 from . import __libraries
 from .errors import *
 from .filter import *
+from .ip import *
 from .node import *
 from .player import *
+from .playlist import *
 from .pool import *
 from .region import *
 from .search_type import *
+from .stats import *
 from .strategy import *
 from .track import *
 from .warnings import *

@@ -1,0 +1,89 @@
+/* attribute tables */
+/*noinspection ALL*/
+.py-attribute-table {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  margin: 0 2em;
+  padding-top: 16px;
+}
+
+.py-attribute-table-column {
+  flex: 1 1 auto;
+}
+
+.py-attribute-table-column > span {
+  font-weight: bold;
+  color: var(--color-foreground-primary);
+}
+
+main .py-attribute-table-column > ul {
+  list-style: none;
+  margin: 4px 0;
+  padding-left: 0;
+  font-size: 0.95em;
+}
+
+.py-attribute-table-entry {
+  margin: 0;
+  padding: 2px 0 2px 0.2em;
+  border-left: 2px solid var(--color-background-border);
+  display: flex;
+  line-height: 1.2em;
+}
+
+.py-attribute-table-entry > a {
+  padding-left: 0.5em;
+  color: var(--color-foreground-primary);
+  flex-grow: 1;
+}
+
+.py-attribute-table-entry > a:hover {
+  color: var(--color-brand-content);
+  text-decoration: none;
+}
+
+.py-attribute-table-entry:hover {
+  background-color: var(--color-background-hover);
+  border-left: 2px solid var(--color-brand-content);
+  text-decoration: none;
+}
+
+.py-attribute-table-badge {
+  flex-basis: 3em;
+  text-align: right;
+  font-size: 0.9em;
+  color: var(--color-foreground-secondary);
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Defaults to... */
+.default-value-section {
+  margin-bottom: 6px;
+}
+.default-value-section .default-value-label {
+  font-style: italic;
+}
+.default-value-section code {
+  color: #306998;
+}
+
+/* ..container:: operations */
+.container.operations {
+  padding: 10px;
+  border: 1px solid var(--color-code-background);
+  margin-bottom: 20px;
+}
+
+.container.operations::before {
+  content: "Supported Operations";
+  color: var(--color-code-foreground);
+  display: block;
+  padding-bottom: 0.5em;
+}
+
+.container.operations > dl.describe > dt {
+  background-color: var(--color-api-background);
+}

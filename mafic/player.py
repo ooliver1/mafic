@@ -7,7 +7,7 @@ from functools import reduce
 from logging import getLogger
 from operator import or_
 from time import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic
 
 from .__libraries import (
     MISSING,
@@ -22,10 +22,10 @@ from .playlist import Playlist
 from .pool import NodePool
 from .search_type import SearchType
 from .track import Track
+from .type_variables import ClientT
 
 if TYPE_CHECKING:
     from .__libraries import (
-        Client,
         Connectable,
         Guild,
         GuildVoiceStatePayload,
@@ -39,7 +39,7 @@ _log = getLogger(__name__)
 __all__ = ("Player",)
 
 
-class Player(VoiceProtocol):
+class Player(VoiceProtocol, Generic[ClientT]):
     """Represents a player for a guild.
 
     .. note::
@@ -58,22 +58,24 @@ class Player(VoiceProtocol):
 
     Attributes
     ----------
-    client:
+    client: :data:`~mafic.type_variables.ClientT`
         The client that the player is associated with.
     channel:
         The voice channel that the player is connected to.
+        This is an ``abc.Connectable`` from your Discord library.
     guild:
         The guild that the player is associated with.
+        This is a ``Guild`` from your Discord library.
     """
 
     def __init__(
         self,
-        client: Client,
+        client: ClientT,
         channel: Connectable,
         *,
-        node: Node | None = None,
+        node: Node[ClientT] | None = None,
     ) -> None:
-        self.client: Client = client
+        self.client: ClientT = client
         self.channel: Connectable = channel
 
         if not isinstance(self.channel, GuildChannel):
@@ -121,7 +123,7 @@ class Player(VoiceProtocol):
         return self._ping
 
     @property
-    def node(self) -> Node:
+    def node(self) -> Node[ClientT]:
         """The node that the player is connected to."""
 
         if self._node is None:
@@ -129,7 +131,7 @@ class Player(VoiceProtocol):
                 "Unable to use best node, player not connected, finding random node.",
                 extra={"guild": self._guild_id},
             )
-            return NodePool.get_random_node()
+            return NodePool[ClientT].get_random_node()
 
         return self._node
 
@@ -221,7 +223,7 @@ class Player(VoiceProtocol):
             or self._server_state["endpoint"] != data["endpoint"]
         ):
             _log.debug("Getting best node for player", extra={"guild": self._guild_id})
-            self._node = NodePool.get_node(
+            self._node = NodePool[ClientT].get_node(
                 guild_id=data["guild_id"], endpoint=data["endpoint"]
             )
             _log.debug(
@@ -323,7 +325,12 @@ class Player(VoiceProtocol):
 
         Returns
         -------
-        The tracks or playlist.
+        :class:`list`\\[:class:`Track`]
+            A list of tracks if the load type is ``TRACK_LOADED`` or ``SEARCH_RESULT``.
+        :class:`Playlist`
+            A playlist if the load type is ``PLAYLIST_LOADED``.
+        None
+            If the load type is ``NO_MATCHES``.
 
         Notes
         -----

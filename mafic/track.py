@@ -38,25 +38,25 @@ class Track:
 
     Attributes
     ----------
-    id:
+    id: :class:`str`
         The ID of the track. This is base64 encoded data used by Lavalink.
-    title:
+    title: :class:`str`
         The title of the track.
-    author:
+    author: :class:`str`
         The author of the track.
-    identifier:
+    identifier: :class:`str`
         The identifier of the track. This is the ID of the track on the source.
-    uri:
+    uri: :data:`~typing.Optional`\\[:class:`str`]
         The URI of the track.
-    source:
+    source: :class:`str`
         The source of the track.
-    stream:
+    stream: :class:`bool`
         Whether the track is a stream.
-    seekable:
+    seekable: :class:`bool`
         Whether the track is seekable.
-    position:
+    position: :class:`int`
         The current position of the track.
-    length:
+    length: :class:`int`
         The length of the track.
     """
 
@@ -116,7 +116,7 @@ class Track:
 
         Returns
         -------
-        Track:
+        :class:`Track`
             The track.
         """
 
@@ -144,7 +144,7 @@ class Track:
 
         Returns
         -------
-        Track:
+        :class:`Track`
             The track.
         """
 

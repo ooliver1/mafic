@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
 
     from .typings import (
         ChannelMix as ChannelMixPayload,
@@ -28,6 +28,7 @@ __all__ = (
     "ChannelMix",
     "Distortion",
     "EQBand",
+    "Equalizer",
     "Filter",
     "Karaoke",
     "LowPass",
@@ -42,14 +43,14 @@ __all__ = (
 class EQBand:
     """Represents an `equaliser`_ band.
 
+    .. _equaliser: https://en.wikipedia.org/wiki/Equalization_(audio)
+
     Attributes
     ----------
-    band:
+    band: :class:`int`
         The band to set the gain of. Must be between ``0`` and ``14``.
-    gain:
+    gain: :class:`float`
         The gain to set the band to. Must be between ``-0.25`` and ``1.0``.
-
-    .. _equaliser: https://en.wikipedia.org/wiki/Equalization_(audio)
     """
 
     band: int
@@ -66,12 +67,12 @@ class EQBand:
 class Equalizer:
     """Represents an `equaliser`_.
 
+    .. _equaliser: https://en.wikipedia.org/wiki/Equalization_(audio)
+
     Attributes
     ----------
-    bands:
-        The bands to set the gains of. Must be between ``0`` and ``14``.
-
-    .. _equaliser: https://en.wikipedia.org/wiki/Equalization_(audio)
+    bands: :class:`list`\\[:class:`EQBand`]
+        The bands to set the gains of.
     """
 
     bands: list[EQBand]
@@ -89,26 +90,26 @@ class Karaoke:
 
     Attributes
     ----------
-    level:
+    level: :data:`~typing.Optional`\\[:class:`float`]
         The level of the karaoke effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``1.0``.
-    mono_level:
+    mono_level: :data:`~typing.Optional`\\[:class:`float`]
         The level of the mono effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``1.0``.
-    filter_band:
+    filter_band: :data:`~typing.Optional`\\[:class:`float`]
         The frequency of the filter band in Hz.
         This defaults to ``220.0``.
-    filter_width:
+    filter_width: :data:`~typing.Optional`\\[:class:`float`]
         The width of the filter band.
         This defaults to ``100.0``.
     """
 
-    level: Optional[float] = None
-    mono_level: Optional[float] = None
-    filter_band: Optional[float] = None
-    filter_width: Optional[float] = None
+    level: float | None = None
+    mono_level: float | None = None
+    filter_band: float | None = None
+    filter_width: float | None = None
 
     @property
     def payload(self) -> KaraokePayload:
@@ -138,17 +139,17 @@ class Timescale:
 
     Attributes
     ----------
-    speed:
+    speed: :data:`~typing.Optional`\\[:class:`float`]
         The speed of the audio. Must be at least ``0.0``. ``1.0`` is normal speed.
-    pitch:
+    pitch: :data:`~typing.Optional`\\[:class:`float`]
         The pitch of the audio. Must be at least ``0.0``. ``1.0`` is normal pitch.
-    rate:
+    rate: :data:`~typing.Optional`\\[:class:`float`]
         The rate of the audio. Must be at least ``0.0``. ``1.0`` is normal rate.
     """
 
-    speed: Optional[float] = None
-    pitch: Optional[float] = None
-    rate: Optional[float] = None
+    speed: float | None = None
+    pitch: float | None = None
+    rate: float | None = None
 
     @property
     def payload(self) -> TimescalePayload:
@@ -174,21 +175,21 @@ class Tremolo:
 
     Tremolo oscillates the volume of the audio.
 
+    .. _tremolo: https://en.wikipedia.org/wiki/Tremolo
+
     Attributes
     ----------
-    frequency:
+    frequency: :data:`~typing.Optional`\\[:class:`float`]
         The frequency of the tremolo effect. Must be at least ``0.0``.
         This defaults to ``2.0``.
-    depth:
+    depth: :data:`~typing.Optional`\\[:class:`float`]
         The depth of the tremolo effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``0.5``.
-
-    .. _tremolo: https://en.wikipedia.org/wiki/Tremolo
     """
 
-    frequency: Optional[float] = None
-    depth: Optional[float] = None
+    frequency: float | None = None
+    depth: float | None = None
 
     @property
     def payload(self) -> TremoloPayload:
@@ -211,21 +212,21 @@ class Vibrato:
 
     Vibrato oscillates the pitch of the audio.
 
+    .. _vibrato: https://en.wikipedia.org/wiki/Vibrato
+
     Attributes
     ----------
-    frequency:
+    frequency: :data:`~typing.Optional`\\[:class:`float`]
         The frequency of the vibrato effect. Must be at least ``0.0``.
         This defaults to ``2.0``.
-    depth:
+    depth: :data:`~typing.Optional`\\[:class:`float`]
         The depth of the vibrato effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``0.5``.
-
-    .. vibato: https://en.wikipedia.org/wiki/Vibrato
     """
 
-    frequency: Optional[float] = None
-    depth: Optional[float] = None
+    frequency: float | None = None
+    depth: float | None = None
 
     @property
     def payload(self) -> VibratoPayload:
@@ -248,16 +249,16 @@ class Rotation:
 
     An example can be with `"8D audio" (without the reverb)`_.
 
+    .. _"8D audio" (without the reverb): https://youtu.be/QB9EB8mTKcc>
+
     Attributes
     ----------
-    rotation_hz:
+    rotation_hz: :data:`~typing.Optional`\\[:class:`float`]
         The rotation speed in Hz. Must be at least ``0.0``.
         ``0.2`` is similar to the example above.
-
-    .. _"8D audio" (without the reverb): https://youtu.be/QB9EB8mTKcc>
     """
 
-    rotation_hz: Optional[float] = None
+    rotation_hz: float | None = None
 
     @property
     def payload(self) -> RotationPayload:
@@ -292,40 +293,40 @@ class Distortion:
 
     Attributes
     ----------
-    sin_offset:
+    sin_offset: :data:`~typing.Optional`\\[:class:`float`]
         The offset of the sine distortion.
         This defaults to ``0.0``.
-    sin_scale:
+    sin_scale: :data:`~typing.Optional`\\[:class:`float`]
         The scale of the sine distortion.
         This defaults to ``1.0``.
-    cos_offset:
+    cos_offset: :data:`~typing.Optional`\\[:class:`float`]
         The offset of the cosine distortion.
         This defaults to ``0.0``.
-    cos_scale:
+    cos_scale: :data:`~typing.Optional`\\[:class:`float`]
         The scale of the cosine distortion.
         This defaults to ``1.0``.
-    tan_offset:
+    tan_offset: :data:`~typing.Optional`\\[:class:`float`]
         The offset of the tangent distortion.
         This defaults to ``0.0``.
-    tan_scale:
+    tan_scale: :data:`~typing.Optional`\\[:class:`float`]
         The scale of the tangent distortion.
         This defaults to ``1.0``.
-    offset:
+    offset: :data:`~typing.Optional`\\[:class:`float`]
         The offset of the distortion.
         This defaults to ``0.0``.
-    scale:
+    scale: :data:`~typing.Optional`\\[:class:`float`]
         The scale of the distortion.
         This defaults to ``1.0``.
     """
 
-    sin_offset: Optional[float] = None
-    sin_scale: Optional[float] = None
-    cos_offset: Optional[float] = None
-    cos_scale: Optional[float] = None
-    tan_offset: Optional[float] = None
-    tan_scale: Optional[float] = None
-    offset: Optional[float] = None
-    scale: Optional[float] = None
+    sin_offset: float | None = None
+    sin_scale: float | None = None
+    cos_offset: float | None = None
+    cos_scale: float | None = None
+    tan_offset: float | None = None
+    tan_scale: float | None = None
+    offset: float | None = None
+    scale: float | None = None
 
     @property
     def payload(self) -> DistortionPayload:
@@ -368,24 +369,24 @@ class ChannelMix:
 
     Attributes
     ----------
-    left_to_left:
+    left_to_left: :data:`~typing.Optional`\\[:class:`float`]
         The amount of the left channel to mix into the left channel.
         This defaults to ``1.0``.
-    left_to_right:
+    left_to_right: :data:`~typing.Optional`\\[:class:`float`]
         The amount of the left channel to mix into the right channel.
         This defaults to ``0.0``.
-    right_to_left:
+    right_to_left: :data:`~typing.Optional`\\[:class:`float`]
         The amount of the right channel to mix into the left channel.
         This defaults to ``0.0``.
-    right_to_right:
+    right_to_right: :data:`~typing.Optional`\\[:class:`float`]
         The amount of the right channel to mix into the right channel.
         This defaults to ``1.0``.
     """
 
-    left_to_left: Optional[float] = None
-    left_to_right: Optional[float] = None
-    right_to_left: Optional[float] = None
-    right_to_right: Optional[float] = None
+    left_to_left: float | None = None
+    left_to_right: float | None = None
+    right_to_left: float | None = None
+    right_to_right: float | None = None
 
     @property
     def payload(self) -> ChannelMixPayload:
@@ -415,9 +416,15 @@ class LowPass:
     High frequencies are suppressed, while low frequencies are passed through.
 
     .. _low pass filter: http://phrogz.net/js/framerate-independent-low-pass-filter.html
+
+    Attributes
+    ----------
+    smoothing: :data:`~typing.Optional`\\[:class:`float`]
+        The smoothing of the low pass filter.
+        This defaults to ``0.0``.
     """
 
-    smoothing: Optional[float] = None
+    smoothing: float | None = None
 
     @property
     def payload(self) -> LowPassPayload:
@@ -433,16 +440,60 @@ class LowPass:
 
 @dataclass(unsafe_hash=True)
 class Filter:
-    equalizer: Optional[Equalizer] = None
-    karaoke: Optional[Karaoke] = None
-    timescale: Optional[Timescale] = None
-    tremolo: Optional[Tremolo] = None
-    vibrato: Optional[Vibrato] = None
-    rotation: Optional[Rotation] = None
-    distortion: Optional[Distortion] = None
-    channel_mix: Optional[ChannelMix] = None
-    low_pass: Optional[LowPass] = None
-    volume: Optional[float] = None
+    """Represents a filter which can be applied to audio.
+
+    .. container:: operations
+
+        .. describe:: x | y
+
+            Merges two filters together, favouring attributes from y.
+
+        .. describe:: x |= y
+
+            Merges two filters together, favouring attributes from x, assigning to x.
+
+        .. describe:: x & y
+
+            Merges two filters together, favouring attributes from x.
+
+        .. describe:: x &= y
+
+            Merges two filters together, favouring attributes from y, assigning to x.
+
+    Attributes
+    ----------
+    equalizer: :data:`~typing.Optional`\\[:class:`Equalizer`]
+        The equalizer to use.
+    karaoke: :data:`~typing.Optional`\\[:class:`Karaoke`]
+        The karaoke filter to use.
+    timescale: :data:`~typing.Optional`\\[:class:`Timescale`]
+        The timescale filter to use.
+    tremolo: :data:`~typing.Optional`\\[:class:`Tremolo`]
+        The tremolo filter to use.
+    vibrato: :data:`~typing.Optional`\\[:class:`Vibrato`]
+        The vibrato filter to use.
+    rotation: :data:`~typing.Optional`\\[:class:`Rotation`]
+        The rotation filter to use.
+    distortion: :data:`~typing.Optional`\\[:class:`Distortion`]
+        The distortion filter to use.
+    channel_mix: :data:`~typing.Optional`\\[:class:`ChannelMix`]
+        The channel mix filter to use.
+    low_pass: :data:`~typing.Optional`\\[:class:`LowPass`]
+        The low pass filter to use.
+    volume: :data:`~typing.Optional`\\[:class:`float`]
+        The volume to use.
+    """
+
+    equalizer: Equalizer | None = None
+    karaoke: Karaoke | None = None
+    timescale: Timescale | None = None
+    tremolo: Tremolo | None = None
+    vibrato: Vibrato | None = None
+    rotation: Rotation | None = None
+    distortion: Distortion | None = None
+    channel_mix: ChannelMix | None = None
+    low_pass: LowPass | None = None
+    volume: float | None = None
 
     @property
     def payload(self) -> Filters:

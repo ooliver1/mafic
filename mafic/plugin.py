@@ -21,9 +21,9 @@ class Plugin:
 
     Attributes
     ----------
-    name:
+    name: :class:`str`
         The name of the plugin.
-    version:
+    version: :class:`str`
         The version of the plugin.
     """
 

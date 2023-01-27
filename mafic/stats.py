@@ -22,11 +22,11 @@ class CPUStats:
 
     Attributes
     ----------
-    cores:
+    cores: :class:`int`
         The number of cores the node has.
-    system_load:
+    system_load: :class:`int`
         The load on the whole system lavalink is on..
-    lavalink_load:
+    lavalink_load: :class:`int`
         The load Lavalink is using.
     """
 
@@ -41,20 +41,15 @@ class CPUStats:
 class MemoryStats:
     """Represents memory stats for a node.
 
-    Parameters
-    ----------
-    payload:
-        The raw payload to use to create the stats.
-
     Attributes
     ----------
-    free:
+    free: :class:`int`
         The amount of free memory.
-    used:
+    used: :class:`int`
         The amount of used memory.
-    allocated:
+    allocated: :class:`int`
         The amount of allocated memory.
-    reservable:
+    reservable: :class:`int`
         The amount of reservable memory for the node. Set by ``-Xmx`` for Java.
     """
 
@@ -70,18 +65,13 @@ class MemoryStats:
 class FrameStats:
     """Represents frame stats for a node.
 
-    Parameters
-    ----------
-    payload:
-        The raw payload to use to create the stats.
-
     Attributes
     ----------
-    sent:
+    sent: :class:`int`
         The amount of frames sent.
-    nulled:
+    nulled: :class:`int`
         The amount of frames nulled.
-    deficit:
+    deficit: :class:`int`
         The amount of frames deficit.
     """
 
@@ -96,24 +86,19 @@ class FrameStats:
 class NodeStats:
     """Represents stats for a node.
 
-    Parameters
-    ----------
-    data:
-        The raw data to use to create the stats.
-
     Attributes
     ----------
-    player_count:
+    player_count: :class:`int`
         The amount of players connected to the node.
-    playing_player_count:
+    playing_player_count: :class:`int`
         The amount of players playing on the node.
-    uptime:
+    uptime: :class:`datetime.timedelta`
         The uptime of the node.
-    memory:
+    memory: :class:`MemoryStats`
         The memory stats of the node.
-    cpu:
+    cpu: :class:`CPUStats`
         The CPU stats of the node.
-    frame_stats:
+    frame_stats: :data:`~typing.Optional`\\[:class:`FrameStats`]
         The frame stats of the node.
     """
 

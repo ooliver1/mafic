@@ -37,7 +37,7 @@ class IPRoutePlannerType(Enum):
 
     More info about what planner to use can be found in the lavalink `docs`_.
 
-    .. docs: https://github.com/freyacodes/Lavalink/blob/master/ROUTEPLANNERS.md
+    .. _docs: https://github.com/freyacodes/Lavalink/blob/master/ROUTEPLANNERS.md
     """
 
     ROTATING_IP = "RotatingIPRoutePlanner"
@@ -70,13 +70,13 @@ class IPBlockType(Enum):
     V4 = "Inet4Address"
     """Represents an `IPv4`_ address.
 
-    .. IPv4: https://en.wikipedia.org/wiki/Internet_Protocol_version_4
+    .. _IPv4: https://en.wikipedia.org/wiki/Internet_Protocol_version_4
     """
 
     V6 = "Inet6Address"
     """Represents an `IPv6`_ address.
 
-    .. IPv6: https://en.wikipedia.org/wiki/IPv6
+    .. _IPv6: https://en.wikipedia.org/wiki/IPv6
     """
 
 
@@ -85,9 +85,9 @@ class IPBlock:
 
     Attributes
     ----------
-    size:
+    size: :class:`int`
         The size of the block - the number of addresses in the block.
-    type:
+    type: :class:`IPBlockType`
         The type of the block.
     """
 
@@ -103,9 +103,9 @@ class FailingAddress:
 
     Attributes
     ----------
-    address:
+    address: :class:`str`
         The IP address.
-    time:
+    time: :class:`datetime.datetime`
         The time the address was added to the list of failing addresses.
     """
 
@@ -121,11 +121,11 @@ class BaseIPRoutePlannerStatus(ABC):
 
     Attributes
     ----------
-    failing_addresses:
+    failing_addresses: :class:`list`\\[:class:`FailingAddress`]
         The list of failing addresses.
-    ip_block:
+    ip_block: :class:`IPBlock`
         The IP block.
-    type:
+    type: :class:`IPRoutePlannerType`
         The type of route planner.
     """
 
@@ -145,14 +145,14 @@ class RotatingIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
 
     Attributes
     ----------
-    type:
+    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.ROTATING_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.ROTATING_IP`.
-    current_address:
+    current_address: :class:`str`
         The current IP address.
-    ip_index:
+    ip_index: :class:`int`
         The offset of the current IP address.
-    rotate_index:
+    rotate_index: :class:`int`
         The number of rotations.
     """
 
@@ -172,10 +172,10 @@ class NanoIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
 
     Attributes
     ----------
-    type:
+    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.NANO_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.NANO_IP`.
-    current_address_index:
+    current_address_index: :class:`int`
         The index of the current address.
     """
 
@@ -193,12 +193,12 @@ class RotatingNanoIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
 
     Attributes
     ----------
-    type:
+    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.ROTATING_NANO_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.ROTATING_NANO_IP`.
-    block_index:
+    block_index: :class:`int`
         The index of the current block.
-    current_address_index:
+    current_address_index: :class:`int`
         The index of the current address.
     """
 
@@ -217,14 +217,14 @@ class BalancingIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
 
     Attributes
     ----------
-    type:
+    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.BALANCING_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.BALANCING_IP`.
-    current_address_index:
+    current_address_index: :class:`int`
         The index of the current address.
-    ip_index:
+    ip_index: :class:`int`
         The offset of the current IP block in the IP block list.
-    rotate_index:
+    rotate_index: :class:`int`
         The number of rotations.
     """
 
@@ -249,5 +249,6 @@ RoutePlannerStatus = Union[
 - :class:`RotatingNanoIPRoutePlannerStatus`
 - :class:`BalancingIPRoutePlannerStatus`
 
-To determine the type of route planner, check the ``type`` attribute.
+To determine the type of route planner, check the :attr:`BaseIPRoutePlannerStatus.type`
+attribute.
 """

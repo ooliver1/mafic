@@ -17,11 +17,11 @@ class Playlist:
 
     Attributes
     ----------
-    name:
+    name: :class:`str`
         The name of the playlist.
-    selected_track:
+    selected_track: :class:`int`
         The index of the selected track, if any.
-    tracks:
+    tracks: :class:`list`\\[:class:`Track`]
         A list of tracks in the playlist.
     """
 

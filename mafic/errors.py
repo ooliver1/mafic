@@ -16,6 +16,7 @@ __all__ = (
     "NoCompatibleLibraries",
     "NoNodesAvailable",
     "NodeAlreadyConnected",
+    "PlayerException",
     "PlayerNotConnected",
     "TrackLoadException",
 )
@@ -24,13 +25,9 @@ __all__ = (
 class MaficException(Exception):
     """The base exception class for custom exceptions raised by Mafic."""
 
-    ...
-
 
 class LibraryCompatibilityError(MaficException):
     """An issue occured when trying to find a compatible library."""
-
-    ...
 
 
 class NoCompatibleLibraries(LibraryCompatibilityError):
@@ -56,15 +53,19 @@ class MultipleCompatibleLibraries(LibraryCompatibilityError):
         )
 
 
-class TrackLoadException(MaficException):
+class PlayerException(MaficException):
+    """An issue occured when trying to play a track."""
+
+
+class TrackLoadException(PlayerException):
     """This is raised when a track could not be loaded.
 
     Attributes
     ----------
-    message:
+    message: :class:`str`
         The message returned by the node.
-    severity:
-        The severity of the error. Either ``COMMON``, ``SUSPICIOUS`` or ``FATAL``.
+    severity: :data:`~typing.Literal`\\[``"COMMON"``, ``"SUSPICIOUS"``, ``"FATAL"``]
+        The severity of the error.
     """
 
     def __init__(self, *, message: str, severity: ExceptionSeverity) -> None:
@@ -84,14 +85,14 @@ class TrackLoadException(MaficException):
 
         Returns
         -------
-        TrackLoadException:
+        TrackLoadException
             The constructed exception.
         """
 
         return cls(message=data["message"], severity=data["severity"])
 
 
-class PlayerNotConnected(MaficException):
+class PlayerNotConnected(PlayerException):
     """This is raised when a player is not connected to a voice channel."""
 
     def __init__(self) -> None:

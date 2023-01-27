@@ -97,6 +97,25 @@ class _TrackDataIterator(Iterator[int]):
 
 
 def decode_track(track_id: str) -> Track:
+    """Decode a track id into a Track object.
+
+    .. warning::
+
+        This still needs a lot of testing and may not work for many tracks.
+        Custom fields on plugins are not implemented and positions in tracks
+        may not work. Use at your own risk.
+
+    Parameters
+    ----------
+    track_id:
+        The track id to decode.
+
+    Returns
+    -------
+    Track:
+        The decoded track.
+    """
+
     raw = b64decode(track_id)
     print(raw)
     iterator = _TrackDataIterator(raw)

@@ -50,6 +50,9 @@ class VoiceRegion(Enum):
     EUROPE = "europe"
     AMSTERDAM = "amsterdam"
 
+    def __repr__(self) -> str:
+        return f"VoiceRegion.{self.name}"
+
 
 class Region(Enum):
     """Represents a region of voice regions.
@@ -85,6 +88,9 @@ class Region(Enum):
     )
     OCEANIA = (VoiceRegion.SYDNEY,)
 
+    def __repr__(self) -> str:
+        return f"<Region.{self.name}>"
+
 
 class Group(Enum):
     """Represents a group of regions.
@@ -114,3 +120,6 @@ class Group(Enum):
         Region.WEST_ASIA,
         Region.OCEANIA,
     )
+
+    def __repr__(self) -> str:
+        return f"<Group.{self.name}>"

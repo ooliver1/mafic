@@ -8,10 +8,10 @@ import re
 import warnings
 from asyncio import Event, TimeoutError, create_task, sleep, wait_for
 from logging import getLogger
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Generic, cast
 
-from aiohttp import ClientSession, WSMsgType
-from yarl import URL
+import aiohttp
+import yarl
 
 from mafic.typings.http import TrackWithInfo
 
@@ -28,6 +28,7 @@ from .plugin import Plugin
 from .region import Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
+from .type_variables import ClientT
 from .warnings import UnsupportedVersionWarning
 
 if TYPE_CHECKING:
@@ -36,7 +37,7 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientWebSocketResponse
 
-    from .__libraries import Client, VoiceServerUpdatePayload
+    from .__libraries import VoiceServerUpdatePayload
     from .filter import Filter
     from .ip import RoutePlannerStatus
     from .player import Player
@@ -76,7 +77,7 @@ def _wrap_regions(
 
     Returns
     -------
-    list[Region] | None
+    :class:`list`\\[:class:`Region`] | None
         The converted list of regions.
     """
 
@@ -103,7 +104,7 @@ def _wrap_regions(
     return actual_regions
 
 
-class Node:
+class Node(Generic[ClientT]):
     """Represents a Lavalink node.
 
     .. warning::
@@ -131,7 +132,7 @@ class Node:
     timeout:
         The amount of time the node will wait for a response before raising a timeout
         error.
-    session:
+    session: :data:`~typing.Optional`\\[:class:`aiohttp.ClientSession`]
         The session to use for the node.
         If not provided, a new session will be created.
     resume_key:
@@ -146,12 +147,12 @@ class Node:
 
     Attributes
     ----------
-    players:
+    players: :class:`dict`\\[:class:`int`, :class:`~mafic.player.Player`]
         The players that are currently connected to the node.
-    regions:
+    regions: :data:`~typing.Optional`\\[:class:`list`\\[:class:`~mafic.region.VoiceRegion`]]
         The regions that the node can be used in.
         This is used to determine when to use this node.
-    shard_ids:
+    shard_ids: :data:`~typing.Optional`\\[:class:`list`\\[:class:`int`]]
         The shard IDs that the node can be used in.
         This is used to determine when to use this node.
     """
@@ -187,11 +188,11 @@ class Node:
         port: int,
         label: str,
         password: str,
-        client: Client,
+        client: ClientT,
         secure: bool = False,
         heartbeat: int = 30,
         timeout: float = 10,
-        session: ClientSession | None = None,
+        session: aiohttp.ClientSession | None = None,
         resume_key: str | None = None,
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
@@ -208,8 +209,10 @@ class Node:
         self.shard_ids: Sequence[int] | None = shard_ids
         self.regions: list[VoiceRegion] | None = _wrap_regions(regions)
 
-        self._rest_uri = URL.build(scheme=f"http{'s'*secure}", host=host, port=port)
-        self._ws_uri = URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)
+        self._rest_uri = yarl.URL.build(
+            scheme=f"http{'s'*secure}", host=host, port=port
+        )
+        self._ws_uri = yarl.URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)
         self._resume_key = resume_key or f"{host}:{port}:{label}"
 
         self._ws: ClientWebSocketResponse | None = None
@@ -218,7 +221,7 @@ class Node:
         self._available = False
         self._ready = Event()
 
-        self.players: dict[int, Player] = {}
+        self.players: dict[int, Player[ClientT]] = {}
 
         self._stats: NodeStats | None = None
         self._session_id: str | None = None
@@ -242,7 +245,7 @@ class Node:
         return self._label
 
     @property
-    def client(self) -> Client:
+    def client(self) -> ClientT:
         """The client that the node is attached to."""
 
         return self._client
@@ -353,12 +356,28 @@ class Node:
 
         return players + cpu + null + deficit + mem
 
+    def get_player(self, guild_id: int) -> Player[ClientT] | None:
+        """Get a player from the node.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to get the player for.
+
+        Returns
+        -------
+        :data:`~typing.Optional`\\[:class:`Player`]
+            The player for the guild, if found.
+        """
+
+        return self.players.get(guild_id)
+
     async def _check_version(self) -> None:
         """Check the version of the node.
 
         Raises
         ------
-        RuntimeError
+        :exc:`RuntimeError`
             If the
             - major version is not 3
             - minor version is less than 7
@@ -367,7 +386,7 @@ class Node:
 
         Warns
         -----
-        UnsupportedVersionWarning
+        :class:`UnsupportedVersionWarning`
             If the minor version is greater than 7.
             Some features may not work.
         """
@@ -399,7 +418,7 @@ class Node:
             self._ws_uri /= "/v3/websocket"
 
     async def _connect_to_websocket(
-        self, headers: dict[str, str], session: ClientSession
+        self, headers: dict[str, str], session: aiohttp.ClientSession
     ) -> None:
         """Connect to the websocket of the node.
 
@@ -521,9 +540,11 @@ class Node:
             _log.debug("Received message from websocket.", extra={"label": self._label})
 
             # Please aiohttp, fix your typehints.
-            _type: WSMsgType = msg.type  # pyright: ignore[reportUnknownMemberType]
+            _type: aiohttp.WSMsgType = (
+                msg.type
+            )  # pyright: ignore[reportUnknownMemberType]
 
-            if _type is WSMsgType.CLOSED:
+            if _type is aiohttp.WSMsgType.CLOSED:
                 self._available = False
                 close_code = self._ws.close_code
                 self._ws = None
@@ -646,7 +667,7 @@ class Node:
 
         Raises
         ------
-        ValueError
+        :exc:`ValueError`
             If the endpoint in the payload is ``None``.
         """
 
@@ -776,10 +797,10 @@ class Node:
             query,
         )
 
-    async def _create_session(self) -> ClientSession:
+    async def _create_session(self) -> aiohttp.ClientSession:
         """Create a new session for the node."""
 
-        return ClientSession(json_serialize=dumps)
+        return aiohttp.ClientSession(json_serialize=dumps)
 
     async def __request(
         self,
@@ -803,7 +824,7 @@ class Node:
 
         Returns
         -------
-        Any
+        :data:`~typing.Any`
             The JSON response from the node.
         """
 
@@ -846,12 +867,10 @@ class Node:
 
         Returns
         -------
-        list[:class:`Track`]
-            A list of tracks if the load type is ``TRACK_LOADED``.
+        :class:`list`\\[:class:`Track`]
+            A list of tracks if the load type is ``TRACK_LOADED`` or ``SEARCH_RESULT``.
         :class:`Playlist`
             A playlist if the load type is ``PLAYLIST_LOADED``.
-        list[:class:`Track`]
-            A list of tracks if the load type is ``SEARCH_RESULT``.
         None
             If the load type is ``NO_MATCHES``.
         """
@@ -912,7 +931,7 @@ class Node:
 
         Returns
         -------
-        list[:class:`Track`]
+        :class:`list`\\[:class:`Track`]
             The decoded tracks.
 
         See Also
@@ -931,20 +950,20 @@ class Node:
 
         Returns
         -------
-        list[:class:`Plugin`]
+        :class:`list`\\[:class:`Plugin`]
             The plugins from the node.
         """
 
         plugins: list[PluginData] = await self.__request("GET", "/plugins")
 
-        return [Plugin.from_data(plugin) for plugin in plugins]
+        return [Plugin(plugin) for plugin in plugins]
 
     async def fetch_route_planner_status(self) -> RoutePlannerStatus | None:
         """Fetch the route planner status from the node.
 
         Returns
         -------
-        :class:`RoutePlannerStatus`
+        :data:`.RoutePlannerStatus`
             The route planner status from the node.
         """
 
