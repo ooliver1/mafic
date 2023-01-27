@@ -28,4 +28,4 @@ pip install git+https://github.com/ooliver1/mafic
 > **Warning**
 > Mafic is in public alpha, do not use in production.
 
-There are no examples as of now, neither are there any docs just yet, for development purposes, `test_bot` contains the start of a bot using mafic.
+There are no examples as of now. For development purposes, `test_bot` contains the start of a bot using mafic.

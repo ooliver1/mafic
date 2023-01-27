@@ -6,6 +6,8 @@
 Welcome to mafic's documentation!
 =================================
 
+Mafic is a properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
