@@ -21,7 +21,7 @@ VERSION_OUTPUT = """
 """.strip()
 
 
-def show_version():
+def show_version() -> None:
     version = mafic.__version__
     uname = platform.uname()
     print(
@@ -36,12 +36,12 @@ def show_version():
     )
 
 
-def core(_: ArgumentParser, args: Namespace):
+def core(_: ArgumentParser, args: Namespace) -> None:
     if args.version:
         show_version()
 
 
-def parse_args():
+def parse_args() -> tuple[ArgumentParser, Namespace]:
     parser = ArgumentParser(prog="mafic", description="CLI tools for mafic")
     parser.add_argument(
         "-v",
@@ -52,7 +52,7 @@ def parse_args():
     return parser, parser.parse_args()
 
 
-def main():
+def main() -> None:
     parser, args = parse_args()
     core(parser, args)
 

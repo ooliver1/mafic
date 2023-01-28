@@ -134,8 +134,8 @@ class BaseIPRoutePlannerStatus(ABC):
     type: IPRoutePlannerType
 
     def __init__(self, data: BaseDetails) -> None:
-        self.ip_block = IPBlock(data["ipBlock"])
-        self.failing_addresses = [
+        self.ip_block: IPBlock = IPBlock(data["ipBlock"])
+        self.failing_addresses: list[FailingAddress] = [
             FailingAddress(addr) for addr in data["failingAddresses"]
         ]
 
