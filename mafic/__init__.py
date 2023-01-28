@@ -12,6 +12,7 @@ import logging
 
 from . import __libraries
 from .errors import *
+from .events import *
 from .filter import *
 from .ip import *
 from .node import *

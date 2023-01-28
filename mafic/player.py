@@ -7,7 +7,7 @@ from functools import reduce
 from logging import getLogger
 from operator import or_
 from time import time
-from typing import TYPE_CHECKING, Generic
+from typing import TYPE_CHECKING, Generic, cast
 
 from .__libraries import (
     MISSING,
@@ -17,6 +17,7 @@ from .__libraries import (
     VoiceProtocol,
 )
 from .errors import PlayerNotConnected
+from .events import *
 from .filter import Filter
 from .playlist import Playlist
 from .pool import NodePool
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
         VoiceServerUpdatePayload,
     )
     from .node import Node
-    from .typings import PlayerUpdateState
+    from .typings import EventPayload, PlayerUpdateState
 
 
 _log = getLogger(__name__)
@@ -94,6 +95,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
         self._ping = -1
         self._current: Track | None = None
         self._filters: OrderedDict[str, Filter] = OrderedDict()
+        # Used to get the last track for TrackEndEvent.
+        self._last_track: Track | None = None
 
     @property
     def connected(self) -> bool:
@@ -134,6 +137,12 @@ class Player(VoiceProtocol, Generic[ClientT]):
             return NodePool[ClientT].get_random_node()
 
         return self._node
+
+    @property
+    def current(self) -> Track | None:
+        """The current track that is playing."""
+
+        return self._current
 
     def update_state(self, state: PlayerUpdateState) -> None:
         """Update the player state.
@@ -180,6 +189,70 @@ class Player(VoiceProtocol, Generic[ClientT]):
             session_id=self._session_id,
             data=self._server_state,
         )
+
+    def dispatch_event(self, data: EventPayload) -> None:
+        if data["type"] == "WebSocketClosedEvent":
+            event = WebSocketClosedEvent(payload=data, player=self)
+            _log.debug("Received websocket closed event: %s", event)
+            self.client.dispatch("websocket_closed", event)
+        elif data["type"] == "TrackStartEvent":
+            track = self._current
+
+            if track is None:
+                _log.error(
+                    "Received track start event but no track was playing, discarding."
+                )
+                return
+
+            event = TrackStartEvent(player=self, track=track)
+            self.client.dispatch("track_start", event)
+            _log.debug("Received track start event: %s", event)
+            self._last_track = track
+        elif data["type"] == "TrackEndEvent":
+            track = self._last_track
+
+            if track is None:
+                _log.error(
+                    "Received track end event but no track was playing, discarding."
+                )
+                return
+
+            event = TrackEndEvent(player=self, track=track, payload=data)
+            self.client.dispatch("track_end", event)
+            _log.debug("Received track end event: %s", event)
+
+            if data["reason"] != "REPLACED":
+                self._current = None
+        elif data["type"] == "TrackExceptionEvent":
+            track = self._current
+
+            if track is None:
+                _log.error(
+                    "Received track exception event but no track was playing, discarding."
+                )
+                return
+
+            event = TrackExceptionEvent(player=self, track=track, payload=data)
+            self.client.dispatch("track_exception", event)
+            _log.debug("Received track exception event: %s", event)
+        elif data["type"] == "TrackStuckEvent":
+            track = self._current
+
+            if track is None:
+                _log.error(
+                    "Received track stuck event but no track was playing, discarding."
+                )
+                return
+
+            event = TrackStuckEvent(player=self, track=track, payload=data)
+            self.client.dispatch("track_stuck", event)
+            _log.debug("Received track stuck event: %s", event)
+        else:
+            # Pyright expects this to never happen, so do I, I really hope.
+            # Nobody expects the Spanish Inquisition, neither does pyright.
+
+            event_type = cast(str, data["type"])
+            _log.warning("Unknown incoming event type %s", event_type)
 
     async def on_voice_state_update(self, data: GuildVoiceStatePayload) -> None:
         """Dispatch a voice state update.

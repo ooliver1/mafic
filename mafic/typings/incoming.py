@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import NotRequired
 
-    from .misc import FriendlyWithCause
+    from .misc import LavalinkException
 
 __all__ = (
     "EventPayload",
@@ -23,6 +23,7 @@ __all__ = (
     "TrackExceptionEvent",
     "TrackStartEvent",
     "TrackStuckEvent",
+    "WebSocketClosedEvent",
 )
 
 
@@ -69,7 +70,7 @@ class TrackExceptionEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackExceptionEvent"]
     encodedTrack: str
-    error: FriendlyWithCause
+    exception: LavalinkException
 
 
 class TrackStuckEvent(PayloadWithGuild):

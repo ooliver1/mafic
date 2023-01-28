@@ -626,27 +626,13 @@ class Node(Generic[ClientT]):
             The data to handle.
         """
 
-        if data["type"] == "WebSocketClosedEvent":
-            # TODO:
-            ...
-        elif data["type"] == "TrackStartEvent":
-            # We do not care about track starts, the user is already aware of it.
+        if not (player := self.players.get(int(data["guildId"]))):
+            _log.error(
+                "Could not find player for guild %s, discarding event.", data["guildId"]
+            )
             return
-        elif data["type"] == "TrackEndEvent":
-            # TODO:
-            ...
-        elif data["type"] == "TrackExceptionEvent":
-            # TODO:
-            ...
-        elif data["type"] == "TrackStuckEvent":
-            # TODO:
-            ...
-        else:
-            # Pyright expects this to never happen, so do I, I really hope.
-            # Nobody expects the Spanish Inquisition, neither does pyright.
 
-            event_type = cast(str, data["type"])
-            _log.warning("Unknown incoming event type %s", event_type)
+        player.dispatch_event(data)
 
     def voice_update(
         self,

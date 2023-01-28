@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .typings import ExceptionSeverity, FriendlyException
+    from .typings import ExceptionSeverity, LavalinkException
 
 __all__ = (
     "LibraryCompatibilityError",
@@ -68,14 +68,16 @@ class TrackLoadException(PlayerException):
         The severity of the error.
     """
 
-    def __init__(self, *, message: str, severity: ExceptionSeverity) -> None:
+    def __init__(
+        self, *, message: str, severity: ExceptionSeverity, cause: str
+    ) -> None:
         super().__init__(f"The track could not be loaded: {message} ({severity} error)")
 
-        self.message = message
-        self.severity = severity
+        self.message: str = message
+        self.severity: ExceptionSeverity = severity
 
     @classmethod
-    def from_data(cls, data: FriendlyException) -> Self:
+    def from_data(cls, data: LavalinkException) -> Self:
         """Construct a new TrackLoadException from raw Lavalink data.
 
         Parameters
@@ -89,7 +91,9 @@ class TrackLoadException(PlayerException):
             The constructed exception.
         """
 
-        return cls(message=data["message"], severity=data["severity"])
+        return cls(
+            message=data["message"], severity=data["severity"], cause=data["cause"]
+        )
 
 
 class PlayerNotConnected(PlayerException):
