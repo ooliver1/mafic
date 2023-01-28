@@ -6,8 +6,8 @@ from typing import Any, Coroutine, Literal, TypedDict, TypeVar
 
 __all__ = (
     "Coro",
+    "LavalinkException",
     "ExceptionSeverity",
-    "FriendlyException",
     "PayloadWithGuild",
 )
 T = TypeVar("T")
@@ -16,12 +16,9 @@ Coro = Coroutine[Any, Any, T]
 ExceptionSeverity = Literal["COMMON", "SUSPICIOUS", "FAULT"]
 
 
-class FriendlyException(TypedDict):
+class LavalinkException(TypedDict):
     severity: ExceptionSeverity
     message: str
-
-
-class FriendlyWithCause(FriendlyException):
     cause: str
 
 

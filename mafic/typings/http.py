@@ -9,7 +9,7 @@ from .common import PlaylistInfo, TrackWithInfo
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
-    from .misc import FriendlyException
+    from .misc import LavalinkException
 
 
 __all__ = (
@@ -61,7 +61,7 @@ class GenericTracks(TypedDict):
 
 class TracksFailed(TypedDict):
     loadType: Literal["LOAD_FAILED"]
-    exception: FriendlyException
+    exception: LavalinkException
 
 
 class NoMatches(TypedDict):
