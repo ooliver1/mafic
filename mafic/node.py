@@ -394,7 +394,10 @@ class Node(Generic[ClientT]):
         if self.__session is None:
             self.__session = await self._create_session()
 
-        async with self.__session.get(self._rest_uri / "version") as resp:
+        async with self.__session.get(
+            self._rest_uri / "version",
+            headers={"Authorization": self.__password},
+        ) as resp:
             # Only the major and minor are needed.
             version = await resp.text()
 
@@ -850,7 +853,7 @@ class Node(Generic[ClientT]):
             )
 
             json = await resp.json(loads=loads)
-            _log.debug("Received raw data %s", json)
+            _log.debug("Received raw data %s from %s", json, path)
             return json
 
     async def fetch_tracks(
