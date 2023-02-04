@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from .misc import PayloadWithGuild
+
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
 
 __all__ = (
     "Filters",
@@ -165,4 +168,4 @@ class Stats(TypedDict):
     uptime: int
     memory: Memory
     cpu: CPU
-    frameStats: FrameStats | None
+    frameStats: NotRequired[FrameStats]

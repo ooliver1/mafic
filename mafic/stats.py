@@ -118,5 +118,5 @@ class NodeStats:
         self.memory: MemoryStats = MemoryStats(data["memory"])
         self.cpu: CPUStats = CPUStats(data["cpu"])
         self.frame_stats: FrameStats | None = (
-            FrameStats(data["frameStats"]) if data["frameStats"] is not None else None
+            FrameStats(data["frameStats"]) if "frameStats" in data else None
         )
