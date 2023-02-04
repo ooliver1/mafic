@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.3.0](https://github.com/ooliver1/mafic/compare/v0.2.0...v0.3.0) (2023-02-04)
+
+
+### Features
+
+* add event dispatching ([#28](https://github.com/ooliver1/mafic/issues/28)) ([d4a837f](https://github.com/ooliver1/mafic/commit/d4a837f9592d16194ac50fe82329809b615a6697))
+* add fine grained errors raised from http operations ([#30](https://github.com/ooliver1/mafic/issues/30)) ([b1f4042](https://github.com/ooliver1/mafic/commit/b1f4042879039f18a8636aaa78a7c16afb8e3858))
+* support plugin search types ([#31](https://github.com/ooliver1/mafic/issues/31)) ([1985484](https://github.com/ooliver1/mafic/commit/19854842b7b1864718e2dc43a0b94d0ea450cd2f))
+
+
+### Bug Fixes
+
+* **node:** improve version checking ([736c268](https://github.com/ooliver1/mafic/commit/736c268a51e2805efef2d4be1f4c9312efb7b01d))
+* **node:** properly resume ([bb20ad6](https://github.com/ooliver1/mafic/commit/bb20ad6cc5ab4122178a00e603525039a9b7f259))
+* **node:** send auth for version, lol ([29baebf](https://github.com/ooliver1/mafic/commit/29baebf0d8d8d244ac19d713642fb99452c3a528))
+* **node:** use track id not identifier to play ([12e0db4](https://github.com/ooliver1/mafic/commit/12e0db499a07a2a56a804d817cfdcec2dba43857))
+* **stats:** framestats is actually ommitable ([4c96b70](https://github.com/ooliver1/mafic/commit/4c96b70da5f34931207064a8e8a2522d3b71af8b))
+
+
+### Documentation
+
+* add documentation ([#25](https://github.com/ooliver1/mafic/issues/25)) ([8f8a421](https://github.com/ooliver1/mafic/commit/8f8a421df1f2143f136de3196ff561fb371d5307))
+* add events ([3bc39f4](https://github.com/ooliver1/mafic/commit/3bc39f412a68a56b3e4d668c7fd8df72b4e6b58b))
+* export ignore lib check env var ([f2f04eb](https://github.com/ooliver1/mafic/commit/f2f04eb0e9a0646853f0d2b066bca2faa7076f05))
+* improve front page ([49d087d](https://github.com/ooliver1/mafic/commit/49d087d202ba682b9252ef7bb30e8a1981f74b29))
+* **installing:** fix typo ([68c1c60](https://github.com/ooliver1/mafic/commit/68c1c601b934fe25fcd3f89f91c2d38f6ca7552a))
+
 ## [0.2.0](https://github.com/ooliver1/mafic/compare/v0.1.0...v0.2.0) (2022-11-09)
 
 
