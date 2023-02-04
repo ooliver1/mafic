@@ -41,4 +41,4 @@ class SearchType(Enum):
     YANDEX_MUSIC = "ymsearch"
 
     # DuncteBot
-    SPEECH = "speak"
+    TTS = "speak"
