@@ -495,13 +495,6 @@ class Node(Generic[ClientT]):
         await self._connect_to_websocket(headers=headers, session=session)
         _log.info("Connected to lavalink.", extra={"label": self._label})
 
-        _log.debug(
-            "Creating task to send configuration to resume with key %s",
-            self._resume_key,
-            extra={"label": self._label},
-        )
-        create_task(self.configure_resuming())
-
         _log.info(
             "Creating task for websocket listener...", extra={"label": self._label}
         )
@@ -606,16 +599,24 @@ class Node(Generic[ClientT]):
             resumed = data["resumed"]
             session_id = data["sessionId"]
 
+            _log.debug(
+                "Received session ID %s", session_id, extra={"label": self._label}
+            )
+            self._session_id = session_id
+
             if resumed:
                 _log.info(
                     "Successfully resumed connection with lavalink.",
                     extra={"label": self._label},
                 )
+            else:
+                _log.debug(
+                    "Sending configuration to resume with key %s",
+                    self._resume_key,
+                    extra={"label": self._label},
+                )
+                await self.configure_resuming()
 
-            _log.debug(
-                "Received session ID %s", session_id, extra={"label": self._label}
-            )
-            self._session_id = session_id
             self._ready.set()
         else:
             # Of course pyright considers this to be `Never`, so this is to keep types.
@@ -672,7 +673,7 @@ class Node(Generic[ClientT]):
 
         return self.__request(
             "PATCH",
-            f"/sessions/{self._session_id}/players/{guild_id}",
+            f"sessions/{self._session_id}/players/{guild_id}",
             {
                 "voice": {
                     "sessionId": session_id,
@@ -693,7 +694,7 @@ class Node(Generic[ClientT]):
 
         return self.__request(
             "PATCH",
-            f"/sessions/{self._session_id}",
+            f"sessions/{self._session_id}",
             {
                 "resumingKey": self._resume_key,
                 "timeout": 60,
@@ -712,7 +713,7 @@ class Node(Generic[ClientT]):
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
         return self.__request(
-            "DELETE", f"/sessions/{self._session_id}/players/{guild_id}"
+            "DELETE", f"sessions/{self._session_id}/players/{guild_id}"
         )
 
     def update(
@@ -783,7 +784,7 @@ class Node(Generic[ClientT]):
 
         return self.__request(
             "PATCH",
-            f"/sessions/{self._session_id}/players/{guild_id}",
+            f"sessions/{self._session_id}/players/{guild_id}",
             data,
             query,
         )
@@ -878,7 +879,7 @@ class Node(Generic[ClientT]):
             query = f"{search_type}:{query}"
 
         data: TrackLoadingResult = await self.__request(
-            "GET", "/loadtracks", params={"identifier": query}
+            "GET", "loadtracks", params={"identifier": query}
         )
 
         if data["loadType"] == "NO_MATCHES":
@@ -913,7 +914,7 @@ class Node(Generic[ClientT]):
         """
 
         info: TrackInfo = await self.__request(
-            "GET", "/decodetrack", params={"encodedTrack": track}
+            "GET", "decodetrack", params={"encodedTrack": track}
         )
 
         return Track.from_data(track=track, info=info)
@@ -937,7 +938,7 @@ class Node(Generic[ClientT]):
         """
 
         track_data: list[TrackWithInfo] = await self.__request(
-            "POST", "/decodetracks", json=tracks
+            "POST", "decodetracks", json=tracks
         )
 
         return [Track.from_data_with_info(track) for track in track_data]
@@ -951,7 +952,7 @@ class Node(Generic[ClientT]):
             The plugins from the node.
         """
 
-        plugins: list[PluginData] = await self.__request("GET", "/plugins")
+        plugins: list[PluginData] = await self.__request("GET", "plugins")
 
         return [Plugin(plugin) for plugin in plugins]
 
@@ -965,7 +966,7 @@ class Node(Generic[ClientT]):
         """
 
         data: RoutePlannerStatusPayload = await self.__request(
-            "GET", "/routeplanner/status"
+            "GET", "routeplanner/status"
         )
 
         if data["class"] == "RotatingIpRoutePlanner":
@@ -997,10 +998,10 @@ class Node(Generic[ClientT]):
         """
 
         await self.__request(
-            "POST", "/routeplanner/free/address", json={"address": address}
+            "POST", "routeplanner/free/address", json={"address": address}
         )
 
     async def unmark_all_addresses(self) -> None:
         """Unmark all failed addresses so they can be used again."""
 
-        await self.__request("POST", "/routeplanner/free/all")
+        await self.__request("POST", "routeplanner/free/all")
