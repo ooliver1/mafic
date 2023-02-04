@@ -757,7 +757,7 @@ class Node(Generic[ClientT]):
         data: UpdatePlayerPayload = {}
 
         if track is not MISSING:
-            data["encodedTrack"] = track.identifier if track is not None else None
+            data["encodedTrack"] = track.id if track is not None else None
 
         if position is not None:
             data["position"] = position

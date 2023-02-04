@@ -154,7 +154,7 @@ async def join(inter: Interaction):
         return await inter.response.send_message("You are not in a voice channel.")
 
     channel = inter.user.voice.channel
-    await channel.connect(cls=Player)
+    await channel.connect(cls=MyPlayer)
     await inter.send(f"Joined {channel.mention}.")
 
 
@@ -178,12 +178,14 @@ async def play(inter: Interaction, query: str):
 
     if isinstance(tracks, Playlist):
         tracks = tracks.tracks
+        if len(tracks) > 1:
+            player.queue.extend(tracks[1:])
 
     track = tracks[0]
-    if len(tracks) > 1:
-        player.queue.extend(tracks[1:])
 
     await player.play(track)
+
+    await inter.send(f"Playing {track}")
 
 
 @bot.listen()
