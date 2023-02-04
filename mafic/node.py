@@ -29,7 +29,7 @@ from .region import Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
 from .type_variables import ClientT
-from .warnings import UnsupportedVersionWarning
+from .warnings import *
 
 if TYPE_CHECKING:
     from asyncio import Task
@@ -396,26 +396,31 @@ class Node(Generic[ClientT]):
 
         async with self.__session.get(self._rest_uri / "version") as resp:
             # Only the major and minor are needed.
-            json = await resp.json()
-            version: str = json["version"]
-            major, minor, _ = version.split(".", maxsplit=2)
-            major = int(major)
-            minor = int(minor)
+            version = await resp.text()
 
-            if major != 3:
-                raise RuntimeError(
-                    f"Unsupported lavalink version {version} (expected 3.7.x)"
-                )
-            elif minor < 7:
-                raise RuntimeError(
-                    f"Unsupported lavalink version {version} (expected 3.7.x)"
-                )
-            elif minor > 7:
-                message = UnsupportedVersionWarning.message
-                warnings.warn(message, UnsupportedVersionWarning)
+            try:
+                major, minor, _ = version.split(".", maxsplit=2)
+            except ValueError:
+                message = UnknownVersionWarning.message
+                warnings.warn(message, UnknownVersionWarning)
+            else:
+                major = int(major)
+                minor = int(minor)
 
-            self._rest_uri /= "/v3"
-            self._ws_uri /= "/v3/websocket"
+                if major != 3:
+                    raise RuntimeError(
+                        f"Unsupported lavalink version {version} (expected 3.7.x)"
+                    )
+                elif minor < 7:
+                    raise RuntimeError(
+                        f"Unsupported lavalink version {version} (expected 3.7.x)"
+                    )
+                elif minor > 7:
+                    message = UnsupportedVersionWarning.message
+                    warnings.warn(message, UnsupportedVersionWarning)
+
+            self._rest_uri /= "v3"
+            self._ws_uri /= "v3/websocket"
 
     async def _connect_to_websocket(
         self, headers: dict[str, str], session: aiohttp.ClientSession
