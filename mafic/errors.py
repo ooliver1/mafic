@@ -10,6 +10,10 @@ if TYPE_CHECKING:
     from .typings import ExceptionSeverity, LavalinkException
 
 __all__ = (
+    "HTTPBadRequest",
+    "HTTPException",
+    "HTTPNotFound",
+    "HTTPUnauthorized",
     "LibraryCompatibilityError",
     "MaficException",
     "MultipleCompatibleLibraries",
@@ -115,3 +119,34 @@ class NoNodesAvailable(MaficException):
 
     def __init__(self) -> None:
         super().__init__("No nodes are available to handle this player.")
+
+
+class HTTPException(MaficException):
+    """An issue occured when trying to make a request to the Lavalink REST API."""
+
+    def __init__(self, status: int, message: str) -> None:
+        super().__init__(f"An HTTP error occured: {message} ({status})")
+
+        self.status: int = status
+        self.message: str = message
+
+
+class HTTPBadRequest(HTTPException):
+    """This is raised when a bad request is made to the Lavalink REST API."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(400, message)
+
+
+class HTTPUnauthorized(HTTPException):
+    """This is raised when an unauthorized request is made to the Lavalink REST API."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(401, message)
+
+
+class HTTPNotFound(HTTPException):
+    """This is raised when a request is made to a non-existent endpoint."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(404, message)

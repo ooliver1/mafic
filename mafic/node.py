@@ -16,7 +16,7 @@ import yarl
 from mafic.typings.http import TrackWithInfo
 
 from .__libraries import MISSING, ExponentialBackoff, dumps, loads
-from .errors import NodeAlreadyConnected, TrackLoadException
+from .errors import *
 from .ip import (
     BalancingIPRoutePlannerStatus,
     NanoIPRoutePlannerStatus,
@@ -828,8 +828,16 @@ class Node(Generic[ClientT]):
             headers={"Authorization": self.__password},
         ) as resp:
             if not (200 <= resp.status < 300):
-                # TODO: raise proper error
-                raise RuntimeError(f"Got status code {resp.status} from lavalink.")
+                text = await resp.text()
+
+                if resp.status == 400:
+                    raise HTTPBadRequest(text)
+                if resp.status == 401:
+                    raise HTTPUnauthorized(text)
+                elif resp.status == 404:
+                    raise HTTPNotFound(text)
+                else:
+                    raise HTTPException(status=resp.status, message=text)
 
             _log.debug(
                 "Received status %s from lavalink from path %s", resp.status, path
@@ -864,7 +872,6 @@ class Node(Generic[ClientT]):
         if not URL_REGEX.match(query):
             query = f"{search_type}:{query}"
 
-        # TODO: handle errors from lavalink
         data: TrackLoadingResult = await self.__request(
             "GET", "/loadtracks", params={"identifier": query}
         )
@@ -900,7 +907,6 @@ class Node(Generic[ClientT]):
         :meth:`decode_tracks`
         """
 
-        # TODO: handle errors from lavalink
         info: TrackInfo = await self.__request(
             "GET", "/decodetrack", params={"encodedTrack": track}
         )

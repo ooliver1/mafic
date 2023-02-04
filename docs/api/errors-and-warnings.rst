@@ -18,6 +18,10 @@ Errors
             - :exc:`PlayerNotConnected`
          - :exc:`NodeAlreadyConnected`
          - :exc:`NoNodesAvailable`
+         - :exc:`HTTPException`
+            - :exc:`HTTPBadRequest`
+            - :exc:`HTTPUnauthorized`
+            - :exc:`HTTPNotFound`
 
 
 .. autoexception:: MaficException
@@ -38,6 +42,14 @@ Errors
 .. autoexception:: NoNodesAvailable
 
 .. autoexception:: NodeAlreadyConnected
+
+.. autoexception:: HTTPException
+
+.. autoexception:: HTTPBadRequest
+
+.. autoexception:: HTTPUnauthorized
+
+.. autoexception:: HTTPNotFound
 
 Warnings
 --------
