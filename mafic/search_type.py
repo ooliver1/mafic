@@ -38,7 +38,7 @@ class SearchType(Enum):
     APPLE_MUSIC = "amsearch"
     DEEZER_SEARCH = "dzsearch"
     DEEZER_ISRC = "dzisrc"
-    YANDEX = "ymsearch"
+    YANDEX_MUSIC = "ymsearch"
 
     # DuncteBot
     SPEECH = "speak"
