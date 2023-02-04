@@ -12,6 +12,7 @@ The full API reference for Mafic:
    stats
    ip
    player
+   events
    track-and-playlist
    filters
    errors-and-warnings
