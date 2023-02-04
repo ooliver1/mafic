@@ -1,4 +1,4 @@
-FROM fredboat/lavalink:v3.6
+FROM fredboat/lavalink:3.7.4
 
 COPY application.yml entrypoint.sh ./
 

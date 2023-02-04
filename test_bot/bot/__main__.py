@@ -1,3 +1,5 @@
+"""Very basic bot to test mafic."""
+
 from __future__ import annotations
 
 from asyncio import sleep
@@ -6,8 +8,9 @@ from os import getenv
 
 from botbase import BotBase
 from nextcord import Intents, Interaction
+from nextcord.abc import Connectable
 
-from mafic import Group, NodePool, Player, Region
+from mafic import Group, NodePool, Player, Playlist, Region, Track, TrackEndEvent
 
 getLogger("mafic").setLevel(DEBUG)
 
@@ -25,6 +28,7 @@ class TestBot(BotBase):
 
         # Account for docker still starting up.
         await sleep(5)
+        # Excessively test pool balancing.
         await self.pool.create_node(
             host="127.0.0.1",
             port=6962,
@@ -122,6 +126,14 @@ intents.voice_states = True
 bot = TestBot(intents=intents, shard_ids=[0, 1], shard_count=2)
 
 
+class MyPlayer(Player[TestBot]):
+    def __init__(self, client: TestBot, channel: Connectable) -> None:
+        super().__init__(client, channel)
+
+        # Mafic does not provide a queue system right now, low priority.
+        self.queue: list[Track] = []
+
+
 @bot.slash_command()
 async def join(inter: Interaction):
     """Join your voice channel."""
@@ -145,15 +157,27 @@ async def play(inter: Interaction, query: str):
     if not inter.guild.voice_client:
         await join(inter)
 
-    player: Player = inter.guild.voice_client
+    player: MyPlayer = inter.guild.voice_client
 
     tracks = await player.fetch_tracks(query)
 
     if not tracks:
-        return await inter.response.send_message("No tracks found.")
+        return await inter.send("No tracks found.")
 
-    # TODO: handle playlists
-    await player.play(tracks[0])
+    if isinstance(tracks, Playlist):
+        tracks = tracks.tracks
+
+    track = tracks[0]
+    if len(tracks) > 1:
+        player.queue.extend(tracks[1:])
+
+    await player.play(track)
+
+
+@bot.listen()
+async def on_track_end(event: TrackEndEvent):
+    if event.player.queue:
+        await event.player.play(event.player.queue.pop(0))
 
 
 bot.run(getenv("TOKEN"))
