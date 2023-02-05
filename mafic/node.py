@@ -667,8 +667,7 @@ class Node(Generic[ClientT]):
         """
 
         _log.debug(
-            "Sending player update to lavalink with data %s.",
-            data,
+            "Sending player update to lavalink.",
             extra={"label": self._label, "guild": guild_id},
         )
         if data["endpoint"] is None:
@@ -775,7 +774,7 @@ class Node(Generic[ClientT]):
             data["filters"] = filter.payload
 
         if no_replace is not None:
-            query: UpdatePlayerParams | None = {"noReplace": no_replace}
+            query: UpdatePlayerParams | None = {"noReplace": str(no_replace)}
         else:
             query = None
 
@@ -829,6 +828,13 @@ class Node(Generic[ClientT]):
         session = self.__session
         uri = self._rest_uri / path
 
+        _log.debug(
+            "Sending %s request to %s and data %s.",
+            method,
+            uri,
+            json,
+            extra={"label": self._label},
+        )
         async with session.request(
             method,
             uri,
@@ -836,6 +842,7 @@ class Node(Generic[ClientT]):
             params=params,
             headers={"Authorization": self.__password},
         ) as resp:
+            _log.debug("Received status %s from lavalink.", resp.status)
             if not (200 <= resp.status < 300):
                 text = await resp.text()
 

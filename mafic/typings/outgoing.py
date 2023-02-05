@@ -39,7 +39,7 @@ class UnmarkAddressPayload(TypedDict):
 
 
 class UpdatePlayerParams(TypedDict):
-    noReplace: bool
+    noReplace: str
 
 
 class TrackLoadParams(TypedDict):
