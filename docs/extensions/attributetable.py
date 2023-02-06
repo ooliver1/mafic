@@ -168,7 +168,7 @@ def build_lookup_table(env: BuildEnvironment):
         "class",
     }
 
-    for (fullname, __, objtype, __, __, __) in domain.get_objects():
+    for fullname, __, objtype, __, __, __ in domain.get_objects():
         if objtype in ignored:
             continue
 
