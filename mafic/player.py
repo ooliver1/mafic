@@ -98,6 +98,17 @@ class Player(VoiceProtocol, Generic[ClientT]):
         # Used to get the last track for TrackEndEvent.
         self._last_track: Track | None = None
 
+    def __repr__(self) -> str:
+        attrs = (
+            ("guild_id", self._guild_id),
+            ("session_id", self._session_id),
+            ("connected", self._connected),
+            ("position", self._position),
+            ("current", self._current),
+        )
+        resolved = " ".join(f"{attr}={value!r}" for attr, value in attrs)
+        return f"<{type(self).__name__} {resolved}>"
+
     @property
     def connected(self) -> bool:
         """Whether the player is connected to a voice channel."""
@@ -269,6 +280,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
         self._session_id = data["session_id"]
 
         channel_id = data["channel_id"]
+
+        if channel_id is None:  # pyright: ignore[reportUnnecessaryComparison]
+            # This can happen and is on disconnect, not sure why this is typed as always Snowflake.
+            return self.cleanup()
+
         channel = self.guild.get_channel(int(channel_id))
         assert isinstance(channel, (StageChannel, VoiceChannel))
 
@@ -367,6 +383,21 @@ class Player(VoiceProtocol, Generic[ClientT]):
         finally:
             self.cleanup()
             self._connected = False
+
+    def cleanup(self) -> None:
+        """Clean up the player.
+
+        This shouldn't be called directly. Instead, use :meth:`disconnect`.
+        """
+
+        self._current = None
+        self._position = 0
+        self._paused = False
+        self._ping = 0
+        self._channel = None
+        self._connected = False
+
+        return super().cleanup()
 
     async def destroy(self) -> None:
         """Destroy the player.

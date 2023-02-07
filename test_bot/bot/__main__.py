@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import traceback
 from asyncio import sleep
 from logging import DEBUG, getLogger
 from os import getenv
@@ -192,6 +193,12 @@ async def play(inter: Interaction, query: str):
 async def on_track_end(event: TrackEndEvent):
     if event.player.queue:
         await event.player.play(event.player.queue.pop(0))
+
+
+@bot.event
+async def on_application_command_error(inter: Interaction, error: Exception):
+    traceback.print_exception(type(error), error, error.__traceback__)
+    await inter.send(f"An error occurred: {error}")
 
 
 bot.run(getenv("TOKEN"))

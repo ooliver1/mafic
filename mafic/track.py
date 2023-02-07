@@ -149,3 +149,20 @@ class Track:
         """
 
         return cls.from_data(track=data["encoded"], info=data["info"])
+
+    def __repr__(self) -> str:
+        attrs = (
+            ("id", self.id),
+            ("title", self.title),
+            ("author", self.author),
+            ("identifier", self.identifier),
+            ("uri", self.uri),
+            ("source", self.source),
+            ("stream", self.stream),
+            ("seekable", self.seekable),
+            ("position", self.position),
+            ("length", self.length),
+        )
+
+        resolved = " ".join(f"{name}={value!r}" for name, value in attrs)
+        return f"<{type(self).__name__} {resolved}>"
