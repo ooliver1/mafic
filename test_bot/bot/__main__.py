@@ -201,4 +201,37 @@ async def on_application_command_error(inter: Interaction, error: Exception):
     await inter.send(f"An error occurred: {error}")
 
 
+STATS = """```
+Uptime: {uptime}
+Memory: {used:.0f}MiB : {free:.0f}MiB / {allocated:.0f}MiB -- {reservable:.0f}MiB
+CPU: {system_load:.2f}% : {lavalink_load:.2f}%
+Players: {player_count}
+Playing Players: {playing_player_count}
+```"""
+
+
+@bot.slash_command()
+async def stats(inter: Interaction):
+    node = bot.pool.nodes[0]
+
+    stats = node.stats
+
+    if not stats:
+        return await inter.send("No stats available.")
+
+    await inter.send(
+        STATS.format(
+            uptime=stats.uptime,
+            used=stats.memory.used / 1024 / 1024,
+            free=stats.memory.free / 1024 / 1024,
+            allocated=stats.memory.allocated / 1024 / 1024,
+            reservable=stats.memory.reservable / 1024 / 1024,
+            system_load=stats.cpu.system_load * 100,
+            lavalink_load=stats.cpu.lavalink_load * 100,
+            player_count=stats.player_count,
+            playing_player_count=stats.playing_player_count,
+        )
+    )
+
+
 bot.run(getenv("TOKEN"))
