@@ -18,7 +18,7 @@ keywords = [
     "py-cord"
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Framework :: AsyncIO",
     "Framework :: aiohttp",
     "Intended Audience :: Developers",
