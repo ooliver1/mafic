@@ -190,7 +190,7 @@ async def play(inter: Interaction, query: str):
 
 
 @bot.listen()
-async def on_track_end(event: TrackEndEvent):
+async def on_track_end(event: TrackEndEvent[MyPlayer]):
     if event.player.queue:
         await event.player.play(event.player.queue.pop(0))
 

@@ -5,12 +5,12 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+from .__libraries import VoiceProtocol
 
 if TYPE_CHECKING:
-    from .player import Player
     from .track import Track
-    from .type_variables import ClientT
     from .typings import (
         LavalinkException,
         TrackEndEvent as TrackEndEventPayload,
@@ -18,6 +18,10 @@ if TYPE_CHECKING:
         TrackStuckEvent as TrackStuckEventPayload,
         WebSocketClosedEvent as WebSocketClosedEventPayload,
     )
+
+
+# This needs HKTs in python - as Player is generic on ClientT.
+PlayerT = TypeVar("PlayerT", bound=VoiceProtocol)
 
 __all__ = (
     "EndReason",
@@ -48,7 +52,7 @@ class EndReason(str, Enum):
     """The track was cleaned up."""
 
 
-class WebSocketClosedEvent:
+class WebSocketClosedEvent(Generic[PlayerT]):
     """Represents an event when the connection to Discord is lost.
 
     Attributes
@@ -68,13 +72,11 @@ class WebSocketClosedEvent:
 
     __slots__ = ("code", "reason", "by_discord", "player")
 
-    def __init__(
-        self, *, payload: WebSocketClosedEventPayload, player: Player[ClientT]
-    ):
+    def __init__(self, *, payload: WebSocketClosedEventPayload, player: PlayerT):
         self.code: int = payload["code"]
         self.reason: str = payload["reason"]
         self.by_discord: bool = payload["byRemote"]
-        self.player: Player[ClientT] = player
+        self.player: PlayerT = player
 
     def __repr__(self) -> str:
         return (
@@ -83,7 +85,7 @@ class WebSocketClosedEvent:
         )
 
 
-class TrackStartEvent:
+class TrackStartEvent(Generic[PlayerT]):
     """Represents an event when a track starts playing.
 
     Attributes
@@ -96,15 +98,15 @@ class TrackStartEvent:
 
     __slots__ = ("track", "player")
 
-    def __init__(self, *, track: Track, player: Player[ClientT]):
+    def __init__(self, *, track: Track, player: PlayerT):
         self.track: Track = track
-        self.player: Player[ClientT] = player
+        self.player: PlayerT = player
 
     def __repr__(self) -> str:
         return f"<TrackStartEvent track={self.track!r}>"
 
 
-class TrackEndEvent:
+class TrackEndEvent(Generic[PlayerT]):
     """Represents an event when a track ends.
 
     Attributes
@@ -119,18 +121,16 @@ class TrackEndEvent:
 
     __slots__ = ("track", "reason", "player")
 
-    def __init__(
-        self, *, track: Track, payload: TrackEndEventPayload, player: Player[ClientT]
-    ):
+    def __init__(self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT):
         self.track: Track = track
         self.reason: EndReason = EndReason(payload["reason"])
-        self.player: Player[ClientT] = player
+        self.player: PlayerT = player
 
     def __repr__(self) -> str:
         return f"<TrackEndEvent track={self.track!r} reason={self.reason!r}>"
 
 
-class TrackExceptionEvent:
+class TrackExceptionEvent(Generic[PlayerT]):
     """Represents an event when an exception occurs while playing a track.
 
     Attributes
@@ -150,11 +150,11 @@ class TrackExceptionEvent:
         *,
         track: Track,
         payload: TrackExceptionEventPayload,
-        player: Player[ClientT],
+        player: PlayerT,
     ):
         self.track: Track = track
         self.exception: LavalinkException = payload["exception"]
-        self.player: Player[ClientT] = player
+        self.player: PlayerT = player
 
     def __repr__(self) -> str:
         return (
@@ -162,7 +162,7 @@ class TrackExceptionEvent:
         )
 
 
-class TrackStuckEvent:
+class TrackStuckEvent(Generic[PlayerT]):
     """Represents an event when a track gets stuck.
 
     Attributes
@@ -178,11 +178,11 @@ class TrackStuckEvent:
     __slots__ = ("track", "threshold_ms", "player")
 
     def __init__(
-        self, *, track: Track, payload: TrackStuckEventPayload, player: Player[ClientT]
+        self, *, track: Track, payload: TrackStuckEventPayload, player: PlayerT
     ):
         self.track: Track = track
         self.threshold_ms: int = payload["thresholdMs"]
-        self.player: Player[ClientT] = player
+        self.player: PlayerT = player
 
     def __repr__(self) -> str:
         return (
