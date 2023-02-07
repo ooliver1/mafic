@@ -71,12 +71,6 @@ sphinx-inline-tabs = "^2022.1.2b11"
 # properly searching for typehints in the code, and using `code` elements to display them
 sphinx-autodoc-typehints = "^1.21.8"
 
-[tool.poetry.extras]
-nextcord = [""]
-disnake = ["disnake@^2.0.0"]
-py-cord = ["py-cord@^2.0.0"]
-"discord.py" = ["discord.py@^2.0.0"]
-
 [tool.taskipy.tasks]
 pre-commit = "pre-commit install --install-hooks"
 lint = "pre-commit run --all-files"
