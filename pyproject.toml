@@ -106,7 +106,7 @@ require-subclass = false
 [tool.pyright]
 typeCheckingMode = "strict"
 pythonVersion = "3.8"
-ignore = ["test_bot"]
+ignore = ["test_bot", "examples"]
 
 [build-system]
 requires = ["poetry-core"]
