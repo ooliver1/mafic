@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.0](https://github.com/ooliver1/mafic/compare/v0.3.0...v1.0.0) (2023-02-07)
+
+
+### Features
+
+* make events generic on player ([68868e0](https://github.com/ooliver1/mafic/commit/68868e0b54560f7dfea901de30bfcbdbad69f779))
+
+
+### Bug Fixes
+
+* **node:** stringify bool query params for `replace` ([63b7462](https://github.com/ooliver1/mafic/commit/63b746243c84f9a28cdd126369ffdb91a85581bf))
+
+
+### Miscellaneous Chores
+
+* update readme ([5763b4a](https://github.com/ooliver1/mafic/commit/5763b4a6df7b64ef5bb4e50718c44d90d018c964))
+
 ## [0.3.0](https://github.com/ooliver1/mafic/compare/v0.2.0...v0.3.0) (2023-02-04)
 
 
