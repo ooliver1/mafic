@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/ooliver1/mafic/compare/v1.0.0...v1.0.1) (2023-02-07)
+
+
+### Miscellaneous Chores
+
+* update project status ([2eff4c3](https://github.com/ooliver1/mafic/commit/2eff4c3e2e85b8946679b6ce8cdac39da7620b8b))
+
 ## [1.0.0](https://github.com/ooliver1/mafic/compare/v0.3.0...v1.0.0) (2023-02-07)
 
 
