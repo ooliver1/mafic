@@ -4,28 +4,85 @@
 [![Releases](https://custom-icon-badges.demolab.com/github/v/release/ooliver1/mafic?display_name=tag&include_prereleases&sort=semver&logo=commit&color=c25db8)](https://github.com/ooliver1/mafic/releases "Mafic Releases")
 [![Dependency Version Status](https://custom-icon-badges.demolab.com/librariesio/github/ooliver1/mafic?logo=versions&color=f062a4)](https://github.com/ooliver1/mafic/blob/master/pyproject.toml "Poetry Dependencies")
 [![Lint Workflow Status](https://custom-icon-badges.demolab.com/github/workflow/status/ooliver1/mafic/lint?label=lint&logo=codescan-checkmark&color=ff738c)](https://github.com/ooliver1/mafic/actions/workflows/lint.yml "Lint Workflow")
-[![Lines of Code](https://custom-icon-badges.demolab.com/tokei/lines/github/ooliver1/mafic?logo=quote&color=ff9075)](https://github.com/ooliver1/mafic/tree/master/mafic "Mafic Module Tree")
+[![PyPI - Status](https://img.shields.io/pypi/status/mafic?color=ff9075&label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/mafic "Mafic PyPI Project")
 [![Open Issues](https://custom-icon-badges.demolab.com/github/issues-raw/ooliver1/mafic?logo=issue-opened&color=ffb263)](https://github.com/ooliver1/mafic/issues "Open Issues")
 [![Open PRs](https://custom-icon-badges.demolab.com/github/issues-pr-raw/ooliver1/mafic?logo=git-pull-request&color=ffd55f)](https://github.com/ooliver1/mafic/pulls "Open Pull Requests")
-[![Last Commit](https://custom-icon-badges.demolab.com/github/last-commit/ooliver1/mafic?logo=git-commit&color=f9f871)](https://github.com/ooliver1/mafic/commits/master)
+[![Read the Docs](https://img.shields.io/readthedocs/mafic?logo=read%20the%20docs&logoColor=white&color=f9f871)](https://mafic.readthedocs.io/en/latest/)
 
 A properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord.
 
 ## Installation
 
-Mafic, as it is in alpha, does not have a stable release on PyPI. To install it, you must use the following command:
-
 ```bash
-pip install git+https://github.com/ooliver1/mafic
+pip install mafic
 ```
 
 > **Note**
 > Use `python -m`, `py -m`, `python3 -m` or similar if that is how you install packages.
 > Generally windows uses `py -m pip` and linux uses `python3 -m pip`
 
+## Documentation
+
+[Read the docs](https://mafic.readthedocs.io/en/latest/).
+
+## Features
+
+- Fully customisable node balancing.
+- Multi-node support.
+- Filters.
+- Full API coverage.
+- Properly typehinted for Pyright strict.
+
 ## Usage
 
-> **Warning**
-> Mafic is in public alpha, do not use in production.
+Go to the [Lavalink Repository](https://github.com/freyacodes/lavalink#server-configuration)
+to set up a Lavalink node.
 
-There are no examples as of now. For development purposes, `test_bot` contains the start of a bot using mafic.
+```python
+import os
+
+import mafic
+import nextcord
+from nextcord.ext import commands
+
+
+class MyBot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.pool = mafic.NodePool(self)
+        self.loop.create_task(self.add_nodes())
+
+    async def add_nodes(self):
+        await self.pool.create_node(
+            host="127.0.0.1",
+            port=2333,
+            label="MAIN",
+            password="<password>",
+        )
+
+
+bot = MyBot(intents=nextcord.Intents(guilds=True, voice_states=True))
+
+
+@bot.slash_command(dm_permission=False)
+async def play(inter: nextcord.Interaction, query: str):
+    if not inter.guild.voice_client:
+        player = await inter.user.voice.channel.connect(cls=mafic.Player)
+    else:
+        player = inter.guild.voice_client
+
+    tracks = await player.fetch_tracks(query)
+
+    if not tracks:
+        return await inter.send("No tracks found.")
+
+    track = tracks[0]
+
+    await player.play(track)
+
+    await inter.send(f"Playing {track.title}.")
+
+
+bot.run(...)
+```
