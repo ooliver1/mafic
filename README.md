@@ -3,7 +3,7 @@
 [![MIT License](https://custom-icon-badges.demolab.com/github/license/ooliver1/mafic?color=845ec2&logo=code-square)](https://github.com/ooliver1/mafic/blob/master/LICENSE "License File")
 [![Releases](https://custom-icon-badges.demolab.com/github/v/release/ooliver1/mafic?display_name=tag&include_prereleases&sort=semver&logo=commit&color=c25db8)](https://github.com/ooliver1/mafic/releases "Mafic Releases")
 [![Dependency Version Status](https://custom-icon-badges.demolab.com/librariesio/github/ooliver1/mafic?logo=versions&color=f062a4)](https://github.com/ooliver1/mafic/blob/master/pyproject.toml "Poetry Dependencies")
-[![Lint Workflow Status](https://custom-icon-badges.demolab.com/github/actions/workflow/status/ooliver1/mafic/lint?label=lint&logo=codescan-checkmark&color=ff738c)](https://github.com/ooliver1/mafic/actions/workflows/lint.yml "Lint Workflow")
+[![Lint Workflow Status](https://custom-icon-badges.demolab.com/github/actions/workflow/status/ooliver1/mafic/lint.yml?label=lint&logo=codescan-checkmark&color=ff738c)](https://github.com/ooliver1/mafic/actions/workflows/lint.yml "Lint Workflow")
 [![PyPI - Status](https://img.shields.io/pypi/status/mafic?color=ff9075&label=PyPI&logo=pypi&logoColor=white)](https://pypi.org/project/mafic "Mafic PyPI Project")
 [![Open Issues](https://custom-icon-badges.demolab.com/github/issues-raw/ooliver1/mafic?logo=issue-opened&color=ffb263)](https://github.com/ooliver1/mafic/issues "Open Issues")
 [![Open PRs](https://custom-icon-badges.demolab.com/github/issues-pr-raw/ooliver1/mafic?logo=git-pull-request&color=ffd55f)](https://github.com/ooliver1/mafic/pulls "Open Pull Requests")
