@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/ooliver1/mafic/compare/v1.0.1...v1.0.2) (2023-02-11)
+
+
+### Bug Fixes
+
+* **player:** resolve issue with player.stop being ignored ([eacab59](https://github.com/ooliver1/mafic/commit/eacab5903da15f9f3339be7ee581c4f5353a12b2))
+
 ## [1.0.1](https://github.com/ooliver1/mafic/compare/v1.0.0...v1.0.1) (2023-02-07)
 
 
