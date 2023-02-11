@@ -604,7 +604,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
         This is a convenience method for :meth:`update`.
         """
 
-        await self.update(track=None)
+        await self.update(track=None, replace=True)
 
     async def _update_filters(self, *, fast_apply: bool) -> None:
         """Update the filters on the player.

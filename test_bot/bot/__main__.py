@@ -189,6 +189,19 @@ async def play(inter: Interaction, query: str):
     await inter.send(f"Playing {track}")
 
 
+@bot.slash_command()
+async def stop(inter: Interaction):
+    """Stop playing."""
+
+    if not inter.guild.voice_client:
+        return await inter.send("I am not in a voice channel.")
+
+    player: MyPlayer = inter.guild.voice_client
+
+    await player.stop()
+    await inter.send("Stopped playing.")
+
+
 @bot.listen()
 async def on_track_end(event: TrackEndEvent[MyPlayer]):
     if event.player.queue:
