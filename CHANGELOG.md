@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/ooliver1/mafic/compare/v1.0.3...v1.1.0) (2023-02-12)
+
+
+### Features
+
+* allow players to not be disconnected by library ([283485d](https://github.com/ooliver1/mafic/commit/283485df6fa8722266e5d72001a1e3a108d42195))
+
 ## [1.0.3](https://github.com/ooliver1/mafic/compare/v1.0.2...v1.0.3) (2023-02-12)
 
 
