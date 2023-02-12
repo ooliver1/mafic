@@ -374,6 +374,10 @@ class Player(VoiceProtocol, Generic[ClientT]):
         if not self._connected and not force:
             return
 
+        # Handled by Discord
+        if self.client.is_closed():
+            return
+
         try:
             _log.debug(
                 "Disconnecting from voice channel.",
