@@ -37,10 +37,9 @@ python = "^3.8"
 aiohttp = "^3.6.0"
 orjson = {version = "^3.8.0", optional = true}
 yarl = "^1.0.0"
-nextcord = {version = "^2.0.0", optional = true}
-disnake = {version = "^2.0.0", optional = true}
-py-cord = {version = "^2.0.0", optional = true}
-"discord.py" = {version = "^2.0.0", optional = true}
+
+[tool.poetry.extras]
+speedups = ["orjson"]
 
 [tool.poetry.group.dev.dependencies]
 pyright = "1.1.289"

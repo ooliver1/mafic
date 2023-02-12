@@ -124,3 +124,7 @@ try:
 
 except ImportError:
     from json import dumps, loads
+
+
+if version_info.major != 2:
+    raise RuntimeError(f"Mafic requires version 2 of {library}.")
