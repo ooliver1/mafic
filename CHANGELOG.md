@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/ooliver1/mafic/compare/v1.0.2...v1.0.3) (2023-02-12)
+
+
+### Bug Fixes
+
+* check major version at runtime ([547b4b4](https://github.com/ooliver1/mafic/commit/547b4b47edbfa3b9e9e2dd36512d94a000bb7ecf))
+
 ## [1.0.2](https://github.com/ooliver1/mafic/compare/v1.0.1...v1.0.2) (2023-02-11)
 
 
