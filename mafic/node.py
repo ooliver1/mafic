@@ -588,9 +588,12 @@ class Node(Generic[ClientT]):
             player = self.players.get(guild_id)
 
             if player is None:
-                _log.error(
-                    "Could not find player for guild %s, discarding event.", guild_id
-                )
+                if data["state"]["connected"] is True:
+                    _log.error(
+                        "Could not find player for guild %s, discarding event.",
+                        guild_id,
+                    )
+
                 return
 
             player.update_state(data["state"])
