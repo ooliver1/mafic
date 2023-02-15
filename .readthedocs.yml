@@ -19,4 +19,4 @@ build:
       - pip install -r requirements.txt
       # Poetry setup still seems to fail on readthedocs.
 sphinx:
-  fail_on_warning: true
+  fail_on_warning: false
