@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from os import getenv
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from pkg_resources import DistributionNotFound, get_distribution
+from pkg_resources import get_distribution  # pyright: ignore[reportUnknownVariableType]
+from pkg_resources import DistributionNotFound
 
 from .errors import MultipleCompatibleLibraries, NoCompatibleLibraries
 
@@ -71,11 +72,13 @@ if library == "nextcord":
     )
     from nextcord.abc import Connectable, GuildChannel
     from nextcord.backoff import ExponentialBackoff
-    from nextcord.types.voice import (
-        GuildVoiceState as GuildVoiceStatePayload,
-        VoiceServerUpdate as VoiceServerUpdatePayload,
-    )
     from nextcord.utils import MISSING
+
+    if TYPE_CHECKING:
+        from nextcord.types.voice import (
+            GuildVoiceState as GuildVoiceStatePayload,
+            VoiceServerUpdate as VoiceServerUpdatePayload,
+        )
 elif library == "disnake":
     from disnake import (
         Client,
@@ -87,17 +90,18 @@ elif library == "disnake":
     )
     from disnake.abc import Connectable, GuildChannel
     from disnake.backoff import ExponentialBackoff
-
-    if version_info >= (2, 6):
-        from disnake.types.gateway import (
-            VoiceServerUpdateEvent as VoiceServerUpdatePayload,  # pyright: ignore
-        )
-    else:
-        from disnake.types.voice import (
-            VoiceServerUpdate as VoiceServerUpdatePayload,  # pyright: ignore
-        )
-    from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload
     from disnake.utils import MISSING
+
+    if TYPE_CHECKING:
+        if version_info >= (2, 6):
+            from disnake.types.gateway import (
+                VoiceServerUpdateEvent as VoiceServerUpdatePayload,  # pyright: ignore
+            )
+        else:
+            from disnake.types.voice import (
+                VoiceServerUpdate as VoiceServerUpdatePayload,  # pyright: ignore
+            )
+        from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload
 else:
     from discord import (
         Client,
@@ -109,11 +113,13 @@ else:
     )
     from discord.abc import Connectable, GuildChannel
     from discord.backoff import ExponentialBackoff
-    from discord.types.voice import (
-        GuildVoiceState as GuildVoiceStatePayload,
-        VoiceServerUpdate as VoiceServerUpdatePayload,
-    )
     from discord.utils import MISSING
+
+    if TYPE_CHECKING:
+        from discord.types.voice import (
+            GuildVoiceState as GuildVoiceStatePayload,
+            VoiceServerUpdate as VoiceServerUpdatePayload,
+        )
 
 
 try:
