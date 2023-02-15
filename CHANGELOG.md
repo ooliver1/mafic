@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/ooliver1/mafic/compare/v1.1.0...v1.1.1) (2023-02-15)
+
+
+### Bug Fixes
+
+* **libraries:** use TYPE_CHECKING to resolve import loop in disnake ([#40](https://github.com/ooliver1/mafic/issues/40)) ([b44a16b](https://github.com/ooliver1/mafic/commit/b44a16b2c551ab51bdc3dac3466b1743f0944ed3))
+
 ## [1.1.0](https://github.com/ooliver1/mafic/compare/v1.0.3...v1.1.0) (2023-02-12)
 
 
