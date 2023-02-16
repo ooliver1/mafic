@@ -174,8 +174,6 @@ class NodePool(Generic[ClientT]):
             shard_ids=shard_ids,
         )
 
-        self._nodes[label] = node
-
         # Add to dictionaries, creating a set or extending it if needed.
         if node.regions:
             for region in node.regions:
@@ -194,6 +192,7 @@ class NodePool(Generic[ClientT]):
         _log.info("Created node, connecting it...", extra={"label": label})
         await node.connect()
 
+        self._nodes[label] = node
         return node
 
     @classmethod
@@ -279,4 +278,7 @@ class NodePool(Generic[ClientT]):
             If there are no nodes.
         """
 
-        return choice(list(cls._nodes.values()))
+        if node := choice(list(cls._nodes.values())):
+            return node
+
+        raise NoNodesAvailable
