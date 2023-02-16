@@ -97,6 +97,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
         self._filters: OrderedDict[str, Filter] = OrderedDict()
         # Used to get the last track for TrackEndEvent.
         self._last_track: Track | None = None
+        self._paused: bool = False
 
     def __repr__(self) -> str:
         attrs = (
@@ -154,6 +155,12 @@ class Player(VoiceProtocol, Generic[ClientT]):
         """The current track that is playing."""
 
         return self._current
+
+    @property
+    def paused(self) -> bool:
+        """Whether the player is paused."""
+
+        return self._paused
 
     def update_state(self, state: PlayerUpdateState) -> None:
         """Update the player state.
@@ -511,6 +518,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
             filter=filter,
             no_replace=not replace,
         )
+
+        if pause is not None:
+            self._paused = pause
 
     async def play(
         self,
