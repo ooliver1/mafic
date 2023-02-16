@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/ooliver1/mafic/compare/v1.1.1...v1.2.0) (2023-02-16)
+
+
+### Features
+
+* **player:** expose Player.paused ([#44](https://github.com/ooliver1/mafic/issues/44)) ([6e25025](https://github.com/ooliver1/mafic/commit/6e2502505f96bb98d2b7be2c63425156a211ed5d))
+
+
+### Bug Fixes
+
+* **node:** stop appending /v3 if done already ([#42](https://github.com/ooliver1/mafic/issues/42)) ([00d547c](https://github.com/ooliver1/mafic/commit/00d547c697849a792e264931086630eff95c83b3))
+* **pool:** ignore unavailable nodes ([#45](https://github.com/ooliver1/mafic/issues/45)) ([f2d6b22](https://github.com/ooliver1/mafic/commit/f2d6b2282d3f03c8ac6be076ce35eb5c0d97c1c5))
+
 ## [1.1.1](https://github.com/ooliver1/mafic/compare/v1.1.0...v1.1.1) (2023-02-15)
 
 
