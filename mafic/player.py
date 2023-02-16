@@ -16,7 +16,7 @@ from .__libraries import (
     VoiceChannel,
     VoiceProtocol,
 )
-from .errors import PlayerNotConnected
+from .errors import NoNodesAvailable, PlayerNotConnected
 from .events import *
 from .filter import Filter
 from .playlist import Playlist
@@ -361,6 +361,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         if not isinstance(self.channel, (VoiceChannel, StageChannel)):
             raise TypeError("Voice channel must be a VoiceChannel or StageChannel.")
+
+        if not NodePool.nodes:
+            raise NoNodesAvailable
 
         _log.debug("Connecting to voice channel %s", self.channel.id)
 

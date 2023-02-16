@@ -21,6 +21,10 @@ pip install mafic
 > Use `python -m`, `py -m`, `python3 -m` or similar if that is how you install packages.
 > Generally windows uses `py -m pip` and linux uses `python3 -m pip`
 
+## Discord Server
+
+[Join the Discord Server](https://discord.gg/mMvUABNegY) for support and updates.
+
 ## Documentation
 
 [Read the docs](https://mafic.readthedocs.io/en/latest/).
