@@ -125,7 +125,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
         if self._connected and self._current is not None:
             # Add the time since the last update to the position.
             # If the track total time is less than that, use that.
-            pos = min(self._current.length, pos + int((time() - self._last_update)))
+            pos = min(
+                self._current.length, pos + int(((time() * 1000) - self._last_update))
+            )
 
         return pos
 
