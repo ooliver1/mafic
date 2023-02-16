@@ -391,6 +391,12 @@ class Node(Generic[ClientT]):
             Some features may not work.
         """
 
+        if self._rest_uri.path.endswith("/v3") or self._ws_uri.path.endswith(
+            "/websocket"
+        ):
+            # This process was already ran likely.
+            return
+
         if self.__session is None:
             self.__session = await self._create_session()
 
