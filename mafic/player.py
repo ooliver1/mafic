@@ -33,7 +33,7 @@ if TYPE_CHECKING:
         VoiceServerUpdatePayload,
     )
     from .node import Node
-    from .typings import EventPayload, PlayerUpdateState
+    from .typings import EventPayload, Player as PlayerPayload, PlayerUpdateState
 
 
 _log = getLogger(__name__)
@@ -98,6 +98,30 @@ class Player(VoiceProtocol, Generic[ClientT]):
         # Used to get the last track for TrackEndEvent.
         self._last_track: Track | None = None
         self._paused: bool = False
+
+    def set_state(self, state: PlayerPayload) -> None:
+        """Set the state of the player.
+
+        .. note::
+
+            This is used internally to set the state of the player.
+            You should not need to use this.
+        """
+
+        self._session_id = state["voice"]["sessionId"]
+        self._ping = state["voice"]["ping"]
+        self._current = (
+            Track.from_data_with_info(state["track"]) if state["track"] else None
+        )
+        self._filters = OrderedDict({"RESUME": Filter.from_payload(state["filters"])})
+        self._paused = state["paused"]
+        self._server_state = {
+            "token": state["voice"]["token"],
+            "endpoint": state["voice"]["endpoint"],
+            "guild_id": self._guild_id,
+        }
+        if state["track"]:
+            self._position = state["track"]["info"]["position"]
 
     def __repr__(self) -> str:
         attrs = (
@@ -328,7 +352,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
                 extra={"guild": self._guild_id},
             )
 
-        self._node.players[self._guild_id] = self
+        self._node.add_player(self._guild_id, self)
 
         self._guild_id = int(data["guild_id"])
         self._server_state = data
@@ -426,7 +450,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
         await self.disconnect()
 
         if self._node is not None:
-            self._node.players.pop(self.guild.id, None)
+            self._node.remove_player(self.guild.id)
             await self._node.destroy(guild_id=self.guild.id)
 
     async def fetch_tracks(

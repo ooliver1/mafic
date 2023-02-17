@@ -2,7 +2,6 @@ version: "3"
 
 services:
   bot:
-    env_file: .env
     depends_on:
       - lavalink
     build: .
@@ -10,7 +9,9 @@ services:
       - ./logs:/bot/logs
       - ../mafic:/bot/mafic
     environment:
-      TEST_BALANCING: 1
+      TOKEN: $TOKEN
+      GW_PROXY: ws://127.0.0.1:7878
+      LAVALINK_FILE: lavalink/multi-nodes.json
     network_mode: host
   lavalink:
     build: lavalink
@@ -20,3 +21,10 @@ services:
       replicas: 8
     ports:
       - "6962-6969:6969"
+  gateway-proxy:
+    image: gelbpunkt/gateway-proxy:x86-64
+    volumes:
+      - ./gateway-proxy/noshard.config.json:/config.json
+    environment:
+      TOKEN: $TOKEN
+    network_mode: host

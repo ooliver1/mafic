@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import traceback
-from asyncio import sleep
+from asyncio import gather
 from logging import DEBUG, getLogger
-from os import getenv
+from os import environ, getenv
+from typing import TYPE_CHECKING
 
+import orjson
 from botbase import BotBase
 from nextcord import Intents, Interaction
 from nextcord.abc import Connectable
@@ -22,132 +24,86 @@ from mafic import (
     Region,
     Track,
     TrackEndEvent,
+    VoiceRegion,
 )
+
+if TYPE_CHECKING:
+    from typing import TypedDict
+
+    from typing_extensions import NotRequired
+
+    class LavalinkInfo(TypedDict):
+        host: str
+        port: int
+        password: str
+        regions: NotRequired[list[str]]
+        shard_ids: NotRequired[list[int]]
+        label: str
+
+
+REGION_CLS = [Group, Region, VoiceRegion]
 
 getLogger("mafic").setLevel(DEBUG)
 
 
 class TestBot(BotBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
+        super().__init__(
+            shard_count=2 if getenv("TEST_BALANCING") else None,
+            shard_ids=[0, 1] if getenv("TEST_BALANCING") else None,
+            intents=Intents(guilds=True, voice_states=True),
+            db_enabled=False,
+        )
 
-        self.ready_ran = False
         self.pool = NodePool(self)
 
-    async def on_ready(self):
-        if self.ready_ran:
-            return
+    # Gateway-proxy is used to keep gateway connections alive.
+    # This is added in testing to ensure resuming a connection works, even over restart.
+    async def launch_shard(
+        self, gateway: str, shard_id: int, *, initial: bool = False
+    ) -> None:
+        return await super().launch_shard(
+            environ["GW_PROXY"], shard_id, initial=initial
+        )
 
-        # Excessively test pool balancing.
-        if getenv("TEST_BALANCING"):
-            # Account for docker still starting up.
-            await sleep(5)
+    async def before_identify_hook(
+        self, shard_id: int | None, *, initial: bool = False
+    ) -> None:
+        # gateway-proxy
+        return
+
+    async def add_nodes(self) -> None:
+        with open(environ["LAVALINK_FILE"], "rb") as f:
+            data: list[LavalinkInfo] = orjson.loads(f.read())
+
+        for node in data:
+            regions: list[Group | Region | VoiceRegion] | None = None
+            if "regions" in node:
+                regions = []
+                for region_str in node["regions"]:
+                    for cls in REGION_CLS:
+                        if region_str in cls.__members__.keys():
+                            region = cls[region_str]
+                            break
+                    else:
+                        raise ValueError(f"Invalid region: {region_str}")
+
+                    regions.append(region)
+
             await self.pool.create_node(
-                host="127.0.0.1",
-                port=6962,
-                label="US-noshard",
-                password="haha",
-                regions=[Group.WEST, Region.OCEANIA, Region.EAST_ASIA],
-            )
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6963,
-                label="EU-noshard",
-                password="haha",
-                regions=[
-                    Group.CENTRAL,
-                    Region.WEST_ASIA,
-                    Region.NORTH_ASIA,
-                    Region.SOUTH_ASIA,
-                ],
-            )
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6964,
-                label="US-shard0",
-                password="haha",
-                regions=[Group.WEST, Region.OCEANIA, Region.EAST_ASIA],
-                shard_ids=[0],
-            )
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6965,
-                label="US-shard1",
-                password="haha",
-                regions=[Group.WEST, Region.OCEANIA, Region.EAST_ASIA],
-                shard_ids=[1],
-            )
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6966,
-                label="EU-shard0-1",
-                password="haha",
-                regions=[
-                    Group.CENTRAL,
-                    Region.WEST_ASIA,
-                    Region.NORTH_ASIA,
-                    Region.SOUTH_ASIA,
-                ],
-                shard_ids=[0],
-            )
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6967,
-                label="EU-shard0-2",
-                password="haha",
-                regions=[
-                    Group.CENTRAL,
-                    Region.WEST_ASIA,
-                    Region.NORTH_ASIA,
-                    Region.SOUTH_ASIA,
-                ],
-                shard_ids=[0],
-            )
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6968,
-                label="EU-shard1-1",
-                password="haha",
-                regions=[
-                    Group.CENTRAL,
-                    Region.WEST_ASIA,
-                    Region.NORTH_ASIA,
-                    Region.SOUTH_ASIA,
-                ],
-                shard_ids=[1],
-            )
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6969,
-                label="EU-shard1-2",
-                password="haha",
-                regions=[
-                    Group.CENTRAL,
-                    Region.WEST_ASIA,
-                    Region.NORTH_ASIA,
-                    Region.SOUTH_ASIA,
-                ],
-                shard_ids=[1],
-            )
-        else:
-            await self.pool.create_node(
-                host="127.0.0.1",
-                port=6969,
-                label="MAIN",
-                password="haha",
+                host=node["host"],
+                port=node["port"],
+                password=node["password"],
+                regions=regions,
+                label=node["label"],
+                shard_ids=node.get("shard_ids"),
             )
 
-        self.ready_ran = True
+    async def start(self, token: str, *, reconnect: bool = True) -> None:
+        await gather(self.add_nodes(), super().start(token, reconnect=reconnect))
 
 
-intents = Intents.none()
-intents.guilds = True
-intents.voice_states = True
-
-if getenv("TEST_BALANCING"):
-    bot = TestBot(intents=intents, shard_ids=[0, 1], shard_count=2)
-else:
-    bot = TestBot(intents=intents)
+bot = TestBot()
 
 
 class MyPlayer(Player[TestBot]):
@@ -256,6 +212,13 @@ async def stats(inter: Interaction):
             playing_player_count=stats.playing_player_count,
         )
     )
+
+
+# Test bot, do not have an open close command.
+@bot.slash_command()
+async def close(inter: Interaction):
+    await inter.send("Closing bot.")
+    await bot.close()
 
 
 @bot.slash_command()

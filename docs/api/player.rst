@@ -9,7 +9,7 @@ your Discord library.
 .. attributetable:: Player
 
 .. autoclass:: Player
-   :exclude-members: on_voice_server_update, on_voice_state_update, update_state
+   :exclude-members: on_voice_server_update, on_voice_state_update, update_state, set_state
 
 .. autoclass:: SearchType
    :undoc-members:

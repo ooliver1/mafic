@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import re
 import warnings
-from asyncio import Event, TimeoutError, create_task, sleep, wait_for
+from asyncio import Event, TimeoutError, create_task, gather, sleep, wait_for
 from logging import getLogger
+from traceback import print_exc
 from typing import TYPE_CHECKING, Generic, cast
 
 import aiohttp
@@ -33,7 +34,7 @@ from .warnings import *
 
 if TYPE_CHECKING:
     from asyncio import Task
-    from typing import Any, Sequence
+    from typing import Any, Literal, Sequence
 
     from aiohttp import ClientWebSocketResponse
 
@@ -49,6 +50,7 @@ if TYPE_CHECKING:
         NanoIPRouteDetails,
         OutgoingMessage,
         OutgoingParams,
+        Player as PlayerPayload,
         PluginData,
         RotatingIPRouteDetails,
         RotatingNanoIPRouteDetails,
@@ -147,8 +149,6 @@ class Node(Generic[ClientT]):
 
     Attributes
     ----------
-    players: :class:`dict`\\[:class:`int`, :class:`~mafic.player.Player`]
-        The players that are currently connected to the node.
     regions: :data:`~typing.Optional`\\[:class:`list`\\[:class:`~mafic.region.VoiceRegion`]]
         The regions that the node can be used in.
         This is used to determine when to use this node.
@@ -165,6 +165,7 @@ class Node(Generic[ClientT]):
         "_heartbeat",
         "_host",
         "_label",
+        "_players",
         "_port",
         "_resume_key",
         "_secure",
@@ -176,7 +177,6 @@ class Node(Generic[ClientT]):
         "_ws",
         "_ws_uri",
         "_ws_task",
-        "players",
         "regions",
         "shard_ids",
     )
@@ -221,7 +221,7 @@ class Node(Generic[ClientT]):
         self._available = False
         self._ready = Event()
 
-        self.players: dict[int, Player[ClientT]] = {}
+        self._players: dict[int, Player[ClientT]] = {}
 
         self._stats: NodeStats | None = None
         self._session_id: str | None = None
@@ -356,6 +356,17 @@ class Node(Generic[ClientT]):
 
         return players + cpu + null + deficit + mem
 
+    @property
+    def players(self) -> list[Player[ClientT]]:
+        """The players connected to the node.
+
+        .. versionchanged:: 2.0
+
+            This is now a list.
+        """
+
+        return [*self._players.values()]
+
     def get_player(self, guild_id: int) -> Player[ClientT] | None:
         """Get a player from the node.
 
@@ -370,7 +381,36 @@ class Node(Generic[ClientT]):
             The player for the guild, if found.
         """
 
-        return self.players.get(guild_id)
+        return self._players.get(guild_id)
+
+    def add_player(self, guild_id: int, player: Player[ClientT]) -> None:
+        """Add a player to the node.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to add the player for.
+        player:
+            The player to add.
+        """
+
+        self._players[guild_id] = player
+
+    def remove_player(self, guild_id: int) -> None:
+        """Remove a player from the node.
+
+        .. note::
+
+            This does not disconnect the player from the voice channel.
+            This simply exists to remove the player from the node cache.
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to remove the player for.
+        """
+
+        self._players.pop(guild_id, None)
 
     async def _check_version(self) -> None:
         """Check the version of the node.
@@ -462,8 +502,15 @@ class Node(Generic[ClientT]):
             )
             raise
 
-    async def connect(self) -> None:
+    async def connect(
+        self, *, backoff: ExponentialBackoff[Literal[False]] | None = None
+    ) -> None:
         """Connect to the node.
+
+        Parameters
+        ----------
+        backoff:
+            The backoff to use when reconnecting.
 
         Raises
         ------
@@ -501,10 +548,31 @@ class Node(Generic[ClientT]):
             self._rest_uri,
             extra={"label": self._label},
         )
-        await self._connect_to_websocket(headers=headers, session=session)
+        try:
+            await self._connect_to_websocket(headers=headers, session=session)
+        except Exception:
+            _log.error(
+                "Failed to connect to lavalink at %s",
+                self._rest_uri,
+                extra={"label": self._label},
+            )
+            print_exc()
+
+            backoff = backoff or ExponentialBackoff()
+            delay = backoff.delay()
+            _log.info(
+                "Retrying connection to lavalink at %s in %s seconds...",
+                self._rest_uri,
+                delay,
+                extra={"label": self._label},
+            )
+            await sleep(delay)
+
+            create_task(self.connect(backoff=backoff))
+
         _log.info("Connected to lavalink.", extra={"label": self._label})
 
-        _log.info(
+        _log.debug(
             "Creating task for websocket listener...", extra={"label": self._label}
         )
         self._ws_task = create_task(
@@ -524,6 +592,7 @@ class Node(Generic[ClientT]):
             _log.info(
                 "Node %s is now available.", self._label, extra={"label": self._label}
             )
+            await self.sync_players()
             self._available = True
 
     async def _ws_listener(self) -> None:
@@ -568,7 +637,7 @@ class Node(Generic[ClientT]):
                 )
 
                 await sleep(wait_time)
-                create_task(self.connect())
+                create_task(self.connect(backoff=backoff))
                 return
             else:
                 _log.debug(
@@ -591,7 +660,7 @@ class Node(Generic[ClientT]):
 
         if data["op"] == "playerUpdate":
             guild_id = int(data["guildId"])
-            player = self.players.get(guild_id)
+            player = self.get_player(guild_id)
 
             if player is None:
                 if data["state"]["connected"] is True:
@@ -644,7 +713,7 @@ class Node(Generic[ClientT]):
             The data to handle.
         """
 
-        if not (player := self.players.get(int(data["guildId"]))):
+        if not (player := self.get_player(int(data["guildId"]))):
             _log.error(
                 "Could not find player for guild %s, discarding event.", data["guildId"]
             )
@@ -1027,3 +1096,76 @@ class Node(Generic[ClientT]):
         """Unmark all failed addresses so they can be used again."""
 
         await self.__request("POST", "routeplanner/free/all")
+
+    async def _add_unknown_player(self, player_id: int, state: PlayerPayload) -> None:
+        """Add an unknown player to the node.
+
+        Parameters
+        ----------
+        player_id:
+            The guild ID of the player.
+        state:
+            The state of the player.
+        """
+
+        guild = self.client.get_guild(player_id)
+        if guild is None:
+            guild = await self.client.fetch_guild(player_id)
+
+        voice_state = guild.me.voice
+
+        if voice_state is None:
+            return
+
+        channel = voice_state.channel
+
+        if channel is None:
+            return
+
+        # Circular, pool -> node -> player -> pool
+        from .player import Player
+
+        player = Player(self.client, channel)
+
+        player.set_state(state)
+
+        self._players[player_id] = player
+
+    async def _remove_unknown_player(self, player_id: int) -> None:
+        """Remove an unknown player from the node.
+
+        Parameters
+        ----------
+        player_id:
+            The guild ID of the player.
+        """
+
+        await self._players[player_id].disconnect(force=True)
+        self.remove_player(player_id)
+
+    async def sync_players(self) -> None:
+        """Sync the players with the node.
+
+        .. note::
+
+            This method is called automatically when the client is ready.
+            You should not need to call this method yourself.
+        """
+
+        players: list[PlayerPayload] = await self.__request(
+            "GET", f"sessions/{self._session_id}/players"
+        )
+        actual_players = {int(player["guildId"]): player for player in players}
+        actual_player_ids = set(actual_players.keys())
+        expected_player_ids = set(self._players.keys())
+
+        await gather(
+            *(
+                self._add_unknown_player(player_id, actual_players[player_id])
+                for player_id in actual_player_ids - expected_player_ids
+            ),
+            *(
+                self._remove_unknown_player(player_id)
+                for player_id in expected_player_ids - actual_player_ids
+            ),
+        )

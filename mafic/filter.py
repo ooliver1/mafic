@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any
 
+    from typing_extensions import Self
+
     from .typings import (
         ChannelMix as ChannelMixPayload,
         Distortion as DistortionPayload,
@@ -81,6 +83,12 @@ class Equalizer:
     def payload(self) -> list[EQBandPayload]:
         return [band.payload for band in self.bands]
 
+    @classmethod
+    def from_payload(cls, payload: list[EQBandPayload]) -> Self:
+        return cls(
+            bands=[EQBand(band=band["band"], gain=band["gain"]) for band in payload]
+        )
+
 
 @dataclass(unsafe_hash=True)
 class Karaoke:
@@ -131,6 +139,15 @@ class Karaoke:
 
         return data
 
+    @classmethod
+    def from_payload(cls, payload: KaraokePayload) -> Self:
+        return cls(
+            level=payload.get("level"),
+            mono_level=payload.get("monoLevel"),
+            filter_band=payload.get("filterBand"),
+            filter_width=payload.get("filterWidth"),
+        )
+
 
 @dataclass(unsafe_hash=True)
 class Timescale:
@@ -167,6 +184,14 @@ class Timescale:
             data["rate"] = self.rate
 
         return data
+
+    @classmethod
+    def from_payload(cls, payload: TimescalePayload) -> Self:
+        return cls(
+            speed=payload.get("speed"),
+            pitch=payload.get("pitch"),
+            rate=payload.get("rate"),
+        )
 
 
 @dataclass(unsafe_hash=True)
@@ -205,6 +230,13 @@ class Tremolo:
 
         return data
 
+    @classmethod
+    def from_payload(cls, payload: TremoloPayload) -> Self:
+        return cls(
+            frequency=payload.get("frequency"),
+            depth=payload.get("depth"),
+        )
+
 
 @dataclass(repr=True)
 class Vibrato:
@@ -242,6 +274,13 @@ class Vibrato:
 
         return data
 
+    @classmethod
+    def from_payload(cls, payload: VibratoPayload) -> Self:
+        return cls(
+            frequency=payload.get("frequency"),
+            depth=payload.get("depth"),
+        )
+
 
 @dataclass(unsafe_hash=True)
 class Rotation:
@@ -270,6 +309,12 @@ class Rotation:
             data["rotationHz"] = self.rotation_hz
 
         return data
+
+    @classmethod
+    def from_payload(cls, payload: RotationPayload) -> Self:
+        return cls(
+            rotation_hz=payload.get("rotationHz"),
+        )
 
 
 @dataclass(unsafe_hash=True)
@@ -360,6 +405,19 @@ class Distortion:
 
         return data
 
+    @classmethod
+    def from_payload(cls, payload: DistortionPayload) -> Self:
+        return cls(
+            sin_offset=payload.get("sinOffset"),
+            sin_scale=payload.get("sinScale"),
+            cos_offset=payload.get("cosOffset"),
+            cos_scale=payload.get("cosScale"),
+            tan_offset=payload.get("tanOffset"),
+            tan_scale=payload.get("tanScale"),
+            offset=payload.get("offset"),
+            scale=payload.get("scale"),
+        )
+
 
 @dataclass(unsafe_hash=True)
 class ChannelMix:
@@ -408,6 +466,15 @@ class ChannelMix:
 
         return data
 
+    @classmethod
+    def from_payload(cls, payload: ChannelMixPayload) -> Self:
+        return cls(
+            left_to_left=payload.get("leftToLeft"),
+            left_to_right=payload.get("leftToRight"),
+            right_to_left=payload.get("rightToLeft"),
+            right_to_right=payload.get("rightToRight"),
+        )
+
 
 @dataclass(unsafe_hash=True)
 class LowPass:
@@ -436,6 +503,10 @@ class LowPass:
             data["smoothing"] = self.smoothing
 
         return data
+
+    @classmethod
+    def from_payload(cls, payload: LowPassPayload) -> Self:
+        return cls(smoothing=payload.get("smoothing"))
 
 
 @dataclass(unsafe_hash=True)
@@ -532,6 +603,44 @@ class Filter:
             payload["volume"] = self.volume
 
         return payload
+
+    @classmethod
+    def from_payload(cls, data: Filters) -> Self:
+        """Generate a filter from a raw Lavalink payload."""
+
+        self = cls()
+
+        if "equalizer" in data:
+            self.equalizer = Equalizer.from_payload(data["equalizer"])
+
+        if "karaoke" in data:
+            self.karaoke = Karaoke.from_payload(data["karaoke"])
+
+        if "timescale" in data:
+            self.timescale = Timescale.from_payload(data["timescale"])
+
+        if "tremolo" in data:
+            self.tremolo = Tremolo.from_payload(data["tremolo"])
+
+        if "vibrato" in data:
+            self.vibrato = Vibrato.from_payload(data["vibrato"])
+
+        if "rotation" in data:
+            self.rotation = Rotation.from_payload(data["rotation"])
+
+        if "distortion" in data:
+            self.distortion = Distortion.from_payload(data["distortion"])
+
+        if "channelMix" in data:
+            self.channel_mix = ChannelMix.from_payload(data["channelMix"])
+
+        if "lowPass" in data:
+            self.low_pass = LowPass.from_payload(data["lowPass"])
+
+        if "volume" in data:
+            self.volume = data["volume"]
+
+        return self
 
     def __or__(self, other: Any) -> Filter:
         # A | B uses A and replaces B, like dictionaries.

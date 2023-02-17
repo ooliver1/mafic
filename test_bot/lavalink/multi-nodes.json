@@ -1,0 +1,64 @@
+[
+  {
+    "host": "127.0.0.1",
+    "port": 6962,
+    "label": "US-noshard",
+    "password": "haha",
+    "regions": ["WEST", "OCEANIA", "EAST_ASIA"]
+  },
+  {
+    "host": "127.0.0.1",
+    "port": 6963,
+    "label": "EU-noshard",
+    "password": "haha",
+    "regions": ["CENTRAL", "WEST_ASIA", "NORTH_ASIA", "SOUTH_ASIA"]
+  },
+  {
+    "host": "127.0.0.1",
+    "port": 6964,
+    "label": "US-shard0",
+    "password": "haha",
+    "regions": ["WEST", "OCEANIA", "EAST_ASIA"],
+    "shard_ids": [0]
+  },
+  {
+    "host": "127.0.0.1",
+    "port": 6965,
+    "label": "US-shard1",
+    "password": "haha",
+    "regions": ["WEST", "OCEANIA", "EAST_ASIA"],
+    "shard_ids": [1]
+  },
+  {
+    "host": "127.0.0.1",
+    "port": 6966,
+    "label": "EU-shard0-1",
+    "password": "haha",
+    "regions": ["CENTRAL", "WEST_ASIA", "NORTH_ASIA", "SOUTH_ASIA"],
+    "shard_ids": [0]
+  },
+  {
+    "host": "127.0.0.1",
+    "port": 6967,
+    "label": "EU-shard0-2",
+    "password": "haha",
+    "regions": ["CENTRAL", "WEST_ASIA", "NORTH_ASIA", "SOUTH_ASIA"],
+    "shard_ids": [0]
+  },
+  {
+    "host": "127.0.0.1",
+    "port": 6968,
+    "label": "EU-shard1-1",
+    "password": "haha",
+    "regions": ["CENTRAL", "WEST_ASIA", "NORTH_ASIA", "SOUTH_ASIA"],
+    "shard_ids": [1]
+  },
+  {
+    "host": "127.0.0.1",
+    "port": 6969,
+    "label": "EU-shard1-2",
+    "password": "haha",
+    "regions": ["CENTRAL", "WEST_ASIA", "NORTH_ASIA", "SOUTH_ASIA"],
+    "shard_ids": [1]
+  }
+]
