@@ -11,7 +11,18 @@ from botbase import BotBase
 from nextcord import Intents, Interaction
 from nextcord.abc import Connectable
 
-from mafic import Group, NodePool, Player, Playlist, Region, Track, TrackEndEvent
+from mafic import (
+    EQBand,
+    Equalizer,
+    Filter,
+    Group,
+    NodePool,
+    Player,
+    Playlist,
+    Region,
+    Track,
+    TrackEndEvent,
+)
 
 getLogger("mafic").setLevel(DEBUG)
 
@@ -245,6 +256,33 @@ async def stats(inter: Interaction):
             playing_player_count=stats.playing_player_count,
         )
     )
+
+
+@bot.slash_command()
+async def boost(inter: Interaction):
+    if not inter.guild.voice_client:
+        return await inter.send("I am not in a voice channel.")
+
+    player: MyPlayer = inter.guild.voice_client
+
+    bassboost_equalizer = Equalizer([EQBand(idx, 0.30) for idx in range(0, 15)])
+
+    bassboost_filter = Filter(bassboost_equalizer)
+    await player.add_filter(bassboost_filter, label="boost")
+
+    await inter.send("Boost enabled.")
+
+
+@bot.slash_command()
+async def unboost(inter: Interaction):
+    if not inter.guild.voice_client:
+        return await inter.send("I am not in a voice channel.")
+
+    player: MyPlayer = inter.guild.voice_client
+
+    await player.remove_filter("boost")
+
+    await inter.send("Boost disabled.")
 
 
 bot.run(getenv("TOKEN"))
