@@ -115,7 +115,7 @@ class VoiceStateRequest(TypedDict):
     sessionId: str
 
 
-class VoiceState(TypedDict):
+class VoiceState(VoiceStateRequest):
     connected: bool
     ping: int
 
