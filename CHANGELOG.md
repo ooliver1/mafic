@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0](https://github.com/ooliver1/mafic/compare/v1.2.1...v2.0.0) (2023-02-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* players is now a read-only list property
+
+### Features
+
+* properly resume players even on full restart ([#53](https://github.com/ooliver1/mafic/issues/53)) ([e3d7ba5](https://github.com/ooliver1/mafic/commit/e3d7ba517319011bd9452b9d9dcc74a6b396a8c7))
+
+
+### Bug Fixes
+
+* **node:** ignore no content responses ([#54](https://github.com/ooliver1/mafic/issues/54)) ([8a13874](https://github.com/ooliver1/mafic/commit/8a138743aadbc74a370ee3218b1a81d8cbe8001b))
+* **player:** set blank filter if no filters enabled ([#51](https://github.com/ooliver1/mafic/issues/51)) ([8ccf60e](https://github.com/ooliver1/mafic/commit/8ccf60e2c6b3cd45b4b74d641810152e7c8bb553))
+
 ## [1.2.1](https://github.com/ooliver1/mafic/compare/v1.2.0...v1.2.1) (2023-02-16)
 
 
