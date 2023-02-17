@@ -853,6 +853,9 @@ class Node(Generic[ClientT]):
         ) as resp:
             _log.debug("Received status %s from lavalink.", resp.status)
             if not (200 <= resp.status < 300):
+                if resp.status == 204:
+                    return None
+
                 text = await resp.text()
 
                 if resp.status == 400:
