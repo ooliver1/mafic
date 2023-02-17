@@ -2,17 +2,27 @@ version: "3"
 
 services:
   bot:
-    env_file: .env
+    restart: on-failure:5
     depends_on:
       - lavalink
     build: .
     volumes:
       - ./logs:/bot/logs
       - ../mafic:/bot/mafic
-    network_mode: host
+    environment:
+      TOKEN: $TOKEN
+      GW_PROXY: ws://gateway-proxy:7878
+      LAVALINK_FILE: lavalink/nodes.json
   lavalink:
     build: lavalink
     volumes:
       - ./logs/lava:/opt/Lavalink/logs
     ports:
+      # debugging
       - "6969:6969"
+  gateway-proxy:
+    image: gelbpunkt/gateway-proxy:x86-64
+    volumes:
+      - ./gateway-proxy/noshard.config.json:/config.json
+    environment:
+      TOKEN: $TOKEN
