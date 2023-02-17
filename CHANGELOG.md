@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.1](https://github.com/ooliver1/mafic/compare/v1.2.0...v1.2.1) (2023-02-16)
+
+
+### Bug Fixes
+
+* **player:** fix player position being wildly out ([#49](https://github.com/ooliver1/mafic/issues/49)) ([63124b8](https://github.com/ooliver1/mafic/commit/63124b878f55fe25a30bdfaa9ccbf5b63ecda98b))
+
+
+### Miscellaneous Chores
+
+* release 1.2.1 ([41e9a49](https://github.com/ooliver1/mafic/commit/41e9a4923a49b7a8af0eda30c4c6a2269d28bdf5))
+* release 1.2.1 ([1ac48d4](https://github.com/ooliver1/mafic/commit/1ac48d4d5ae67cec86a525fd246afac3d5d55450))
+
 ## [1.2.0](https://github.com/ooliver1/mafic/compare/v1.1.1...v1.2.0) (2023-02-16)
 
 
