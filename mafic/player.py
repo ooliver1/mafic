@@ -632,10 +632,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
             Whether to seek to the current position after updating the filters.
         """
 
-        if not self._filters:
-            await self.update(filter=Filter())
-
-        await self.update(filter=reduce(or_, self._filters.values()))
+        await self.update(
+            filter=reduce(or_, self._filters.values()) if self._filters else Filter()
+        )
 
         if fast_apply:
             await self.seek(self.position)
