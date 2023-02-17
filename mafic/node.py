@@ -921,10 +921,10 @@ class Node(Generic[ClientT]):
             headers={"Authorization": self.__password},
         ) as resp:
             _log.debug("Received status %s from lavalink.", resp.status)
-            if not (200 <= resp.status < 300):
-                if resp.status == 204:
-                    return None
+            if resp.status == 204:
+                return None
 
+            if not (200 <= resp.status < 300):
                 text = await resp.text()
 
                 if resp.status == 400:
