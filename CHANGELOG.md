@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/ooliver1/mafic/compare/v2.0.0...v2.0.1) (2023-02-17)
+
+
+### Bug Fixes
+
+* **node:** literally blind ([01c34d9](https://github.com/ooliver1/mafic/commit/01c34d9d7615e44d2ce955194d97feb47a0b73b8))
+
 ## [2.0.0](https://github.com/ooliver1/mafic/compare/v1.2.1...v2.0.0) (2023-02-17)
 
 
