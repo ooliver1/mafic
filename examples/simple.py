@@ -5,13 +5,15 @@ from __future__ import annotations
 import traceback
 from logging import DEBUG, getLogger
 from os import getenv
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from nextcord import Intents, Interaction, Member
-from nextcord.abc import Connectable
 from nextcord.ext import commands
 
 from mafic import NodePool, Player, Playlist, Track, TrackEndEvent
+
+if TYPE_CHECKING:
+    from nextcord.abc import Connectable
 
 getLogger("mafic").setLevel(DEBUG)
 
@@ -51,7 +53,6 @@ class MyPlayer(Player[Bot]):
 @bot.slash_command(dm_permission=False)
 async def join(inter: Interaction[Bot]):
     """Join your voice channel."""
-
     assert isinstance(inter.user, Member)
 
     if not inter.user.voice or not inter.user.voice.channel:
@@ -71,7 +72,6 @@ async def play(inter: Interaction[Bot], query: str):
     query:
         The song to search or play.
     """
-
     assert inter.guild is not None
 
     if not inter.guild.voice_client:

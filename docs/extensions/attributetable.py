@@ -8,16 +8,18 @@ import importlib
 import inspect
 import re
 from collections import OrderedDict
-from typing import Callable, NamedTuple, Optional
+from typing import TYPE_CHECKING, NamedTuple
 
 from docutils import nodes
-from docutils.nodes import document
 from sphinx import addnodes
-from sphinx.application import Sphinx
-from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
-from sphinx.writers.html5 import HTML5Translator
+
+if TYPE_CHECKING:
+    from docutils.nodes import document
+    from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
+    from sphinx.writers.html5 import HTML5Translator
 
 
 class attributetable(nodes.General, nodes.Element):
@@ -44,20 +46,26 @@ class attributetable_item(nodes.Part, nodes.Element):
     pass
 
 
-def visit_attributetable_node(self: HTML5Translator, node: attributetable):
+def visit_attributetable_node(self: HTML5Translator, node: attributetable) -> None:
     class_ = node["python-class"]
     self.body.append(f'<div class="py-attribute-table" data-move-to-id="{class_}">')
 
 
-def visit_attributetablecolumn_node(self: HTML5Translator, node: attributetablecolumn):
+def visit_attributetablecolumn_node(
+    self: HTML5Translator, node: attributetablecolumn
+) -> None:
     self.body.append(self.starttag(node, "div", CLASS="py-attribute-table-column"))
 
 
-def visit_attributetabletitle_node(self: HTML5Translator, node: attributetabletitle):
+def visit_attributetabletitle_node(
+    self: HTML5Translator, node: attributetabletitle
+) -> None:
     self.body.append(self.starttag(node, "span"))
 
 
-def visit_attributetablebadge_node(self: HTML5Translator, node: attributetablebadge):
+def visit_attributetablebadge_node(
+    self: HTML5Translator, node: attributetablebadge
+) -> None:
     attributes = {
         "class": "py-attribute-table-badge",
         "title": node["badge-type"],
@@ -65,27 +73,35 @@ def visit_attributetablebadge_node(self: HTML5Translator, node: attributetableba
     self.body.append(self.starttag(node, "span", **attributes))
 
 
-def visit_attributetable_item_node(self: HTML5Translator, node: attributetable):
+def visit_attributetable_item_node(self: HTML5Translator, node: attributetable) -> None:
     self.body.append(self.starttag(node, "li", CLASS="py-attribute-table-entry"))
 
 
-def depart_attributetable_node(self: HTML5Translator, node: attributetable):
+def depart_attributetable_node(self: HTML5Translator, _node: attributetable) -> None:
     self.body.append("</div>")
 
 
-def depart_attributetablecolumn_node(self: HTML5Translator, node: attributetablecolumn):
+def depart_attributetablecolumn_node(
+    self: HTML5Translator, _node: attributetablecolumn
+) -> None:
     self.body.append("</div>")
 
 
-def depart_attributetabletitle_node(self: HTML5Translator, node: attributetabletitle):
+def depart_attributetabletitle_node(
+    self: HTML5Translator, _node: attributetabletitle
+) -> None:
     self.body.append("</span>")
 
 
-def depart_attributetablebadge_node(self: HTML5Translator, node: attributetablebadge):
+def depart_attributetablebadge_node(
+    self: HTML5Translator, _node: attributetablebadge
+) -> None:
     self.body.append("</span>")
 
 
-def depart_attributetable_item_node(self: HTML5Translator, node: attributetable_item):
+def depart_attributetable_item_node(
+    self: HTML5Translator, _node: attributetable_item
+) -> None:
     self.body.append("</li>")
 
 
@@ -99,10 +115,11 @@ class PyAttributeTable(SphinxDirective):
     final_argument_whitespace = False
     option_spec = {}
 
-    def parse_name(self, content: str):
+    def parse_name(self, content: str) -> tuple[str, str]:
         match = _name_parser_regex.match(content)
         if match is None:
-            raise RuntimeError("could not find module name somehow")
+            msg = "could not find module name somehow"
+            raise RuntimeError(msg)
 
         path, name = match.groups()
         if path:
@@ -112,13 +129,12 @@ class PyAttributeTable(SphinxDirective):
             if not modulename:
                 modulename = self.env.ref_context.get("py:module")
         if modulename is None:
-            raise RuntimeError(
-                "modulename somehow None for %s in %s." % (content, self.env.docname)
-            )
+            msg = f"modulename somehow None for {content} in {self.env.docname}."
+            raise RuntimeError(msg)
 
         return modulename, name
 
-    def run(self):
+    def run(self) -> list[attributetableplaceholder]:
         """If you're curious on the HTML this is meant to generate:
 
         <div class="py-attribute-table">
@@ -155,7 +171,7 @@ class PyAttributeTable(SphinxDirective):
         return [node]
 
 
-def build_lookup_table(env: BuildEnvironment):
+def build_lookup_table(env: BuildEnvironment) -> dict[str, list[str]]:
     # Given an environment, load up a lookup table of
     # full-class-name: objects
     result: dict[str, list[str]] = {}
@@ -184,10 +200,10 @@ def build_lookup_table(env: BuildEnvironment):
 class TableElement(NamedTuple):
     fullname: str
     label: str
-    badge: Optional[attributetablebadge]
+    badge: attributetablebadge | None
 
 
-def process_attributetable(app: Sphinx, doctree: document, fromdocname: str):
+def process_attributetable(app: Sphinx, doctree: document, _fromdocname: str) -> None:
     env = app.builder.env
 
     lookup = build_lookup_table(env)
@@ -197,9 +213,9 @@ def process_attributetable(app: Sphinx, doctree: document, fromdocname: str):
             node["python-class"],
             node["python-full-name"],
         )
-        assert isinstance(modulename, str)
-        assert isinstance(classname, str)
-        assert isinstance(fullname, str)
+        assert isinstance(modulename, str)  # noqa: S101
+        assert isinstance(classname, str)  # noqa: S101
+        assert isinstance(fullname, str)  # noqa: S101
 
         groups = get_class_results(lookup, modulename, classname, fullname)
         table = attributetable("")
@@ -207,8 +223,9 @@ def process_attributetable(app: Sphinx, doctree: document, fromdocname: str):
             if not subitems:
                 continue
 
-            key: Callable[[TableElement], str] = lambda c: c.label
-            table.append(class_results_to_node(label, sorted(subitems, key=key)))
+            table.append(
+                class_results_to_node(label, sorted(subitems, key=lambda c: c.label))
+            )
 
         table["python-class"] = fullname
 
@@ -220,7 +237,7 @@ def process_attributetable(app: Sphinx, doctree: document, fromdocname: str):
 
 def get_class_results(
     lookup: dict[str, list[str]], modulename: str, name: str, fullname: str
-):
+) -> OrderedDict[str, list[TableElement]]:
     module = importlib.import_module(modulename)
     cls = getattr(module, name)
 
@@ -275,17 +292,19 @@ def get_class_results(
     return groups
 
 
-def class_results_to_node(key: str, elements: list[TableElement]):
+def class_results_to_node(
+    key: str, elements: list[TableElement]
+) -> attributetablecolumn:
     title = attributetabletitle(key, key)
     ul = nodes.bullet_list("")
     for element in elements:
         ref = nodes.reference(
             "",
             "",
+            *[nodes.Text(element.label)],
             internal=True,
             refuri="#" + element.fullname,
             anchorname="",
-            *[nodes.Text(element.label)],
         )
         para = addnodes.compact_paragraph("", "", ref)
         if element.badge is not None:
@@ -296,7 +315,7 @@ def class_results_to_node(key: str, elements: list[TableElement]):
     return attributetablecolumn("", title, ul)
 
 
-def setup(app: Sphinx):
+def setup(app: Sphinx) -> None:
     app.add_directive("attributetable", PyAttributeTable)
     app.add_node(
         attributetable, html=(visit_attributetable_node, depart_attributetable_node)

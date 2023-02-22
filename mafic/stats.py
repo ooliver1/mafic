@@ -1,3 +1,4 @@
+"""A module containing classes to represent node statistics."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -84,7 +85,7 @@ class FrameStats:
 
 
 class NodeStats:
-    """Represents stats for a node.
+    r"""Represents stats for a node.
 
     Attributes
     ----------
@@ -98,7 +99,7 @@ class NodeStats:
         The memory stats of the node.
     cpu: :class:`CPUStats`
         The CPU stats of the node.
-    frame_stats: :data:`~typing.Optional`\\[:class:`FrameStats`]
+    frame_stats: :data:`~typing.Optional`\[:class:`FrameStats`]
         The frame stats of the node.
     """
 

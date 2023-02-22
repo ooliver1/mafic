@@ -1,14 +1,15 @@
 # SPDX-License-Identifier: MIT
+# ruff: noqa: UP013
+# `class` in `TypedDict` does not work as that is a reserved keyword
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
 
-from .common import PlaylistInfo, TrackWithInfo
-
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
+    from .common import PlaylistInfo, TrackWithInfo
     from .misc import LavalinkException
 
 

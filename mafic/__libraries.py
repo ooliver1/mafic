@@ -5,8 +5,10 @@ from __future__ import annotations
 from os import getenv
 from typing import TYPE_CHECKING, Any
 
-from pkg_resources import get_distribution  # pyright: ignore[reportUnknownVariableType]
-from pkg_resources import DistributionNotFound
+from pkg_resources import (
+    DistributionNotFound,
+    get_distribution,  # pyright: ignore[reportUnknownVariableType]
+)
 
 from .errors import MultipleCompatibleLibraries, NoCompatibleLibraries
 
@@ -40,7 +42,7 @@ for library in libraries:
         found.append(library)
 
 
-if not getenv("MAFIC_IGNORE_LIBRARY_CHECK", False):
+if not getenv("MAFIC_IGNORE_LIBRARY_CHECK", default=False):
     if len(found) == 0:
         raise NoCompatibleLibraries
     elif len(found) > 1:
@@ -117,15 +119,15 @@ else:
 
     if TYPE_CHECKING:
         from discord.types.voice import (
-            GuildVoiceState as GuildVoiceStatePayload,
-            VoiceServerUpdate as VoiceServerUpdatePayload,
+            GuildVoiceState as GuildVoiceStatePayload,  # noqa: TCH004
+            VoiceServerUpdate as VoiceServerUpdatePayload,  # noqa: TCH004
         )
 
 
 try:
     from orjson import dumps as _dumps, loads
 
-    def dumps(obj: Any) -> str:
+    def dumps(obj: Any) -> str:  # noqa: ANN401
         return _dumps(obj).decode()
 
 except ImportError:
@@ -133,4 +135,5 @@ except ImportError:
 
 
 if version_info.major != 2:
-    raise RuntimeError(f"Mafic requires version 2 of {library}.")
+    msg = f"Mafic requires version 2 of {library}."
+    raise RuntimeError(msg)

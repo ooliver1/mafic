@@ -1,3 +1,4 @@
+"""Objects for dispatched events via the client."""
 # SPDX-License-Identifier: MIT
 # pyright: reportImportCycles=false
 # Player import.
@@ -61,7 +62,7 @@ class WebSocketClosedEvent(Generic[PlayerT]):
         The close code.
         Find what this can be in the Discord `docs`_.
 
-        .. _docs: https://discord.com/developers/docs/topics/opcodes-and-status-codes#close-event-codes.
+        .. _docs: https://discord.dev/topics/opcodes-and-status-codes#close-event-codes.
     reason: :class:`str`
         The close reason.
     by_discord: :class:`bool`
@@ -72,13 +73,16 @@ class WebSocketClosedEvent(Generic[PlayerT]):
 
     __slots__ = ("code", "reason", "by_discord", "player")
 
-    def __init__(self, *, payload: WebSocketClosedEventPayload, player: PlayerT):
+    def __init__(
+        self, *, payload: WebSocketClosedEventPayload, player: PlayerT
+    ) -> None:
         self.code: int = payload["code"]
         self.reason: str = payload["reason"]
         self.by_discord: bool = payload["byRemote"]
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return (
             f"<WebSocketClosedEvent code={self.code} reason={self.reason!r} "
             f"by_discord={self.by_discord}>"
@@ -98,11 +102,12 @@ class TrackStartEvent(Generic[PlayerT]):
 
     __slots__ = ("track", "player")
 
-    def __init__(self, *, track: Track, player: PlayerT):
+    def __init__(self, *, track: Track, player: PlayerT) -> None:
         self.track: Track = track
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return f"<TrackStartEvent track={self.track!r}>"
 
 
@@ -121,12 +126,15 @@ class TrackEndEvent(Generic[PlayerT]):
 
     __slots__ = ("track", "reason", "player")
 
-    def __init__(self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT):
+    def __init__(
+        self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT
+    ) -> None:
         self.track: Track = track
         self.reason: EndReason = EndReason(payload["reason"])
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return f"<TrackEndEvent track={self.track!r} reason={self.reason!r}>"
 
 
@@ -151,12 +159,13 @@ class TrackExceptionEvent(Generic[PlayerT]):
         track: Track,
         payload: TrackExceptionEventPayload,
         player: PlayerT,
-    ):
+    ) -> None:
         self.track: Track = track
         self.exception: LavalinkException = payload["exception"]
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return (
             f"<TrackExceptionEvent track={self.track!r} exception={self.exception!r}>"
         )
@@ -179,12 +188,13 @@ class TrackStuckEvent(Generic[PlayerT]):
 
     def __init__(
         self, *, track: Track, payload: TrackStuckEventPayload, player: PlayerT
-    ):
+    ) -> None:
         self.track: Track = track
         self.threshold_ms: int = payload["thresholdMs"]
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return (
             f"<TrackStuckEvent track={self.track!r} threshold_ms={self.threshold_ms}>"
         )

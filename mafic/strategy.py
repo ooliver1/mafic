@@ -1,12 +1,14 @@
+"""The strategy system for selecting a :class:`Node` from a :class:`NodePool`."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from enum import Enum, auto
 from logging import getLogger
 from random import choice
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 from .node import Node
 from .type_variables import ClientT
@@ -43,7 +45,7 @@ class Strategy(Enum):
 def shard_strategy(
     nodes: list[Node[ClientT]], guild_id: int, shard_count: int | None, _: str | None
 ) -> list[Node[ClientT]]:
-    """Selects a node based on the shard ID of the guild.
+    """Get a node based on the shard ID of the guild.
 
     Parameters
     ----------
@@ -56,7 +58,6 @@ def shard_strategy(
     _:
         Unused parameter.
     """
-
     if shard_count is None:
         shard_count = 1
 
@@ -73,7 +74,7 @@ _REGION_REGEX = re.compile(r"(?:vip-)?(?P<region>[a-z-]{1,15})\d{1,5}\.discord\.
 def location_strategy(
     nodes: list[Node[ClientT]], _: int, __: int | None, endpoint: str | None
 ) -> list[Node[ClientT]]:
-    """Selects a node based on the region the guild is in.
+    """Get a node based on the region the guild is in.
 
     Parameters
     ----------
@@ -86,7 +87,6 @@ def location_strategy(
     endpoint:
         The endpoint of the guild to select a node for.
     """
-
     if endpoint is None:
         return nodes
 
@@ -124,7 +124,7 @@ def location_strategy(
 def usage_strategy(
     nodes: list[Node[ClientT]], _: int, __: int | None, ___: str | None
 ) -> list[Node[ClientT]]:
-    """Selects a node based on the least used node.
+    """Get a node based on the least used node.
 
     This is calculated using :attr:`Node.weight`.
 
@@ -139,7 +139,6 @@ def usage_strategy(
     ___:
         Unused parameter.
     """
-
     # max() would be nice, however if all nodes have no stats, it returns the first.
 
     lowest = None
@@ -159,7 +158,7 @@ def usage_strategy(
 def random_strategy(
     nodes: list[Node[ClientT]], _: int, __: int | None, ___: str | None
 ) -> list[Node[ClientT]]:
-    """Selects a random node.
+    """Get a random node.
 
     Parameters
     ----------
@@ -172,7 +171,6 @@ def random_strategy(
     ___:
         Unused parameter.
     """
-
     return [choice(nodes)]
 
 
@@ -184,7 +182,7 @@ def call_strategy(
     shard_count: int | None,
     endpoint: str | None,
 ) -> list[Node[ClientT]]:
-    """Calls a strategy.
+    """Call a strategy's callback and get the result.
 
     Parameters
     ----------
@@ -199,7 +197,6 @@ def call_strategy(
     endpoint:
         The endpoint of the voice client to select a node for.
     """
-
     if strategy is Strategy.LOCATION:
         return location_strategy(nodes, guild_id, shard_count, endpoint)
     elif strategy is Strategy.RANDOM:
@@ -209,4 +206,5 @@ def call_strategy(
     elif strategy is Strategy.USAGE:
         return usage_strategy(nodes, guild_id, shard_count, endpoint)
     else:
-        raise ValueError(f"Unknown strategy {strategy}")
+        msg = f"Unknown strategy {strategy}"
+        raise ValueError(msg)

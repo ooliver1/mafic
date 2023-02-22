@@ -1,9 +1,10 @@
+"""A module to decode a track id into a Track object."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 from base64 import b64decode
-from typing import Iterator
+from collections.abc import Iterator
 
 from ..track import Track
 
@@ -24,7 +25,7 @@ class _TrackDataIterator(Iterator[int]):
     _TRACK_INFO_VERSIONED = 1
     _FLAG_MASK = 0xC0000000
 
-    def __init__(self, data: bytes):
+    def __init__(self, data: bytes) -> None:
         self.__iterable = iter(data)
 
         # https://github.com/sedmelluq/lavaplayer/blob/97a8efecfe3cb79da4d7d0422de0179e18c30947/main/src/main/java/com/sedmelluq/discord/lavaplayer/tools/io/MessageInput.java#L37
@@ -88,10 +89,11 @@ class _TrackDataIterator(Iterator[int]):
             return None
 
         if (byte := next(self)) != 0:
-            raise ValueError(
+            msg = (
                 "Attempted to traverse a track id "
                 f"and came across an unexpected character: {byte}."
             )
+            raise ValueError(msg)
 
         return self.read_str()
 
@@ -115,9 +117,8 @@ def decode_track(track_id: str) -> Track:
     Track:
         The decoded track.
     """
-
     raw = b64decode(track_id)
-    print(raw)
+    # print(raw)
     iterator = _TrackDataIterator(raw)
 
     # https://github.com/sedmelluq/lavaplayer/blob/97a8efecfe3cb79da4d7d0422de0179e18c30947/main/src/main/java/com/sedmelluq/discord/lavaplayer/player/DefaultAudioPlayerManager.java#L268

@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 import orjson
 from botbase import BotBase
 from nextcord import Intents, Interaction
-from nextcord.abc import Connectable
 
 from mafic import (
     EQBand,
@@ -30,6 +29,7 @@ from mafic import (
 if TYPE_CHECKING:
     from typing import TypedDict
 
+    from nextcord.abc import Connectable
     from typing_extensions import NotRequired
 
     class LavalinkInfo(TypedDict):
@@ -47,7 +47,7 @@ getLogger("mafic").setLevel(DEBUG)
 
 
 class TestBot(BotBase):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             shard_count=2 if getenv("TEST_BALANCING") else None,
             shard_ids=[0, 1] if getenv("TEST_BALANCING") else None,
@@ -60,14 +60,14 @@ class TestBot(BotBase):
     # Gateway-proxy is used to keep gateway connections alive.
     # This is added in testing to ensure resuming a connection works, even over restart.
     async def launch_shard(
-        self, gateway: str, shard_id: int, *, initial: bool = False
+        self, _gateway: str, shard_id: int, *, initial: bool = False
     ) -> None:
         return await super().launch_shard(
             environ["GW_PROXY"], shard_id, initial=initial
         )
 
     async def before_identify_hook(
-        self, shard_id: int | None, *, initial: bool = False
+        self, _shard_id: int | None, *, initial: bool = False  # noqa: ARG002
     ) -> None:
         # gateway-proxy
         return
@@ -82,11 +82,12 @@ class TestBot(BotBase):
                 regions = []
                 for region_str in node["regions"]:
                     for cls in REGION_CLS:
-                        if region_str in cls.__members__.keys():
+                        if region_str in cls.__members__:
                             region = cls[region_str]
                             break
                     else:
-                        raise ValueError(f"Invalid region: {region_str}")
+                        msg = f"Invalid region: {region_str}"
+                        raise ValueError(msg)
 
                     regions.append(region)
 
@@ -117,7 +118,6 @@ class MyPlayer(Player[TestBot]):
 @bot.slash_command()
 async def join(inter: Interaction):
     """Join your voice channel."""
-
     if not inter.user.voice:
         return await inter.response.send_message("You are not in a voice channel.")
 
@@ -133,7 +133,6 @@ async def play(inter: Interaction, query: str):
     query:
         The song to search or play.
     """
-
     if not inter.guild.voice_client:
         await join(inter)
 
@@ -154,12 +153,12 @@ async def play(inter: Interaction, query: str):
     await player.play(track)
 
     await inter.send(f"Playing {track}")
+    return None
 
 
 @bot.slash_command()
 async def stop(inter: Interaction):
     """Stop playing."""
-
     if not inter.guild.voice_client:
         return await inter.send("I am not in a voice channel.")
 
@@ -167,6 +166,7 @@ async def stop(inter: Interaction):
 
     await player.stop()
     await inter.send("Stopped playing.")
+    return None
 
 
 @bot.listen()
@@ -212,6 +212,7 @@ async def stats(inter: Interaction):
             playing_player_count=stats.playing_player_count,
         )
     )
+    return None
 
 
 # Test bot, do not have an open close command.
@@ -234,6 +235,7 @@ async def boost(inter: Interaction):
     await player.add_filter(bassboost_filter, label="boost")
 
     await inter.send("Boost enabled.")
+    return None
 
 
 @bot.slash_command()
@@ -246,6 +248,7 @@ async def unboost(inter: Interaction):
     await player.remove_filter("boost")
 
     await inter.send("Boost disabled.")
+    return None
 
 
 bot.run(getenv("TOKEN"))

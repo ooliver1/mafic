@@ -1,3 +1,4 @@
+"""Errors raised by Mafic."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -62,14 +63,16 @@ class PlayerException(MaficException):
 
 
 class TrackLoadException(PlayerException):
-    """This is raised when a track could not be loaded.
+    r"""An error raised when a track could not be loaded.
 
     Attributes
     ----------
     message: :class:`str`
         The message returned by the node.
-    severity: :data:`~typing.Literal`\\[``"COMMON"``, ``"SUSPICIOUS"``, ``"FATAL"``]
+    severity: :data:`~typing.Literal`\[``"COMMON"``, ``"SUSPICIOUS"``, ``"FATAL"``]
         The severity of the error.
+    cause: :class:`str`
+        The cause of the error.
     """
 
     def __init__(
@@ -79,6 +82,7 @@ class TrackLoadException(PlayerException):
 
         self.message: str = message
         self.severity: ExceptionSeverity = severity
+        self.cause: str = cause
 
     @classmethod
     def from_data(cls, data: LavalinkException) -> Self:
@@ -94,28 +98,27 @@ class TrackLoadException(PlayerException):
         TrackLoadException
             The constructed exception.
         """
-
         return cls(
             message=data["message"], severity=data["severity"], cause=data["cause"]
         )
 
 
 class PlayerNotConnected(PlayerException):
-    """This is raised when a player is not connected to a voice channel."""
+    """An error raised when a player is not connected to a voice channel."""
 
     def __init__(self) -> None:
         super().__init__("The player is not connected to a voice channel.")
 
 
 class NodeAlreadyConnected(MaficException):
-    """This is raised when a node is already connected to Mafic."""
+    """An error raised when a node is already connected to Mafic."""
 
     def __init__(self) -> None:
         super().__init__("The node is already connected to Mafic.")
 
 
 class NoNodesAvailable(MaficException):
-    """This is raised when no nodes are available to handle a player."""
+    """An error raised when no nodes are available to handle a player."""
 
     def __init__(self) -> None:
         super().__init__("No nodes are available to handle this player.")
@@ -132,21 +135,21 @@ class HTTPException(MaficException):
 
 
 class HTTPBadRequest(HTTPException):
-    """This is raised when a bad request is made to the Lavalink REST API."""
+    """An error raised when a bad request is made to the Lavalink REST API."""
 
     def __init__(self, message: str) -> None:
         super().__init__(400, message)
 
 
 class HTTPUnauthorized(HTTPException):
-    """This is raised when an unauthorized request is made to the Lavalink REST API."""
+    """An error raised when an unauthorized request is made to the Lavalink REST API."""
 
     def __init__(self, message: str) -> None:
         super().__init__(401, message)
 
 
 class HTTPNotFound(HTTPException):
-    """This is raised when a request is made to a non-existent endpoint."""
+    """An error raised when a request is made to a non-existent endpoint."""
 
     def __init__(self, message: str) -> None:
         super().__init__(404, message)

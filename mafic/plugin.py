@@ -1,3 +1,4 @@
+"""The Lavalink plugin system."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations

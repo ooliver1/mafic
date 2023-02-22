@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
-from sphinx.config import Config
+if TYPE_CHECKING:
+    from sphinx.config import Config
 
 os.environ["MAFIC_IGNORE_LIBRARY_CHECK"] = "1"
 
@@ -89,7 +90,7 @@ aliases = {
 }
 
 
-def typehints_formatter(annotation: Any, _: Config) -> str | None:
+def typehints_formatter(annotation: Any, _: Config) -> str | None:  # noqa: ANN401
     return aliases.get(annotation, None)
 
 

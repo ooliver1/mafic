@@ -1,3 +1,4 @@
+"""The module containing :class:`Track`."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -13,7 +14,7 @@ __all__ = ("Track",)
 
 
 class Track:
-    """Represents a track.
+    r"""Represents a track.
 
     Parameters
     ----------
@@ -46,7 +47,7 @@ class Track:
         The author of the track.
     identifier: :class:`str`
         The identifier of the track. This is the ID of the track on the source.
-    uri: :data:`~typing.Optional`\\[:class:`str`]
+    uri: :data:`~typing.Optional`\[:class:`str`]
         The URI of the track.
     source: :class:`str`
         The source of the track.
@@ -119,7 +120,6 @@ class Track:
         :class:`Track`
             The track.
         """
-
         return cls(
             track_id=track,
             title=info["title"],
@@ -147,10 +147,10 @@ class Track:
         :class:`Track`
             The track.
         """
-
         return cls.from_data(track=data["encoded"], info=data["info"])
 
     def __repr__(self) -> str:
+        """Return the string representation of this track."""
         attrs = (
             ("id", self.id),
             ("title", self.title),

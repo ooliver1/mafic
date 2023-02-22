@@ -1,8 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""
-Mafic
-=====
-A properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord.
+"""A properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord.
 
 :copyright: (c) 2022-present ooliver1
 :license: MIT, see LICENSE for more details.

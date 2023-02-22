@@ -1,3 +1,4 @@
+"""Mafic CLI tools."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -22,9 +23,10 @@ VERSION_OUTPUT = """
 
 
 def show_version() -> None:
+    """Show version information."""
     version = mafic.__version__
     uname = platform.uname()
-    print(
+    print(  # noqa: T201
         VERSION_OUTPUT.format(
             py=sys.version_info,
             mafic=version,
@@ -37,11 +39,13 @@ def show_version() -> None:
 
 
 def core(_: ArgumentParser, args: Namespace) -> None:
+    """Core function for mafic CLI tools."""
     if args.version:
         show_version()
 
 
 def parse_args() -> tuple[ArgumentParser, Namespace]:
+    """Parse arguments from the CLI."""
     parser = ArgumentParser(prog="mafic", description="CLI tools for mafic")
     parser.add_argument(
         "-v",
@@ -53,6 +57,7 @@ def parse_args() -> tuple[ArgumentParser, Namespace]:
 
 
 def main() -> None:
+    """Run the parser for arguments then execute."""
     parser, args = parse_args()
     core(parser, args)
 
