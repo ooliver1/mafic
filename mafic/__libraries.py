@@ -5,8 +5,10 @@ from __future__ import annotations
 from os import getenv
 from typing import TYPE_CHECKING, Any
 
-from pkg_resources import get_distribution  # pyright: ignore[reportUnknownVariableType]
-from pkg_resources import DistributionNotFound
+from pkg_resources import (
+    DistributionNotFound,
+    get_distribution,  # pyright: ignore[reportUnknownVariableType]
+)
 
 from .errors import MultipleCompatibleLibraries, NoCompatibleLibraries
 

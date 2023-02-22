@@ -10,12 +10,6 @@ repos:
       - id: black
         name: Running black in all files.
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        name: Running isort in all files.
-
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.251
     hooks:

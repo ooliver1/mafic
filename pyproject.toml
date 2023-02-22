@@ -44,7 +44,6 @@ speedups = ["orjson"]
 [tool.poetry.group.dev.dependencies]
 pyright = "1.1.289"
 black = "^22.8.0"
-isort = "^5.10.1"
 taskipy = "^1.10.3"
 pre-commit = "^2.20.0"
 python-dotenv = "^0.21.0"
@@ -73,7 +72,6 @@ sphinx-autodoc-typehints = "^1.21.8"
 pre-commit = "pre-commit install --install-hooks"
 lint = "pre-commit run --all-files"
 black = "task lint black"
-isort = "task lint isort"
 ruff = "task lint ruff"
 slotscheck = "task lint slotscheck"
 pyright = "dotenv -f task.env run -- pyright"
@@ -83,12 +81,8 @@ docs = "cd docs && sphinx-autobuild . _build/html --ignore _build --watch ../maf
 line-length = 88
 target-version = ["py38", "py39", "py310"]
 
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 88
-combine_as_imports = true
-filter_files = true
+[tool.ruff.isort]
+combine-as-imports = true
 
 [tool.slotscheck]
 strict-imports = true
@@ -101,7 +95,7 @@ pythonVersion = "3.8"
 ignore = ["test_bot", "examples/**"]
 
 [tool.ruff]
-select = ["E", "F"]
+select = ["E", "F", "I", "W"]
 ignore = ["F403", "F405"]
 
 [tool.ruff.per-file-ignores]
