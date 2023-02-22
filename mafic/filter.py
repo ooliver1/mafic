@@ -644,7 +644,8 @@ class Filter:
         if not isinstance(
             other, Filter
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
-            raise TypeError(f"Expected Filter instance, not {type(other)!r}")
+            msg = f"Expected Filter instance, not {type(other)!r}"
+            raise TypeError(msg)
 
         return Filter(
             equalizer=other.equalizer or self.equalizer,
@@ -664,7 +665,8 @@ class Filter:
         if not isinstance(
             other, Filter
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
-            raise TypeError(f"Expected Filter instance, not {type(other)!r}")
+            msg = f"Expected Filter instance, not {type(other)!r}"
+            raise TypeError(msg)
 
         self.equalizer = other.equalizer or self.equalizer
         self.karaoke = other.karaoke or self.karaoke
@@ -682,7 +684,8 @@ class Filter:
         if not isinstance(
             other, Filter
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
-            raise TypeError(f"Expected Filter instance, not {type(other)!r}")
+            msg = f"Expected Filter instance, not {type(other)!r}"
+            raise TypeError(msg)
 
         return Filter(
             equalizer=self.equalizer or other.equalizer,
@@ -702,7 +705,8 @@ class Filter:
         if not isinstance(
             other, Filter
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
-            raise TypeError(f"Expected Filter instance, not {type(other)!r}")
+            msg = f"Expected Filter instance, not {type(other)!r}"
+            raise TypeError(msg)
 
         self.equalizer = self.equalizer or other.equalizer
         self.karaoke = self.karaoke or other.karaoke

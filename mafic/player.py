@@ -81,7 +81,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
         self.channel: Connectable = channel
 
         if not isinstance(self.channel, GuildChannel):
-            raise TypeError("Voice channel must be a GuildChannel.")
+            msg = "Voice channel must be a GuildChannel."
+            raise TypeError(msg)
 
         self.guild: Guild = self.channel.guild
 
@@ -320,9 +321,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         channel = self.guild.get_channel(int(channel_id))
         if not isinstance(channel, (VoiceChannel, StageChannel)):
-            raise TypeError(
-                "Channel was not a connectable channel that was recognised."
-            )
+            msg = "Channel was not a connectable channel that was recognised."
+            raise TypeError(msg)
 
         self.channel = channel
 
@@ -387,7 +387,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
             Whether to deafen the bot on connect.
         """
         if not isinstance(self.channel, (VoiceChannel, StageChannel)):
-            raise TypeError("Voice channel must be a VoiceChannel or StageChannel.")
+            msg = "Voice channel must be a VoiceChannel or StageChannel."
+            raise TypeError(msg)
 
         if not NodePool.nodes:
             raise NoNodesAvailable

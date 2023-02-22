@@ -116,7 +116,8 @@ class PyAttributeTable(SphinxDirective):
     def parse_name(self, content: str) -> tuple[str, str]:
         match = _name_parser_regex.match(content)
         if match is None:
-            raise RuntimeError("could not find module name somehow")
+            msg = "could not find module name somehow"
+            raise RuntimeError(msg)
 
         path, name = match.groups()
         if path:
@@ -126,9 +127,8 @@ class PyAttributeTable(SphinxDirective):
             if not modulename:
                 modulename = self.env.ref_context.get("py:module")
         if modulename is None:
-            raise RuntimeError(
-                f"modulename somehow None for {content} in {self.env.docname}."
-            )
+            msg = f"modulename somehow None for {content} in {self.env.docname}."
+            raise RuntimeError(msg)
 
         return modulename, name
 

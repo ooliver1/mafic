@@ -135,4 +135,5 @@ except ImportError:
 
 
 if version_info.major != 2:
-    raise RuntimeError(f"Mafic requires version 2 of {library}.")
+    msg = f"Mafic requires version 2 of {library}."
+    raise RuntimeError(msg)

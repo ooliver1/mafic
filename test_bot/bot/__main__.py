@@ -86,7 +86,8 @@ class TestBot(BotBase):
                             region = cls[region_str]
                             break
                     else:
-                        raise ValueError(f"Invalid region: {region_str}")
+                        msg = f"Invalid region: {region_str}"
+                        raise ValueError(msg)
 
                     regions.append(region)
 

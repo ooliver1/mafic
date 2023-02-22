@@ -89,10 +89,11 @@ class _TrackDataIterator(Iterator[int]):
             return None
 
         if (byte := next(self)) != 0:
-            raise ValueError(
+            msg = (
                 "Attempted to traverse a track id "
                 f"and came across an unexpected character: {byte}."
             )
+            raise ValueError(msg)
 
         return self.read_str()
 

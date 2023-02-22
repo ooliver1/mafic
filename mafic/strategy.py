@@ -206,4 +206,5 @@ def call_strategy(
     elif strategy is Strategy.USAGE:
         return usage_strategy(nodes, guild_id, shard_count, endpoint)
     else:
-        raise ValueError(f"Unknown strategy {strategy}")
+        msg = f"Unknown strategy {strategy}"
+        raise ValueError(msg)

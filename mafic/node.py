@@ -100,9 +100,8 @@ def _wrap_regions(
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
             actual_regions.append(item)
         else:
-            raise TypeError(
-                f"Expected Group, Region, or VoiceRegion, got {type(item)!r}."
-            )
+            msg = f"Expected Group, Region, or VoiceRegion, got {type(item)!r}."
+            raise TypeError(msg)
 
     return actual_regions
 
@@ -446,13 +445,11 @@ class Node(Generic[ClientT]):
                 minor = int(minor)
 
                 if major != 3:
-                    raise RuntimeError(
-                        f"Unsupported lavalink version {version} (expected 3.7.x)"
-                    )
+                    msg = f"Unsupported lavalink version {version} (expected 3.7.x)"
+                    raise RuntimeError(msg)
                 elif minor < 7:
-                    raise RuntimeError(
-                        f"Unsupported lavalink version {version} (expected 3.7.x)"
-                    )
+                    msg = f"Unsupported lavalink version {version} (expected 3.7.x)"
+                    raise RuntimeError(msg)
                 elif minor > 7:
                     message = UnsupportedVersionWarning.message
                     warnings.warn(message, UnsupportedVersionWarning)
@@ -514,7 +511,8 @@ class Node(Generic[ClientT]):
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
         await self._client.wait_until_ready()
         if self._client.user is None:
-            raise RuntimeError("Client.user is None")
+            msg = "Client.user is None"
+            raise RuntimeError(msg)
 
         if self.__session is None:
             self.__session = await self._create_session()
@@ -593,9 +591,8 @@ class Node(Generic[ClientT]):
                 "No websocket was found, aborting listener.",
                 extra={"label": self._label},
             )
-            raise RuntimeError(
-                "Websocket is not connected but attempted to listen, report this."
-            )
+            msg = "Websocket is not connected but attempted to listen, report this."
+            raise RuntimeError(msg)
 
         # To catch closing messages, we cannot use async for.
         while True:
@@ -734,7 +731,8 @@ class Node(Generic[ClientT]):
             extra={"label": self._label, "guild": guild_id},
         )
         if data["endpoint"] is None:
-            raise ValueError("Discord did not provide an endpoint.")
+            msg = "Discord did not provide an endpoint."
+            raise ValueError(msg)
 
         return self.__request(
             "PATCH",
@@ -1052,7 +1050,8 @@ class Node(Generic[ClientT]):
         elif data["class"] is None:
             return None
         else:
-            raise RuntimeError(f"Unknown route planner class {data['class']}.")
+            msg = f"Unknown route planner class {data['class']}."
+            raise RuntimeError(msg)
 
     async def unmark_failed_address(self, address: str) -> None:
         """Unmark a failed address so it can be used again.

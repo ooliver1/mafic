@@ -155,7 +155,8 @@ class NodePool(Generic[ClientT]):
             If the node pool has not been initialized.
         """
         if self._client is None:
-            raise RuntimeError("NodePool has not been initialized.")
+            msg = "NodePool has not been initialized."
+            raise RuntimeError(msg)
 
         node = Node(
             host=host,
@@ -224,7 +225,8 @@ class NodePool(Generic[ClientT]):
             If the node pool has not been initialized.
         """
         if cls._client is None:
-            raise RuntimeError("NodePool has not been initialized.")
+            msg = "NodePool has not been initialized."
+            raise RuntimeError(msg)
 
         actual_strategies: Sequence[StrategyCallable[ClientT] | Strategy]
 
