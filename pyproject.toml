@@ -120,6 +120,9 @@ select = [
     "SIM",
     "TCH",
     "ARG",
+    "PGH",
+    "PLC",
+    "PLE",
 ]
 # F403, F405 do not need to hate wildcard imports. Pyright can find undefined errors.
 # D107, class docstr is in the class level, may change in future.
