@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import TYPE_CHECKING, Union
 
@@ -114,7 +114,9 @@ class FailingAddress:
 
     def __init__(self, data: FailingIPAddress) -> None:
         self.address: str = data["address"]
-        self.time: datetime = datetime.fromtimestamp(data["failingTimestamp"])
+        self.time: datetime = datetime.fromtimestamp(
+            data["failingTimestamp"], tz=timezone.utc
+        )
 
 
 class BaseIPRoutePlannerStatus(ABC):
