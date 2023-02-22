@@ -51,7 +51,6 @@ class MyPlayer(Player[Bot]):
 @bot.slash_command(dm_permission=False)
 async def join(inter: Interaction[Bot]):
     """Join your voice channel."""
-
     assert isinstance(inter.user, Member)
 
     if not inter.user.voice or not inter.user.voice.channel:
@@ -71,7 +70,6 @@ async def play(inter: Interaction[Bot], query: str):
     query:
         The song to search or play.
     """
-
     assert inter.guild is not None
 
     if not inter.guild.voice_client:

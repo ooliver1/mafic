@@ -117,7 +117,6 @@ class MyPlayer(Player[TestBot]):
 @bot.slash_command()
 async def join(inter: Interaction):
     """Join your voice channel."""
-
     if not inter.user.voice:
         return await inter.response.send_message("You are not in a voice channel.")
 
@@ -133,7 +132,6 @@ async def play(inter: Interaction, query: str):
     query:
         The song to search or play.
     """
-
     if not inter.guild.voice_client:
         await join(inter)
 
@@ -159,7 +157,6 @@ async def play(inter: Interaction, query: str):
 @bot.slash_command()
 async def stop(inter: Interaction):
     """Stop playing."""
-
     if not inter.guild.voice_client:
         return await inter.send("I am not in a voice channel.")
 

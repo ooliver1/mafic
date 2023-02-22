@@ -1,3 +1,4 @@
+r"""A module containing a :class:`NodePool`, used to manage :class:`Node`\s."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -85,14 +86,12 @@ class NodePool(Generic[ClientT]):
 
     @classproperty
     def label_to_node(cls) -> dict[str, Node[ClientT]]:
-        """A dictionary mapping node labels to nodes."""
-
+        """Get a mapping node labels to nodes."""
         return cls._nodes
 
     @classproperty
     def nodes(cls) -> list[Node[ClientT]]:
-        """A list of all nodes."""
-
+        """Get the list of all nodes."""
         return list(cls._nodes.values())
 
     async def create_node(
@@ -110,7 +109,7 @@ class NodePool(Generic[ClientT]):
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
     ) -> Node[ClientT]:
-        """Create a node and connect it.
+        r"""Create a node and connect it.
 
         The parameters here relate to :class:`Node`.
 
@@ -130,7 +129,7 @@ class NodePool(Generic[ClientT]):
             The interval to send heartbeats to the node websocket connection.
         timeout:
             The timeout to use for the node websocket connection.
-        session: :data:`~typing.Optional`\\ [:class:`aiohttp.ClientSession`]
+        session: :data:`~typing.Optional`\[:class:`aiohttp.ClientSession`]
             The session to use for the node websocket connection.
         resume_key:
             The key to use to resume the node websocket connection.
@@ -155,7 +154,6 @@ class NodePool(Generic[ClientT]):
         RuntimeError
             If the node pool has not been initialized.
         """
-
         if self._client is None:
             raise RuntimeError("NodePool has not been initialized.")
 
@@ -225,7 +223,6 @@ class NodePool(Generic[ClientT]):
         RuntimeError
             If the node pool has not been initialized.
         """
-
         if cls._client is None:
             raise RuntimeError("NodePool has not been initialized.")
 
@@ -277,7 +274,6 @@ class NodePool(Generic[ClientT]):
         ValueError
             If there are no nodes.
         """
-
         if node := choice(list(cls._nodes.values())):
             return node
 

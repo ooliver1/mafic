@@ -1,3 +1,4 @@
+"""Node class to represent one Lavalink instance."""
 # SPDX-License-Identifier: MIT
 # pyright: reportImportCycles=false
 # Player import.
@@ -70,7 +71,7 @@ __all__ = ("Node",)
 def _wrap_regions(
     regions: Sequence[Group | Region | VoiceRegion] | None,
 ) -> list[VoiceRegion] | None:
-    """Converts a list of voice regions, regions and groups into a list of regions.
+    r"""Convert a list of voice regions, regions and groups into a list of regions.
 
     Parameters
     ----------
@@ -79,10 +80,9 @@ def _wrap_regions(
 
     Returns
     -------
-    :class:`list`\\[:class:`Region`] | None
+    :class:`list`\[:class:`Region`] | None
         The converted list of regions.
     """
-
     if not regions:
         return None
 
@@ -107,7 +107,7 @@ def _wrap_regions(
 
 
 class Node(Generic[ClientT]):
-    """Represents a Lavalink node.
+    r"""Represents a Lavalink node.
 
     .. warning::
 
@@ -134,7 +134,7 @@ class Node(Generic[ClientT]):
     timeout:
         The amount of time the node will wait for a response before raising a timeout
         error.
-    session: :data:`~typing.Optional`\\[:class:`aiohttp.ClientSession`]
+    session: :data:`~typing.Optional`\[:class:`aiohttp.ClientSession`]
         The session to use for the node.
         If not provided, a new session will be created.
     resume_key:
@@ -149,10 +149,10 @@ class Node(Generic[ClientT]):
 
     Attributes
     ----------
-    regions: :data:`~typing.Optional`\\[:class:`list`\\[:class:`~.VoiceRegion`]]
+    regions: :data:`~typing.Optional`\[:class:`list`\[:class:`~.VoiceRegion`]]
         The regions that the node can be used in.
         This is used to determine when to use this node.
-    shard_ids: :data:`~typing.Optional`\\[:class:`list`\\[:class:`int`]]
+    shard_ids: :data:`~typing.Optional`\[:class:`list`\[:class:`int`]]
         The shard IDs that the node can be used in.
         This is used to determine when to use this node.
     """
@@ -229,31 +229,26 @@ class Node(Generic[ClientT]):
     @property
     def host(self) -> str:
         """The host of the node."""
-
         return self._host
 
     @property
     def port(self) -> int:
         """The port of the node."""
-
         return self._port
 
     @property
     def label(self) -> str:
         """The label of the node."""
-
         return self._label
 
     @property
     def client(self) -> ClientT:
         """The client that the node is attached to."""
-
         return self._client
 
     @property
     def secure(self) -> bool:
         """Whether the node is using a secure connection."""
-
         return self._secure
 
     @property
@@ -272,7 +267,6 @@ class Node(Generic[ClientT]):
 
         This is ``False`` if the node is not connected, or if it is not ready.
         """
-
         return self._available
 
     @property
@@ -295,7 +289,6 @@ class Node(Generic[ClientT]):
         This is so that the node will be used if it is the only one available,
         or if stats sending is disabled on the node.
         """
-
         if self._stats is None:
             # Stats haven't been set yet, so we'll just return a high value.
             # This is so we can properly balance known nodes.
@@ -364,11 +357,10 @@ class Node(Generic[ClientT]):
 
             This is now a list.
         """
-
         return [*self._players.values()]
 
     def get_player(self, guild_id: int) -> Player[ClientT] | None:
-        """Get a player from the node.
+        r"""Get a player from the node.
 
         Parameters
         ----------
@@ -377,10 +369,9 @@ class Node(Generic[ClientT]):
 
         Returns
         -------
-        :data:`~typing.Optional`\\[:class:`Player`]
+        :data:`~typing.Optional`\[:class:`Player`]
             The player for the guild, if found.
         """
-
         return self._players.get(guild_id)
 
     def add_player(self, guild_id: int, player: Player[ClientT]) -> None:
@@ -393,7 +384,6 @@ class Node(Generic[ClientT]):
         player:
             The player to add.
         """
-
         self._players[guild_id] = player
 
     def remove_player(self, guild_id: int) -> None:
@@ -409,7 +399,6 @@ class Node(Generic[ClientT]):
         guild_id:
             The guild ID to remove the player for.
         """
-
         self._players.pop(guild_id, None)
 
     async def _check_version(self) -> None:
@@ -430,7 +419,6 @@ class Node(Generic[ClientT]):
             If the minor version is greater than 7.
             Some features may not work.
         """
-
         if self._rest_uri.path.endswith("/v3") or self._ws_uri.path.endswith(
             "/websocket"
         ):
@@ -483,7 +471,6 @@ class Node(Generic[ClientT]):
         session:
             The session to use for the websocket connection.
         """
-
         try:
             self._ws = (
                 await session.ws_connect(  # pyright: ignore[reportUnknownMemberType]
@@ -520,7 +507,6 @@ class Node(Generic[ClientT]):
             If the connection times out.
             You can change the timeout with the `timeout` parameter.
         """
-
         if self._ws is not None:
             raise NodeAlreadyConnected()
 
@@ -597,7 +583,6 @@ class Node(Generic[ClientT]):
 
     async def _ws_listener(self) -> None:
         """Listen for messages from the websocket."""
-
         backoff = ExponentialBackoff()
 
         if self._ws is None:
@@ -654,7 +639,6 @@ class Node(Generic[ClientT]):
         data:
             The data to handle.
         """
-
         _log.debug("Received event with op %s", data["op"])
         _log.debug("Event data: %s", data)
 
@@ -712,7 +696,6 @@ class Node(Generic[ClientT]):
         data:
             The data to handle.
         """
-
         if not (player := self.get_player(int(data["guildId"]))):
             _log.error(
                 "Could not find player for guild %s, discarding event.", data["guildId"]
@@ -743,7 +726,6 @@ class Node(Generic[ClientT]):
         :exc:`ValueError`
             If the endpoint in the payload is ``None``.
         """
-
         _log.debug(
             "Sending player update to lavalink.",
             extra={"label": self._label, "guild": guild_id},
@@ -765,7 +747,6 @@ class Node(Generic[ClientT]):
 
     def configure_resuming(self) -> Coro[None]:
         """Configure the node to resume."""
-
         _log.info(
             "Sending resume configuration to lavalink with resume key %s.",
             self._resume_key,
@@ -789,7 +770,6 @@ class Node(Generic[ClientT]):
         guild_id:
             The guild ID to destroy the player for.
         """
-
         _log.debug("Sending request to destroy player", extra={"label": self._label})
 
         return self.__request(
@@ -830,7 +810,6 @@ class Node(Generic[ClientT]):
         filter:
             The filter to apply to the player.
         """
-
         data: UpdatePlayerPayload = {}
 
         if track is not MISSING:
@@ -871,7 +850,6 @@ class Node(Generic[ClientT]):
 
     async def _create_session(self) -> aiohttp.ClientSession:
         """Create a new session for the node."""
-
         return aiohttp.ClientSession(json_serialize=dumps)
 
     async def __request(
@@ -899,7 +877,6 @@ class Node(Generic[ClientT]):
         :data:`~typing.Any`
             The JSON response from the node.
         """
-
         if self.__session is None:
             self.__session = await self._create_session()
 
@@ -947,7 +924,7 @@ class Node(Generic[ClientT]):
     async def fetch_tracks(
         self, query: str, *, search_type: str
     ) -> list[Track] | Playlist | None:
-        """Fetch tracks from the node.
+        r"""Fetch tracks from the node.
 
         Parameters
         ----------
@@ -958,14 +935,13 @@ class Node(Generic[ClientT]):
 
         Returns
         -------
-        :class:`list`\\[:class:`Track`]
+        :class:`list`\[:class:`Track`]
             A list of tracks if the load type is ``TRACK_LOADED`` or ``SEARCH_RESULT``.
         :class:`Playlist`
             A playlist if the load type is ``PLAYLIST_LOADED``.
         None
             If the load type is ``NO_MATCHES``.
         """
-
         if not URL_REGEX.match(query):
             query = f"{search_type}:{query}"
 
@@ -1003,7 +979,6 @@ class Node(Generic[ClientT]):
         --------
         :meth:`decode_tracks`
         """
-
         info: TrackInfo = await self.__request(
             "GET", "decodetrack", params={"encodedTrack": track}
         )
@@ -1011,7 +986,7 @@ class Node(Generic[ClientT]):
         return Track.from_data(track=track, info=info)
 
     async def decode_tracks(self, tracks: list[str]) -> list[Track]:
-        """Decode a list of tracks from the encoded base64 data.
+        r"""Decode a list of tracks from the encoded base64 data.
 
         Parameters
         ----------
@@ -1020,14 +995,13 @@ class Node(Generic[ClientT]):
 
         Returns
         -------
-        :class:`list`\\[:class:`Track`]
+        :class:`list`\[:class:`Track`]
             The decoded tracks.
 
         See Also
         --------
         :meth:`decode_track`
         """
-
         track_data: list[TrackWithInfo] = await self.__request(
             "POST", "decodetracks", json=tracks
         )
@@ -1035,14 +1009,13 @@ class Node(Generic[ClientT]):
         return [Track.from_data_with_info(track) for track in track_data]
 
     async def fetch_plugins(self) -> list[Plugin]:
-        """Fetch the plugins from the node.
+        r"""Fetch the plugins from the node.
 
         Returns
         -------
-        :class:`list`\\[:class:`Plugin`]
+        :class:`list`\[:class:`Plugin`]
             The plugins from the node.
         """
-
         plugins: list[PluginData] = await self.__request("GET", "plugins")
 
         return [Plugin(plugin) for plugin in plugins]
@@ -1055,7 +1028,6 @@ class Node(Generic[ClientT]):
         :data:`.RoutePlannerStatus`
             The route planner status from the node.
         """
-
         data: RoutePlannerStatusPayload = await self.__request(
             "GET", "routeplanner/status"
         )
@@ -1087,14 +1059,12 @@ class Node(Generic[ClientT]):
         address:
             The address to unmark.
         """
-
         await self.__request(
             "POST", "routeplanner/free/address", json={"address": address}
         )
 
     async def unmark_all_addresses(self) -> None:
         """Unmark all failed addresses so they can be used again."""
-
         await self.__request("POST", "routeplanner/free/all")
 
     async def _add_unknown_player(self, player_id: int, state: PlayerPayload) -> None:
@@ -1107,7 +1077,6 @@ class Node(Generic[ClientT]):
         state:
             The state of the player.
         """
-
         guild = self.client.get_guild(player_id)
         if guild is None:
             guild = await self.client.fetch_guild(player_id)
@@ -1139,7 +1108,6 @@ class Node(Generic[ClientT]):
         player_id:
             The guild ID of the player.
         """
-
         await self._players[player_id].disconnect(force=True)
         self.remove_player(player_id)
 
@@ -1151,7 +1119,6 @@ class Node(Generic[ClientT]):
             This method is called automatically when the client is ready.
             You should not need to call this method yourself.
         """
-
         players: list[PlayerPayload] = await self.__request(
             "GET", f"sessions/{self._session_id}/players"
         )

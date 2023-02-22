@@ -1,3 +1,4 @@
+"""Objects for dispatched events via the client."""
 # SPDX-License-Identifier: MIT
 # pyright: reportImportCycles=false
 # Player import.
@@ -79,6 +80,7 @@ class WebSocketClosedEvent(Generic[PlayerT]):
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return (
             f"<WebSocketClosedEvent code={self.code} reason={self.reason!r} "
             f"by_discord={self.by_discord}>"
@@ -103,6 +105,7 @@ class TrackStartEvent(Generic[PlayerT]):
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return f"<TrackStartEvent track={self.track!r}>"
 
 
@@ -127,6 +130,7 @@ class TrackEndEvent(Generic[PlayerT]):
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return f"<TrackEndEvent track={self.track!r} reason={self.reason!r}>"
 
 
@@ -157,6 +161,7 @@ class TrackExceptionEvent(Generic[PlayerT]):
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return (
             f"<TrackExceptionEvent track={self.track!r} exception={self.exception!r}>"
         )
@@ -185,6 +190,7 @@ class TrackStuckEvent(Generic[PlayerT]):
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
+        """Get a string representation of the event."""
         return (
             f"<TrackStuckEvent track={self.track!r} threshold_ms={self.threshold_ms}>"
         )

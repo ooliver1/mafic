@@ -1,3 +1,4 @@
+"""A module to decode a track id into a Track object."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -115,7 +116,6 @@ def decode_track(track_id: str) -> Track:
     Track:
         The decoded track.
     """
-
     raw = b64decode(track_id)
     print(raw)
     iterator = _TrackDataIterator(raw)

@@ -1,3 +1,4 @@
+"""A module contains region enums for voice regions and groups."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -51,6 +52,7 @@ class VoiceRegion(Enum):
     AMSTERDAM = "amsterdam"
 
     def __repr__(self) -> str:
+        """Get the representation of this voice region."""
         return f"VoiceRegion.{self.name}"
 
 
@@ -89,6 +91,7 @@ class Region(Enum):
     OCEANIA = (VoiceRegion.SYDNEY,)
 
     def __repr__(self) -> str:
+        """Get the representation of this region."""
         return f"<Region.{self.name}>"
 
 
@@ -122,4 +125,5 @@ class Group(Enum):
     )
 
     def __repr__(self) -> str:
+        """Get the representation of this group."""
         return f"<Group.{self.name}>"

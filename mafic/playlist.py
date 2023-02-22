@@ -1,3 +1,4 @@
+"""The module containing :class:`Playlist`."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -13,7 +14,7 @@ __all__ = ("Playlist",)
 
 
 class Playlist:
-    """Represents a playlist.
+    r"""Represents a playlist.
 
     Attributes
     ----------
@@ -21,7 +22,7 @@ class Playlist:
         The name of the playlist.
     selected_track: :class:`int`
         The index of the selected track, if any.
-    tracks: :class:`list`\\[:class:`Track`]
+    tracks: :class:`list`\[:class:`Track`]
         A list of tracks in the playlist.
     """
 

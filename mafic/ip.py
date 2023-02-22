@@ -1,3 +1,4 @@
+"""The Lavalink route planner API."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -117,11 +118,11 @@ class FailingAddress:
 
 
 class BaseIPRoutePlannerStatus(ABC):
-    """An :term:`abstract base class` representing the status of an IP route planner.
+    r"""An :term:`abstract base class` representing the status of an IP route planner.
 
     Attributes
     ----------
-    failing_addresses: :class:`list`\\[:class:`FailingAddress`]
+    failing_addresses: :class:`list`\[:class:`FailingAddress`]
         The list of failing addresses.
     ip_block: :class:`IPBlock`
         The IP block.
@@ -141,11 +142,11 @@ class BaseIPRoutePlannerStatus(ABC):
 
 
 class RotatingIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
-    """Represents the status of a rotating IP route planner.
+    r"""Represents the status of a rotating IP route planner.
 
     Attributes
     ----------
-    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.ROTATING_IP`]
+    type: :data:`~typing.Literal`\[:attr:`IPRoutePlannerType.ROTATING_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.ROTATING_IP`.
     current_address: :class:`str`
@@ -168,11 +169,11 @@ class RotatingIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
 
 
 class NanoIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
-    """Represents the status of a nano IP route planner.
+    r"""Represents the status of a nano IP route planner.
 
     Attributes
     ----------
-    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.NANO_IP`]
+    type: :data:`~typing.Literal`\[:attr:`IPRoutePlannerType.NANO_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.NANO_IP`.
     current_address_index: :class:`int`
@@ -189,11 +190,11 @@ class NanoIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
 
 
 class RotatingNanoIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
-    """Represents the status of a rotating nano IP route planner.
+    r"""Represents the status of a rotating nano IP route planner.
 
     Attributes
     ----------
-    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.ROTATING_NANO_IP`]
+    type: :data:`~typing.Literal`\[:attr:`IPRoutePlannerType.ROTATING_NANO_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.ROTATING_NANO_IP`.
     block_index: :class:`int`
@@ -213,11 +214,11 @@ class RotatingNanoIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
 
 
 class BalancingIPRoutePlannerStatus(BaseIPRoutePlannerStatus):
-    """Represents the status of a balancing IP route planner.
+    r"""Represents the status of a balancing IP route planner.
 
     Attributes
     ----------
-    type: :data:`~typing.Literal`\\[:attr:`IPRoutePlannerType.BALANCING_IP`]
+    type: :data:`~typing.Literal`\[:attr:`IPRoutePlannerType.BALANCING_IP`]
         The type of route planner. This will always be
         :attr:`IPRoutePlannerType.BALANCING_IP`.
     current_address_index: :class:`int`

@@ -1,3 +1,4 @@
+"""A Player is used to connect to a channel."""
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -107,7 +108,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
             This is used internally to set the state of the player.
             You should not need to use this.
         """
-
         self._session_id = state["voice"]["sessionId"]
         self._ping = state["voice"]["ping"]
         self._current = (
@@ -124,6 +124,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             self._position = state["track"]["info"]["position"]
 
     def __repr__(self) -> str:
+        """Return a string representation of the player."""
         attrs = (
             ("guild_id", self._guild_id),
             ("session_id", self._session_id),
@@ -137,13 +138,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
     @property
     def connected(self) -> bool:
         """Whether the player is connected to a voice channel."""
-
         return self._connected
 
     @property
     def position(self) -> int:
         """The current position of the player in milliseconds."""
-
         pos = self._position
 
         if self._connected and self._current is not None:
@@ -158,13 +157,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
     @property
     def ping(self) -> int:
         """The current ping of the player in milliseconds."""
-
         return self._ping
 
     @property
     def node(self) -> Node[ClientT]:
         """The node that the player is connected to."""
-
         if self._node is None:
             _log.warning(
                 "Unable to use best node, player not connected, finding random node.",
@@ -177,13 +174,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
     @property
     def current(self) -> Track | None:
         """The current track that is playing."""
-
         return self._current
 
     @property
     def paused(self) -> bool:
         """Whether the player is paused."""
-
         return self._paused
 
     def update_state(self, state: PlayerUpdateState) -> None:
@@ -196,7 +191,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         state:
             The state to update the player with.
         """
-
         self._last_update = state["time"]
         self._position = state.get("position", 0)
         self._connected = state["connected"]
@@ -208,12 +202,10 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         This is an alias for :attr:`connected`.
         """
-
         return self._connected
 
     async def _dispatch_player_update(self) -> None:
         """Dispatch a player update to the node."""
-
         if self._node is None:
             _log.debug("Recieved voice update before node was found.")
             return
@@ -233,6 +225,15 @@ class Player(VoiceProtocol, Generic[ClientT]):
         )
 
     def dispatch_event(self, data: EventPayload) -> None:
+        """Dispatch an event to the player.
+
+        This is called by the library and usually should not be called by the user.
+
+        Parameters
+        ----------
+        data:
+            The event payload to dispatch.
+        """
         if data["type"] == "WebSocketClosedEvent":
             event = WebSocketClosedEvent(payload=data, player=self)
             _log.debug("Received websocket closed event: %s", event)
@@ -307,7 +308,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         data:
             The voice state update payload.
         """
-
         before_session_id = self._session_id
         self._session_id = data["session_id"]
 
@@ -336,7 +336,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         data:
             The voice server update payload.
         """
-
         # Fetch the best node as we either don't know the best one yet.
         # Or the node we were using was not the best one (endpoint optimisation).
         if (
@@ -384,7 +383,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         self_deaf:
             Whether to deafen the bot on connect.
         """
-
         if not isinstance(self.channel, (VoiceChannel, StageChannel)):
             raise TypeError("Voice channel must be a VoiceChannel or StageChannel.")
 
@@ -406,7 +404,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         force:
             Whether to force the disconnect even if not connected.
         """
-
         if not self._connected and not force:
             return
 
@@ -429,7 +426,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         This shouldn't be called directly. Instead, use :meth:`disconnect`.
         """
-
         self._current = None
         self._position = 0
         self._paused = False
@@ -444,7 +440,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         This will disconnect the player and remove it from the node.
         """
-
         _log.debug(
             "Disconnecting player and destroying client.",
             extra={"guild": self._guild_id},
@@ -458,7 +453,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
     async def fetch_tracks(
         self, query: str, search_type: SearchType | str = SearchType.YOUTUBE
     ) -> list[Track] | Playlist | None:
-        """Fetch tracks from the node.
+        r"""Fetch tracks from the node.
 
         Parameters
         ----------
@@ -469,7 +464,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         Returns
         -------
-        :class:`list`\\[:class:`Track`]
+        :class:`list`\[:class:`Track`]
             A list of tracks if the load type is ``TRACK_LOADED`` or ``SEARCH_RESULT``.
         :class:`Playlist`
             A playlist if the load type is ``PLAYLIST_LOADED``.
@@ -481,7 +476,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         If a node was not selected due to not being connected, this will use a
         random node.
         """
-
         node = self.node
 
         raw_type: str
@@ -527,7 +521,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         PlayerNotConnected
             If the player is not connected to a voice channel.
         """
-
         if self._node is None or not self._connected:
             raise PlayerNotConnected
 
@@ -588,7 +581,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         -----
         This is a convenience method for :meth:`update`.
         """
-
         return await self.update(
             track=track,
             position=start_time,
@@ -615,7 +607,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         -----
         This is a convenience method for :meth:`update`.
         """
-
         return await self.update(pause=pause)
 
     async def resume(self) -> None:
@@ -631,7 +622,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         This is a convenience method for :meth:`pause`, with ``pause`` set to
         ``False``.
         """
-
         return await self.pause(False)
 
     async def stop(self) -> None:
@@ -646,7 +636,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         -----
         This is a convenience method for :meth:`update`.
         """
-
         await self.update(track=None, replace=True)
 
     async def _update_filters(self, *, fast_apply: bool) -> None:
@@ -657,7 +646,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         fast_apply:
             Whether to seek to the current position after updating the filters.
         """
-
         await self.update(
             filter=reduce(or_, self._filters.values()) if self._filters else Filter()
         )
@@ -687,7 +675,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         PlayerNotConnected
             If the player is not connected to a voice channel.
         """
-
         self._filters[label] = filter
 
         await self._update_filters(fast_apply=fast_apply)
@@ -711,7 +698,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         ValueError
             If the filter does not exist.
         """
-
         self._filters.pop(label)
 
         await self._update_filters(fast_apply=fast_apply)
@@ -731,7 +717,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         PlayerNotConnected
             If the player is not connected to a voice channel.
         """
-
         self._filters.clear()
 
         await self._update_filters(fast_apply=fast_apply)
@@ -753,7 +738,6 @@ class Player(VoiceProtocol, Generic[ClientT]):
         -----
         This is a convenience method for :meth:`update`.
         """
-
         await self.update(volume=volume)
 
     async def seek(self, position: int, /) -> None:
@@ -773,5 +757,4 @@ class Player(VoiceProtocol, Generic[ClientT]):
         -----
         This is a convenience method for :meth:`update`.
         """
-
         return await self.update(position=position)

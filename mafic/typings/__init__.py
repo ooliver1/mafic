@@ -1,9 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""
-mafic.typings
--------------
-A collection of Python types for the Lavalink API.
-"""
+"""A collection of Python types for the Lavalink API."""
 
 from .common import *
 from .http import *

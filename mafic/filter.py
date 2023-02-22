@@ -1,3 +1,4 @@
+"""Filters that can be applied to a Player."""
 # SPDX-License-Identifier: MIT
 # Reference to filter meanings can be found in:
 # https://github.com/natanbc/lavadsp
@@ -61,19 +62,18 @@ class EQBand:
     @property
     def payload(self) -> EQBandPayload:
         """Generate the raw Lavalink payload for this band."""
-
         return {"band": self.band, "gain": self.gain}
 
 
 @dataclass(unsafe_hash=True)
 class Equalizer:
-    """Represents an `equaliser`_.
+    r"""Represents an `equaliser`_.
 
     .. _equaliser: https://en.wikipedia.org/wiki/Equalization_(audio)
 
     Attributes
     ----------
-    bands: :class:`list`\\[:class:`EQBand`]
+    bands: :class:`list`\[:class:`EQBand`]
         The bands to set the gains of.
     """
 
@@ -81,10 +81,12 @@ class Equalizer:
 
     @property
     def payload(self) -> list[EQBandPayload]:
+        """Generate the raw Lavalink payload for this equaliser."""
         return [band.payload for band in self.bands]
 
     @classmethod
     def from_payload(cls, payload: list[EQBandPayload]) -> Self:
+        """Generate an :class:`Equalizer` from a Lavalink payload."""
         return cls(
             bands=[EQBand(band=band["band"], gain=band["gain"]) for band in payload]
         )
@@ -92,24 +94,24 @@ class Equalizer:
 
 @dataclass(unsafe_hash=True)
 class Karaoke:
-    """Represents a filter which can be used to eliminate part of a band.
+    r"""Represents a filter which can be used to eliminate part of a band.
 
     This usually targets vocals, to sound like karaoke music.
 
     Attributes
     ----------
-    level: :data:`~typing.Optional`\\[:class:`float`]
+    level: :data:`~typing.Optional`\[:class:`float`]
         The level of the karaoke effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``1.0``.
-    mono_level: :data:`~typing.Optional`\\[:class:`float`]
+    mono_level: :data:`~typing.Optional`\[:class:`float`]
         The level of the mono effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``1.0``.
-    filter_band: :data:`~typing.Optional`\\[:class:`float`]
+    filter_band: :data:`~typing.Optional`\[:class:`float`]
         The frequency of the filter band in Hz.
         This defaults to ``220.0``.
-    filter_width: :data:`~typing.Optional`\\[:class:`float`]
+    filter_width: :data:`~typing.Optional`\[:class:`float`]
         The width of the filter band.
         This defaults to ``100.0``.
     """
@@ -122,7 +124,6 @@ class Karaoke:
     @property
     def payload(self) -> KaraokePayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: KaraokePayload = {}
 
         if self.level is not None:
@@ -141,6 +142,7 @@ class Karaoke:
 
     @classmethod
     def from_payload(cls, payload: KaraokePayload) -> Self:
+        """Generate a :class:`Karaoke` from a Lavalink payload."""
         return cls(
             level=payload.get("level"),
             mono_level=payload.get("monoLevel"),
@@ -151,16 +153,15 @@ class Karaoke:
 
 @dataclass(unsafe_hash=True)
 class Timescale:
-    """Represents a filter which can be used to change the speed,
-    pitch and rate of audio.
+    r"""Represents a filter which is used to change the speed, pitch and rate of audio.
 
     Attributes
     ----------
-    speed: :data:`~typing.Optional`\\[:class:`float`]
+    speed: :data:`~typing.Optional`\[:class:`float`]
         The speed of the audio. Must be at least ``0.0``. ``1.0`` is normal speed.
-    pitch: :data:`~typing.Optional`\\[:class:`float`]
+    pitch: :data:`~typing.Optional`\[:class:`float`]
         The pitch of the audio. Must be at least ``0.0``. ``1.0`` is normal pitch.
-    rate: :data:`~typing.Optional`\\[:class:`float`]
+    rate: :data:`~typing.Optional`\[:class:`float`]
         The rate of the audio. Must be at least ``0.0``. ``1.0`` is normal rate.
     """
 
@@ -171,7 +172,6 @@ class Timescale:
     @property
     def payload(self) -> TimescalePayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: TimescalePayload = {}
 
         if self.speed is not None:
@@ -187,6 +187,7 @@ class Timescale:
 
     @classmethod
     def from_payload(cls, payload: TimescalePayload) -> Self:
+        """Generate a :class:`Timescale` from a Lavalink payload."""
         return cls(
             speed=payload.get("speed"),
             pitch=payload.get("pitch"),
@@ -196,7 +197,7 @@ class Timescale:
 
 @dataclass(unsafe_hash=True)
 class Tremolo:
-    """Represents a filter which can be used to add a `tremolo`_ effect to audio.
+    r"""Represents a filter which can be used to add a `tremolo`_ effect to audio.
 
     Tremolo oscillates the volume of the audio.
 
@@ -204,10 +205,10 @@ class Tremolo:
 
     Attributes
     ----------
-    frequency: :data:`~typing.Optional`\\[:class:`float`]
+    frequency: :data:`~typing.Optional`\[:class:`float`]
         The frequency of the tremolo effect. Must be at least ``0.0``.
         This defaults to ``2.0``.
-    depth: :data:`~typing.Optional`\\[:class:`float`]
+    depth: :data:`~typing.Optional`\[:class:`float`]
         The depth of the tremolo effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``0.5``.
@@ -219,7 +220,6 @@ class Tremolo:
     @property
     def payload(self) -> TremoloPayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: TremoloPayload = {}
 
         if self.frequency is not None:
@@ -232,6 +232,7 @@ class Tremolo:
 
     @classmethod
     def from_payload(cls, payload: TremoloPayload) -> Self:
+        """Generate a :class:`Tremolo` from a Lavalink payload."""
         return cls(
             frequency=payload.get("frequency"),
             depth=payload.get("depth"),
@@ -240,7 +241,7 @@ class Tremolo:
 
 @dataclass(repr=True)
 class Vibrato:
-    """Represents a filter which can be used to add a `vibrato`_ effect to audio.
+    r"""Represents a filter which can be used to add a `vibrato`_ effect to audio.
 
     Vibrato oscillates the pitch of the audio.
 
@@ -248,10 +249,10 @@ class Vibrato:
 
     Attributes
     ----------
-    frequency: :data:`~typing.Optional`\\[:class:`float`]
+    frequency: :data:`~typing.Optional`\[:class:`float`]
         The frequency of the vibrato effect. Must be at least ``0.0``.
         This defaults to ``2.0``.
-    depth: :data:`~typing.Optional`\\[:class:`float`]
+    depth: :data:`~typing.Optional`\[:class:`float`]
         The depth of the vibrato effect. Must be between ``0.0`` and ``1.0``.
         Where ``0.0`` is no effect and ``1.0`` is full effect.
         This defaults to ``0.5``.
@@ -263,7 +264,6 @@ class Vibrato:
     @property
     def payload(self) -> VibratoPayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: VibratoPayload = {}
 
         if self.frequency is not None:
@@ -276,6 +276,7 @@ class Vibrato:
 
     @classmethod
     def from_payload(cls, payload: VibratoPayload) -> Self:
+        """Generate a :class:`Vibrato` from a Lavalink payload."""
         return cls(
             frequency=payload.get("frequency"),
             depth=payload.get("depth"),
@@ -284,7 +285,7 @@ class Vibrato:
 
 @dataclass(unsafe_hash=True)
 class Rotation:
-    """Represents a filter which can be used to add a rotating effect to audio.
+    r"""Represents a filter which can be used to add a rotating effect to audio.
 
     An example can be with `"8D audio" (without the reverb)`_.
 
@@ -292,7 +293,7 @@ class Rotation:
 
     Attributes
     ----------
-    rotation_hz: :data:`~typing.Optional`\\[:class:`float`]
+    rotation_hz: :data:`~typing.Optional`\[:class:`float`]
         The rotation speed in Hz. Must be at least ``0.0``.
         ``0.2`` is similar to the example above.
     """
@@ -302,7 +303,6 @@ class Rotation:
     @property
     def payload(self) -> RotationPayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: RotationPayload = {}
 
         if self.rotation_hz is not None:
@@ -312,6 +312,7 @@ class Rotation:
 
     @classmethod
     def from_payload(cls, payload: RotationPayload) -> Self:
+        """Generate a :class:`Rotation` from a Lavalink payload."""
         return cls(
             rotation_hz=payload.get("rotationHz"),
         )
@@ -319,7 +320,7 @@ class Rotation:
 
 @dataclass(unsafe_hash=True)
 class Distortion:
-    """Represents a filter which can be used to add a distortion effect to audio.
+    r"""Represents a filter which can be used to add a distortion effect to audio.
 
     This applies sine, cosine and tangent distortion to the audio.
     The formula that is used::
@@ -338,28 +339,28 @@ class Distortion:
 
     Attributes
     ----------
-    sin_offset: :data:`~typing.Optional`\\[:class:`float`]
+    sin_offset: :data:`~typing.Optional`\[:class:`float`]
         The offset of the sine distortion.
         This defaults to ``0.0``.
-    sin_scale: :data:`~typing.Optional`\\[:class:`float`]
+    sin_scale: :data:`~typing.Optional`\[:class:`float`]
         The scale of the sine distortion.
         This defaults to ``1.0``.
-    cos_offset: :data:`~typing.Optional`\\[:class:`float`]
+    cos_offset: :data:`~typing.Optional`\[:class:`float`]
         The offset of the cosine distortion.
         This defaults to ``0.0``.
-    cos_scale: :data:`~typing.Optional`\\[:class:`float`]
+    cos_scale: :data:`~typing.Optional`\[:class:`float`]
         The scale of the cosine distortion.
         This defaults to ``1.0``.
-    tan_offset: :data:`~typing.Optional`\\[:class:`float`]
+    tan_offset: :data:`~typing.Optional`\[:class:`float`]
         The offset of the tangent distortion.
         This defaults to ``0.0``.
-    tan_scale: :data:`~typing.Optional`\\[:class:`float`]
+    tan_scale: :data:`~typing.Optional`\[:class:`float`]
         The scale of the tangent distortion.
         This defaults to ``1.0``.
-    offset: :data:`~typing.Optional`\\[:class:`float`]
+    offset: :data:`~typing.Optional`\[:class:`float`]
         The offset of the distortion.
         This defaults to ``0.0``.
-    scale: :data:`~typing.Optional`\\[:class:`float`]
+    scale: :data:`~typing.Optional`\[:class:`float`]
         The scale of the distortion.
         This defaults to ``1.0``.
     """
@@ -376,7 +377,6 @@ class Distortion:
     @property
     def payload(self) -> DistortionPayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: DistortionPayload = {}
 
         if self.sin_offset is not None:
@@ -407,6 +407,7 @@ class Distortion:
 
     @classmethod
     def from_payload(cls, payload: DistortionPayload) -> Self:
+        """Generate a :class:`Distortion` from a Lavalink payload."""
         return cls(
             sin_offset=payload.get("sinOffset"),
             sin_scale=payload.get("sinScale"),
@@ -421,22 +422,22 @@ class Distortion:
 
 @dataclass(unsafe_hash=True)
 class ChannelMix:
-    """Represents a filter which can be used to mix the audio channels.
+    r"""Represents a filter which can be used to mix the audio channels.
 
     Setting all of these to ``0.5`` will make the audio mono.
 
     Attributes
     ----------
-    left_to_left: :data:`~typing.Optional`\\[:class:`float`]
+    left_to_left: :data:`~typing.Optional`\[:class:`float`]
         The amount of the left channel to mix into the left channel.
         This defaults to ``1.0``.
-    left_to_right: :data:`~typing.Optional`\\[:class:`float`]
+    left_to_right: :data:`~typing.Optional`\[:class:`float`]
         The amount of the left channel to mix into the right channel.
         This defaults to ``0.0``.
-    right_to_left: :data:`~typing.Optional`\\[:class:`float`]
+    right_to_left: :data:`~typing.Optional`\[:class:`float`]
         The amount of the right channel to mix into the left channel.
         This defaults to ``0.0``.
-    right_to_right: :data:`~typing.Optional`\\[:class:`float`]
+    right_to_right: :data:`~typing.Optional`\[:class:`float`]
         The amount of the right channel to mix into the right channel.
         This defaults to ``1.0``.
     """
@@ -449,7 +450,6 @@ class ChannelMix:
     @property
     def payload(self) -> ChannelMixPayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: ChannelMixPayload = {}
 
         if self.left_to_left is not None:
@@ -468,6 +468,7 @@ class ChannelMix:
 
     @classmethod
     def from_payload(cls, payload: ChannelMixPayload) -> Self:
+        """Generate a :class:`ChannelMix` from a Lavalink payload."""
         return cls(
             left_to_left=payload.get("leftToLeft"),
             left_to_right=payload.get("leftToRight"),
@@ -478,7 +479,7 @@ class ChannelMix:
 
 @dataclass(unsafe_hash=True)
 class LowPass:
-    """Represents a filter which can be used to apply a `low pass filter` to audio.
+    r"""Represents a filter which can be used to apply a `low pass filter` to audio.
 
     High frequencies are suppressed, while low frequencies are passed through.
 
@@ -486,7 +487,7 @@ class LowPass:
 
     Attributes
     ----------
-    smoothing: :data:`~typing.Optional`\\[:class:`float`]
+    smoothing: :data:`~typing.Optional`\[:class:`float`]
         The smoothing of the low pass filter.
         This defaults to ``0.0``.
     """
@@ -496,7 +497,6 @@ class LowPass:
     @property
     def payload(self) -> LowPassPayload:
         """Generate the raw Lavalink payload for this filter."""
-
         data: LowPassPayload = {}
 
         if self.smoothing is not None:
@@ -506,12 +506,13 @@ class LowPass:
 
     @classmethod
     def from_payload(cls, payload: LowPassPayload) -> Self:
+        """Generate a :class:`LowPass` from a Lavalink payload."""
         return cls(smoothing=payload.get("smoothing"))
 
 
 @dataclass(unsafe_hash=True)
 class Filter:
-    """Represents a filter which can be applied to audio.
+    r"""Represents a filter which can be applied to audio.
 
     .. container:: operations
 
@@ -533,25 +534,25 @@ class Filter:
 
     Attributes
     ----------
-    equalizer: :data:`~typing.Optional`\\[:class:`Equalizer`]
+    equalizer: :data:`~typing.Optional`\[:class:`Equalizer`]
         The equalizer to use.
-    karaoke: :data:`~typing.Optional`\\[:class:`Karaoke`]
+    karaoke: :data:`~typing.Optional`\[:class:`Karaoke`]
         The karaoke filter to use.
-    timescale: :data:`~typing.Optional`\\[:class:`Timescale`]
+    timescale: :data:`~typing.Optional`\[:class:`Timescale`]
         The timescale filter to use.
-    tremolo: :data:`~typing.Optional`\\[:class:`Tremolo`]
+    tremolo: :data:`~typing.Optional`\[:class:`Tremolo`]
         The tremolo filter to use.
-    vibrato: :data:`~typing.Optional`\\[:class:`Vibrato`]
+    vibrato: :data:`~typing.Optional`\[:class:`Vibrato`]
         The vibrato filter to use.
-    rotation: :data:`~typing.Optional`\\[:class:`Rotation`]
+    rotation: :data:`~typing.Optional`\[:class:`Rotation`]
         The rotation filter to use.
-    distortion: :data:`~typing.Optional`\\[:class:`Distortion`]
+    distortion: :data:`~typing.Optional`\[:class:`Distortion`]
         The distortion filter to use.
-    channel_mix: :data:`~typing.Optional`\\[:class:`ChannelMix`]
+    channel_mix: :data:`~typing.Optional`\[:class:`ChannelMix`]
         The channel mix filter to use.
-    low_pass: :data:`~typing.Optional`\\[:class:`LowPass`]
+    low_pass: :data:`~typing.Optional`\[:class:`LowPass`]
         The low pass filter to use.
-    volume: :data:`~typing.Optional`\\[:class:`float`]
+    volume: :data:`~typing.Optional`\[:class:`float`]
         The volume to use.
     """
 
@@ -569,7 +570,6 @@ class Filter:
     @property
     def payload(self) -> Filters:
         """Generate the raw Lavalink payload for this filter."""
-
         payload: Filters = {}
 
         if self.equalizer:
@@ -607,7 +607,6 @@ class Filter:
     @classmethod
     def from_payload(cls, data: Filters) -> Self:
         """Generate a filter from a raw Lavalink payload."""
-
         self = cls()
 
         if "equalizer" in data:
@@ -643,8 +642,7 @@ class Filter:
         return self
 
     def __or__(self, other: Any) -> Filter:
-        # A | B uses A and replaces B, like dictionaries.
-
+        """Merge two filters together, favouring attributes from other."""
         if not isinstance(other, Filter):
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
@@ -662,8 +660,7 @@ class Filter:
         )
 
     def __ior__(self, other: Any) -> None:
-        # Like __or__ but |=
-
+        """Merge two filters together, favouring attributes from other, in place."""
         if not isinstance(other, Filter):
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
@@ -679,8 +676,7 @@ class Filter:
         self.volume = other.volume or self.volume
 
     def __and__(self, other: Any) -> Filter:
-        # A & B uses A and only B if A does not have that field.
-
+        """Merge two filters together, favouring attributes from self."""
         if not isinstance(other, Filter):
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
@@ -698,8 +694,7 @@ class Filter:
         )
 
     def __iand__(self, other: Any) -> None:
-        # Like __and__ but &=
-
+        """Merge two filters together, favouring attributes from self, in place."""
         if not isinstance(other, Filter):
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
