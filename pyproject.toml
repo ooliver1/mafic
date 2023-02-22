@@ -95,7 +95,7 @@ pythonVersion = "3.8"
 ignore = ["test_bot", "examples/**"]
 
 [tool.ruff]
-select = ["E", "F", "W", "I", "D", "UP", "YTT", "ANN", "S", "BLE", "FBT"]
+select = ["E", "F", "W", "I", "D", "UP", "YTT", "ANN", "S", "BLE", "FBT", "B"]
 # F403, F405 do not need to hate wildcard imports. Pyright can find undefined errors.
 # D107, class docstr is in the class level, may change in future.
 # D203 and D211, D212 and D213 intentionally clash
