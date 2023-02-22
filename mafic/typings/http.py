@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: MIT
+# ruff: noqa: UP013
+# `class` in `TypedDict` does not work as that is a reserved keyword
 
 from __future__ import annotations
 

@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from enum import Enum, auto
 from logging import getLogger
 from random import choice
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 from .node import Node
 from .type_variables import ClientT

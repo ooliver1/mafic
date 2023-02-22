@@ -35,7 +35,8 @@ from .warnings import *
 
 if TYPE_CHECKING:
     from asyncio import Task
-    from typing import Any, Literal, Sequence
+    from collections.abc import Sequence
+    from typing import Any, Literal
 
     from aiohttp import ClientWebSocketResponse
 
