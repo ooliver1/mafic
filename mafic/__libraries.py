@@ -42,7 +42,7 @@ for library in libraries:
         found.append(library)
 
 
-if not getenv("MAFIC_IGNORE_LIBRARY_CHECK", False):
+if not getenv("MAFIC_IGNORE_LIBRARY_CHECK", default=False):
     if len(found) == 0:
         raise NoCompatibleLibraries
     elif len(found) > 1:

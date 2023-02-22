@@ -593,7 +593,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             pause=pause,
         )
 
-    async def pause(self, pause: bool = True) -> None:
+    async def pause(self, pause: bool = True) -> None:  # noqa: FBT
         """Pause the current track.
 
         Parameters
@@ -625,7 +625,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
         This is a convenience method for :meth:`pause`, with ``pause`` set to
         ``False``.
         """
-        return await self.pause(False)
+        return await self.pause(False)  # noqa: FBT003
 
     async def stop(self) -> None:
         """Stop the current track.
