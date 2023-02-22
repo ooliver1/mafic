@@ -24,7 +24,7 @@ def visit_exception_hierarchy_node(
 
 
 def depart_exception_hierarchy_node(
-    self: HTML5Translator, node: exception_hierarchy
+    self: HTML5Translator, _node: exception_hierarchy
 ) -> None:
     self.body.append("</div>\n")
 

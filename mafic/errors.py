@@ -71,6 +71,8 @@ class TrackLoadException(PlayerException):
         The message returned by the node.
     severity: :data:`~typing.Literal`\[``"COMMON"``, ``"SUSPICIOUS"``, ``"FATAL"``]
         The severity of the error.
+    cause: :class:`str`
+        The cause of the error.
     """
 
     def __init__(
@@ -80,6 +82,7 @@ class TrackLoadException(PlayerException):
 
         self.message: str = message
         self.severity: ExceptionSeverity = severity
+        self.cause: str = cause
 
     @classmethod
     def from_data(cls, data: LavalinkException) -> Self:

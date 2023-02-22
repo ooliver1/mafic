@@ -77,30 +77,30 @@ def visit_attributetable_item_node(self: HTML5Translator, node: attributetable) 
     self.body.append(self.starttag(node, "li", CLASS="py-attribute-table-entry"))
 
 
-def depart_attributetable_node(self: HTML5Translator, node: attributetable) -> None:
+def depart_attributetable_node(self: HTML5Translator, _node: attributetable) -> None:
     self.body.append("</div>")
 
 
 def depart_attributetablecolumn_node(
-    self: HTML5Translator, node: attributetablecolumn
+    self: HTML5Translator, _node: attributetablecolumn
 ) -> None:
     self.body.append("</div>")
 
 
 def depart_attributetabletitle_node(
-    self: HTML5Translator, node: attributetabletitle
+    self: HTML5Translator, _node: attributetabletitle
 ) -> None:
     self.body.append("</span>")
 
 
 def depart_attributetablebadge_node(
-    self: HTML5Translator, node: attributetablebadge
+    self: HTML5Translator, _node: attributetablebadge
 ) -> None:
     self.body.append("</span>")
 
 
 def depart_attributetable_item_node(
-    self: HTML5Translator, node: attributetable_item
+    self: HTML5Translator, _node: attributetable_item
 ) -> None:
     self.body.append("</li>")
 
@@ -203,7 +203,7 @@ class TableElement(NamedTuple):
     badge: attributetablebadge | None
 
 
-def process_attributetable(app: Sphinx, doctree: document, fromdocname: str) -> None:
+def process_attributetable(app: Sphinx, doctree: document, _fromdocname: str) -> None:
     env = app.builder.env
 
     lookup = build_lookup_table(env)

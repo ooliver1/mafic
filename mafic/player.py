@@ -366,8 +366,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
     async def connect(
         self,
         *,
-        timeout: float,
-        reconnect: bool,
+        timeout: float,  # noqa: ARG002
+        reconnect: bool,  # noqa: ARG002
         self_mute: bool = False,
         self_deaf: bool = False,
     ) -> None:

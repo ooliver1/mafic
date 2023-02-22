@@ -16,9 +16,7 @@ __all__ = ("classproperty",)
 class _ClassPropertyDescriptor(Generic[T]):
     """A descriptor that mimics the behavior of a property, but for classmethods."""
 
-    def __init__(
-        self, fget: classmethod[T] | staticmethod[T], fset: None = None
-    ) -> None:
+    def __init__(self, fget: classmethod[T] | staticmethod[T]) -> None:
         self.fget = fget
 
     def __get__(self, instance: object, owner: type | None = None) -> T:

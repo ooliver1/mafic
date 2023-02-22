@@ -60,14 +60,14 @@ class TestBot(BotBase):
     # Gateway-proxy is used to keep gateway connections alive.
     # This is added in testing to ensure resuming a connection works, even over restart.
     async def launch_shard(
-        self, gateway: str, shard_id: int, *, initial: bool = False
+        self, _gateway: str, shard_id: int, *, initial: bool = False
     ) -> None:
         return await super().launch_shard(
             environ["GW_PROXY"], shard_id, initial=initial
         )
 
     async def before_identify_hook(
-        self, shard_id: int | None, *, initial: bool = False
+        self, _shard_id: int | None, *, initial: bool = False  # noqa: ARG002
     ) -> None:
         # gateway-proxy
         return
