@@ -211,9 +211,9 @@ def process_attributetable(app: Sphinx, doctree: document, fromdocname: str) -> 
             node["python-class"],
             node["python-full-name"],
         )
-        assert isinstance(modulename, str)
-        assert isinstance(classname, str)
-        assert isinstance(fullname, str)
+        assert isinstance(modulename, str)  # noqa: S101
+        assert isinstance(classname, str)  # noqa: S101
+        assert isinstance(fullname, str)  # noqa: S101
 
         groups = get_class_results(lookup, modulename, classname, fullname)
         table = attributetable("")

@@ -513,7 +513,8 @@ class Node(Generic[ClientT]):
 
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
         await self._client.wait_until_ready()
-        assert self._client.user is not None
+        if self._client.user is None:
+            raise RuntimeError("Client.user is None")
 
         if self.__session is None:
             self.__session = await self._create_session()

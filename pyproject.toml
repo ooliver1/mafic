@@ -95,7 +95,7 @@ pythonVersion = "3.8"
 ignore = ["test_bot", "examples/**"]
 
 [tool.ruff]
-select = ["E", "F", "W", "I", "D", "UP", "YTT", "ANN"]
+select = ["E", "F", "W", "I", "D", "UP", "YTT", "ANN", "S"]
 # F403, F405 do not need to hate wildcard imports. Pyright can find undefined errors.
 # D107, class docstr is in the class level, may change in future.
 # D203 and D211, D212 and D213 intentionally clash
@@ -108,9 +108,9 @@ keep-runtime-typing = true
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
 "mafic/typings/*" = ["D"]
-"test_bot/*" = ["D", "ANN"]
+"test_bot/*" = ["D", "ANN", "S101", "S106"]
 "docs/*" = ["D"]
-"examples/*" = ["D", "ANN"]
+"examples/*" = ["D", "ANN", "S101", "S106"]
 
 [build-system]
 requires = ["poetry-core"]

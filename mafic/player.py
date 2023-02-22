@@ -319,7 +319,10 @@ class Player(VoiceProtocol, Generic[ClientT]):
             return self.cleanup()
 
         channel = self.guild.get_channel(int(channel_id))
-        assert isinstance(channel, (StageChannel, VoiceChannel))
+        if not isinstance(channel, (VoiceChannel, StageChannel)):
+            raise TypeError(
+                "Channel was not a connectable channel that was recognised."
+            )
 
         self.channel = channel
 
