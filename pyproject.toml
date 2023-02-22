@@ -123,12 +123,15 @@ select = [
     "PGH",
     "PLC",
     "PLE",
+    "PLR",
+    "PLW",
 ]
 # F403, F405 do not need to hate wildcard imports. Pyright can find undefined errors.
 # D107, class docstr is in the class level, may change in future.
 # D203 and D211, D212 and D213 intentionally clash
 # ANN101, ANN102 ask for `self` and `cls` annotations, what?
 # RET505-RET508 does not allow for any branches where it is an elif and else after a return
+# PLR2004 too much to deal with right now
 ignore = [
     "F403",
     "F405",
@@ -141,6 +144,7 @@ ignore = [
     "RET506",
     "RET507",
     "RET508",
+    "PLR2004",
 ]
 unfixable = ["RET502", "RET503"]
 
