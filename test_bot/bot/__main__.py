@@ -153,6 +153,7 @@ async def play(inter: Interaction, query: str):
     await player.play(track)
 
     await inter.send(f"Playing {track}")
+    return None
 
 
 @bot.slash_command()
@@ -165,6 +166,7 @@ async def stop(inter: Interaction):
 
     await player.stop()
     await inter.send("Stopped playing.")
+    return None
 
 
 @bot.listen()
@@ -210,6 +212,7 @@ async def stats(inter: Interaction):
             playing_player_count=stats.playing_player_count,
         )
     )
+    return None
 
 
 # Test bot, do not have an open close command.
@@ -232,6 +235,7 @@ async def boost(inter: Interaction):
     await player.add_filter(bassboost_filter, label="boost")
 
     await inter.send("Boost enabled.")
+    return None
 
 
 @bot.slash_command()
@@ -244,6 +248,7 @@ async def unboost(inter: Interaction):
     await player.remove_filter("boost")
 
     await inter.send("Boost disabled.")
+    return None
 
 
 bot.run(getenv("TOKEN"))

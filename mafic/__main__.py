@@ -26,7 +26,7 @@ def show_version() -> None:
     """Show version information."""
     version = mafic.__version__
     uname = platform.uname()
-    print(
+    print(  # noqa: T201
         VERSION_OUTPUT.format(
             py=sys.version_info,
             mafic=version,

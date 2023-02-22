@@ -118,7 +118,7 @@ def decode_track(track_id: str) -> Track:
         The decoded track.
     """
     raw = b64decode(track_id)
-    print(raw)
+    # print(raw)
     iterator = _TrackDataIterator(raw)
 
     # https://github.com/sedmelluq/lavaplayer/blob/97a8efecfe3cb79da4d7d0422de0179e18c30947/main/src/main/java/com/sedmelluq/discord/lavaplayer/player/DefaultAudioPlayerManager.java#L268

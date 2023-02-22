@@ -506,7 +506,7 @@ class Node(Generic[ClientT]):
             You can change the timeout with the `timeout` parameter.
         """
         if self._ws is not None:
-            raise NodeAlreadyConnected()
+            raise NodeAlreadyConnected
 
         _log.info("Waiting for client to be ready...", extra={"label": self._label})
         await self._client.wait_until_ready()
@@ -962,6 +962,7 @@ class Node(Generic[ClientT]):
             raise TrackLoadException.from_data(data["exception"])
         else:
             _log.warning("Unknown load type recieved: %s", data["loadType"])
+            return None
 
     async def decode_track(self, track: str) -> Track:
         """Decode a track from the encoded base64 data.

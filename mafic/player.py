@@ -326,8 +326,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         self.channel = channel
 
-        if self._session_id != before_session_id:
-            await self._dispatch_player_update()
+        if self._session_id != before_session_id:  # noqa: RET503
+            await self._dispatch_player_update()  # noqa: RET503
 
     async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
         """Handle a voice server update.
