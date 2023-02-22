@@ -163,9 +163,11 @@ class Node(Generic[ClientT]):
         "__session",
         "_available",
         "_client",
+        "_connect_task",
         "_heartbeat",
         "_host",
         "_label",
+        "_msg_tasks",
         "_players",
         "_port",
         "_resume_key",
@@ -226,6 +228,9 @@ class Node(Generic[ClientT]):
 
         self._stats: NodeStats | None = None
         self._session_id: str | None = None
+
+        self._msg_tasks: set[Task[None]] = set()
+        self._connect_task: Task[None] | None = None
 
     @property
     def host(self) -> str:
@@ -553,7 +558,13 @@ class Node(Generic[ClientT]):
             )
             await sleep(delay)
 
-            create_task(self.connect(backoff=backoff))
+            task = create_task(self.connect(backoff=backoff))
+            self._connect_task = task
+
+            def remove_task(_: Task[None]) -> None:
+                self._connect_task = None
+
+            task.add_done_callback(remove_task)
 
         _log.info("Connected to lavalink.", extra={"label": self._label})
 
@@ -620,14 +631,22 @@ class Node(Generic[ClientT]):
                 )
 
                 await sleep(wait_time)
-                create_task(self.connect(backoff=backoff))
+                task = create_task(self.connect(backoff=backoff))
+                self._connect_task = task
+
+                def remove_task(_: Task[None]) -> None:
+                    self._connect_task = None
+
+                task.add_done_callback(remove_task)
                 return
             else:
                 _log.debug(
                     "Creating task to handle websocket message.",
                     extra={"label": self._label},
                 )
-                create_task(self._handle_msg(msg.json(loads=loads)))
+                task = create_task(self._handle_msg(msg.json(loads=loads)))
+                self._msg_tasks.add(task)
+                task.add_done_callback(self._msg_tasks.discard)
 
     async def _handle_msg(self, data: IncomingMessage) -> None:
         """Handle a message from the websocket.
@@ -895,7 +914,7 @@ class Node(Generic[ClientT]):
             json=json,
             params=params,
             headers={"Authorization": self.__password},
-        ) as resp:  # noqa: ANN401
+        ) as resp:
             _log.debug("Received status %s from lavalink.", resp.status)
             if resp.status == 204:
                 return None
