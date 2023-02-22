@@ -8,7 +8,7 @@ import importlib
 import inspect
 import re
 from collections import OrderedDict
-from typing import Callable, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 from docutils import nodes
 from docutils.nodes import document
@@ -207,8 +207,9 @@ def process_attributetable(app: Sphinx, doctree: document, fromdocname: str):
             if not subitems:
                 continue
 
-            key: Callable[[TableElement], str] = lambda c: c.label
-            table.append(class_results_to_node(label, sorted(subitems, key=key)))
+            table.append(
+                class_results_to_node(label, sorted(subitems, key=lambda c: c.label))
+            )
 
         table["python-class"] = fullname
 

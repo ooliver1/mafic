@@ -61,7 +61,7 @@ class WebSocketClosedEvent(Generic[PlayerT]):
         The close code.
         Find what this can be in the Discord `docs`_.
 
-        .. _docs: https://discord.com/developers/docs/topics/opcodes-and-status-codes#close-event-codes.
+        .. _docs: https://discord.dev/topics/opcodes-and-status-codes#close-event-codes.
     reason: :class:`str`
         The close reason.
     by_discord: :class:`bool`

@@ -149,7 +149,7 @@ class Node(Generic[ClientT]):
 
     Attributes
     ----------
-    regions: :data:`~typing.Optional`\\[:class:`list`\\[:class:`~mafic.region.VoiceRegion`]]
+    regions: :data:`~typing.Optional`\\[:class:`list`\\[:class:`~.VoiceRegion`]]
         The regions that the node can be used in.
         This is used to determine when to use this node.
     shard_ids: :data:`~typing.Optional`\\[:class:`list`\\[:class:`int`]]

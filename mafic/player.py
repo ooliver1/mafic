@@ -270,7 +270,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
             if track is None:
                 _log.error(
-                    "Received track exception event but no track was playing, discarding."
+                    "Received track exception event but no track was playing, "
+                    "discarding."
                 )
                 return
 
@@ -313,7 +314,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
         channel_id = data["channel_id"]
 
         if channel_id is None:  # pyright: ignore[reportUnnecessaryComparison]
-            # This can happen and is on disconnect, not sure why this is typed as always Snowflake.
+            # This can happen and is on disconnect.
+            # Not sure why this is typed as always Snowflake.
             return self.cleanup()
 
         channel = self.guild.get_channel(int(channel_id))
