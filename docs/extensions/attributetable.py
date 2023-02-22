@@ -8,16 +8,18 @@ import importlib
 import inspect
 import re
 from collections import OrderedDict
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from docutils import nodes
-from docutils.nodes import document
 from sphinx import addnodes
-from sphinx.application import Sphinx
-from sphinx.environment import BuildEnvironment
 from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
-from sphinx.writers.html5 import HTML5Translator
+
+if TYPE_CHECKING:
+    from docutils.nodes import document
+    from sphinx.application import Sphinx
+    from sphinx.environment import BuildEnvironment
+    from sphinx.writers.html5 import HTML5Translator
 
 
 class attributetable(nodes.General, nodes.Element):

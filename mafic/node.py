@@ -15,8 +15,6 @@ from typing import TYPE_CHECKING, Generic, cast
 import aiohttp
 import yarl
 
-from mafic.typings.http import TrackWithInfo
-
 from .__libraries import MISSING, ExponentialBackoff, dumps, loads
 from .errors import *
 from .ip import (
@@ -31,6 +29,13 @@ from .region import Group, Region, VoiceRegion
 from .stats import NodeStats
 from .track import Track
 from .type_variables import ClientT
+from .typings import (
+    BalancingIPRouteDetails,
+    NanoIPRouteDetails,
+    RotatingIPRouteDetails,
+    RotatingNanoIPRouteDetails,
+    TrackWithInfo,
+)
 from .warnings import *
 
 if TYPE_CHECKING:
@@ -45,17 +50,13 @@ if TYPE_CHECKING:
     from .ip import RoutePlannerStatus
     from .player import Player
     from .typings import (
-        BalancingIPRouteDetails,
         Coro,
         EventPayload,
         IncomingMessage,
-        NanoIPRouteDetails,
         OutgoingMessage,
         OutgoingParams,
         Player as PlayerPayload,
         PluginData,
-        RotatingIPRouteDetails,
-        RotatingNanoIPRouteDetails,
         RoutePlannerStatus as RoutePlannerStatusPayload,
         TrackInfo,
         TrackLoadingResult,

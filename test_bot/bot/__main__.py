@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 import orjson
 from botbase import BotBase
 from nextcord import Intents, Interaction
-from nextcord.abc import Connectable
 
 from mafic import (
     EQBand,
@@ -30,6 +29,7 @@ from mafic import (
 if TYPE_CHECKING:
     from typing import TypedDict
 
+    from nextcord.abc import Connectable
     from typing_extensions import NotRequired
 
     class LavalinkInfo(TypedDict):

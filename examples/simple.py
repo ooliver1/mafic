@@ -5,13 +5,15 @@ from __future__ import annotations
 import traceback
 from logging import DEBUG, getLogger
 from os import getenv
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from nextcord import Intents, Interaction, Member
-from nextcord.abc import Connectable
 from nextcord.ext import commands
 
 from mafic import NodePool, Player, Playlist, Track, TrackEndEvent
+
+if TYPE_CHECKING:
+    from nextcord.abc import Connectable
 
 getLogger("mafic").setLevel(DEBUG)
 

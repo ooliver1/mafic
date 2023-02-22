@@ -20,7 +20,6 @@ from .__libraries import (
 from .errors import NoNodesAvailable, PlayerNotConnected
 from .events import *
 from .filter import Filter
-from .playlist import Playlist
 from .pool import NodePool
 from .search_type import SearchType
 from .track import Track
@@ -34,6 +33,7 @@ if TYPE_CHECKING:
         VoiceServerUpdatePayload,
     )
     from .node import Node
+    from .playlist import Playlist
     from .typings import EventPayload, Player as PlayerPayload, PlayerUpdateState
 
 

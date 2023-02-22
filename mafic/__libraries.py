@@ -119,8 +119,8 @@ else:
 
     if TYPE_CHECKING:
         from discord.types.voice import (
-            GuildVoiceState as GuildVoiceStatePayload,
-            VoiceServerUpdate as VoiceServerUpdatePayload,
+            GuildVoiceState as GuildVoiceStatePayload,  # noqa: TCH004
+            VoiceServerUpdate as VoiceServerUpdatePayload,  # noqa: TCH004
         )
 
 

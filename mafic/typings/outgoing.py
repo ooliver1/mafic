@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import List, TypedDict, Union
+from typing import TYPE_CHECKING, List, TypedDict, Union
 
-from .common import Filters, VoiceStateRequest
+if TYPE_CHECKING:
+    from .common import Filters, VoiceStateRequest
 
 __all__ = (
     "DecodeTrackParams",
