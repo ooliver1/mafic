@@ -127,7 +127,7 @@ else:
 try:
     from orjson import dumps as _dumps, loads
 
-    def dumps(obj: Any) -> str:
+    def dumps(obj: Any) -> str:  # noqa: ANN401
         return _dumps(obj).decode()
 
 except ImportError:

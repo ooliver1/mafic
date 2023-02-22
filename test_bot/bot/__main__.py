@@ -47,7 +47,7 @@ getLogger("mafic").setLevel(DEBUG)
 
 
 class TestBot(BotBase):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             shard_count=2 if getenv("TEST_BALANCING") else None,
             shard_ids=[0, 1] if getenv("TEST_BALANCING") else None,

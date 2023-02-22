@@ -859,7 +859,7 @@ class Node(Generic[ClientT]):
         path: str,
         json: OutgoingMessage | None = None,
         params: OutgoingParams | None = None,
-    ) -> Any:
+    ) -> Any:  # noqa: ANN401
         """Send a request to the node.
 
         Parameters
@@ -897,7 +897,7 @@ class Node(Generic[ClientT]):
             json=json,
             params=params,
             headers={"Authorization": self.__password},
-        ) as resp:
+        ) as resp:  # noqa: ANN401
             _log.debug("Received status %s from lavalink.", resp.status)
             if resp.status == 204:
                 return None

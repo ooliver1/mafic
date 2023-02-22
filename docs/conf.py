@@ -89,7 +89,7 @@ aliases = {
 }
 
 
-def typehints_formatter(annotation: Any, _: Config) -> str | None:
+def typehints_formatter(annotation: Any, _: Config) -> str | None:  # noqa: ANN401
     return aliases.get(annotation, None)
 
 

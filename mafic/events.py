@@ -73,7 +73,9 @@ class WebSocketClosedEvent(Generic[PlayerT]):
 
     __slots__ = ("code", "reason", "by_discord", "player")
 
-    def __init__(self, *, payload: WebSocketClosedEventPayload, player: PlayerT):
+    def __init__(
+        self, *, payload: WebSocketClosedEventPayload, player: PlayerT
+    ) -> None:
         self.code: int = payload["code"]
         self.reason: str = payload["reason"]
         self.by_discord: bool = payload["byRemote"]
@@ -100,7 +102,7 @@ class TrackStartEvent(Generic[PlayerT]):
 
     __slots__ = ("track", "player")
 
-    def __init__(self, *, track: Track, player: PlayerT):
+    def __init__(self, *, track: Track, player: PlayerT) -> None:
         self.track: Track = track
         self.player: PlayerT = player
 
@@ -124,7 +126,9 @@ class TrackEndEvent(Generic[PlayerT]):
 
     __slots__ = ("track", "reason", "player")
 
-    def __init__(self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT):
+    def __init__(
+        self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT
+    ) -> None:
         self.track: Track = track
         self.reason: EndReason = EndReason(payload["reason"])
         self.player: PlayerT = player
@@ -155,7 +159,7 @@ class TrackExceptionEvent(Generic[PlayerT]):
         track: Track,
         payload: TrackExceptionEventPayload,
         player: PlayerT,
-    ):
+    ) -> None:
         self.track: Track = track
         self.exception: LavalinkException = payload["exception"]
         self.player: PlayerT = player
@@ -184,7 +188,7 @@ class TrackStuckEvent(Generic[PlayerT]):
 
     def __init__(
         self, *, track: Track, payload: TrackStuckEventPayload, player: PlayerT
-    ):
+    ) -> None:
         self.track: Track = track
         self.threshold_ms: int = payload["thresholdMs"]
         self.player: PlayerT = player

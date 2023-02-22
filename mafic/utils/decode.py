@@ -25,7 +25,7 @@ class _TrackDataIterator(Iterator[int]):
     _TRACK_INFO_VERSIONED = 1
     _FLAG_MASK = 0xC0000000
 
-    def __init__(self, data: bytes):
+    def __init__(self, data: bytes) -> None:
         self.__iterable = iter(data)
 
         # https://github.com/sedmelluq/lavaplayer/blob/97a8efecfe3cb79da4d7d0422de0179e18c30947/main/src/main/java/com/sedmelluq/discord/lavaplayer/tools/io/MessageInput.java#L37

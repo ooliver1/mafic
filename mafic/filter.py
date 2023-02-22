@@ -9,8 +9,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any
-
     from typing_extensions import Self
 
     from .typings import (
@@ -641,9 +639,11 @@ class Filter:
 
         return self
 
-    def __or__(self, other: Any) -> Filter:
+    def __or__(self, other: Filter) -> Filter:
         """Merge two filters together, favouring attributes from other."""
-        if not isinstance(other, Filter):
+        if not isinstance(
+            other, Filter
+        ):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
         return Filter(
@@ -659,9 +659,11 @@ class Filter:
             volume=other.volume or self.volume,
         )
 
-    def __ior__(self, other: Any) -> None:
+    def __ior__(self, other: Filter) -> None:
         """Merge two filters together, favouring attributes from other, in place."""
-        if not isinstance(other, Filter):
+        if not isinstance(
+            other, Filter
+        ):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
         self.equalizer = other.equalizer or self.equalizer
@@ -675,9 +677,11 @@ class Filter:
         self.low_pass = other.low_pass or self.low_pass
         self.volume = other.volume or self.volume
 
-    def __and__(self, other: Any) -> Filter:
+    def __and__(self, other: Filter) -> Filter:
         """Merge two filters together, favouring attributes from self."""
-        if not isinstance(other, Filter):
+        if not isinstance(
+            other, Filter
+        ):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
         return Filter(
@@ -693,9 +697,11 @@ class Filter:
             volume=self.volume or other.volume,
         )
 
-    def __iand__(self, other: Any) -> None:
+    def __iand__(self, other: Filter) -> None:
         """Merge two filters together, favouring attributes from self, in place."""
-        if not isinstance(other, Filter):
+        if not isinstance(
+            other, Filter
+        ):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError(f"Expected Filter instance, not {type(other)!r}")
 
         self.equalizer = self.equalizer or other.equalizer

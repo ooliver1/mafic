@@ -28,7 +28,7 @@ class Playlist:
 
     __slots__ = ("name", "selected_track", "tracks")
 
-    def __init__(self, *, info: PlaylistInfo, tracks: list[TrackWithInfo]):
+    def __init__(self, *, info: PlaylistInfo, tracks: list[TrackWithInfo]) -> None:
         self.name: str = info["name"]
         self.selected_track: int = info["selectedTrack"]
         self.tracks: list[Track] = [
