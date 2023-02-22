@@ -232,10 +232,7 @@ class NodePool(Generic[ClientT]):
 
         strategies = strategies or cls._default_strategies
 
-        if callable(strategies):
-            actual_strategies = [strategies]
-        else:
-            actual_strategies = strategies
+        actual_strategies = [strategies] if callable(strategies) else strategies
 
         nodes = cls.nodes
 

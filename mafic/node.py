@@ -444,10 +444,7 @@ class Node(Generic[ClientT]):
                 major = int(major)
                 minor = int(minor)
 
-                if major != 3:
-                    msg = f"Unsupported lavalink version {version} (expected 3.7.x)"
-                    raise RuntimeError(msg)
-                elif minor < 7:
+                if major != 3 or minor < 7:
                     msg = f"Unsupported lavalink version {version} (expected 3.7.x)"
                     raise RuntimeError(msg)
                 elif minor > 7:

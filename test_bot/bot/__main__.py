@@ -82,7 +82,7 @@ class TestBot(BotBase):
                 regions = []
                 for region_str in node["regions"]:
                     for cls in REGION_CLS:
-                        if region_str in cls.__members__.keys():
+                        if region_str in cls.__members__:
                             region = cls[region_str]
                             break
                     else:
