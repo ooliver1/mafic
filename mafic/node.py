@@ -538,10 +538,11 @@ class Node(Generic[ClientT]):
         )
         try:
             await self._connect_to_websocket(headers=headers, session=session)
-        except Exception:
+        except Exception as e:  # noqa: BLE001
             _log.error(
-                "Failed to connect to lavalink at %s",
+                "Failed to connect to lavalink at %s: %s",
                 self._rest_uri,
+                e,
                 extra={"label": self._label},
             )
             print_exc()
