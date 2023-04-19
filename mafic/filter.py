@@ -694,7 +694,7 @@ class Filter:
         )
 
     def __repr__(self) -> str:
-        """Gemerate the string representation of this filter."""
+        """Generate the string representation of this filter."""
         slots = self.__slots__
 
         attrs = [
