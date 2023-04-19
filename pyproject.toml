@@ -153,6 +153,9 @@ unfixable = ["RET502", "RET503"]
 [tool.ruff.pyupgrade]
 keep-runtime-typing = true
 
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
 "mafic/typings/*" = ["D"]
