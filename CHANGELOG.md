@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/ooliver1/mafic/compare/v2.0.1...v2.1.0) (2023-04-19)
+
+
+### Features
+
+* **filter:** allow more types for Equalizer ([#61](https://github.com/ooliver1/mafic/issues/61)) ([a3d2596](https://github.com/ooliver1/mafic/commit/a3d2596eab8223dca94174ab4977e97b25ed5b3b))
+* **player:** add has_filter method ([#63](https://github.com/ooliver1/mafic/issues/63)) ([bda2301](https://github.com/ooliver1/mafic/commit/bda230188a9a2f5c39effa8e26093c0484f652ed))
+
 ## [2.0.1](https://github.com/ooliver1/mafic/compare/v2.0.0...v2.0.1) (2023-02-17)
 
 
