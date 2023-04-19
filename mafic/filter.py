@@ -63,11 +63,16 @@ class EQBand:
         return {"band": self.band, "gain": self.gain}
 
 
-@dataclass(unsafe_hash=True)
 class Equalizer:
     r"""Represents an `equaliser`_.
 
     .. _equaliser: https://en.wikipedia.org/wiki/Equalization_(audio)
+
+    .. versionchanged:: 2.1
+
+        Added support for :class:`list`\s of
+        :class:`tuple`\[:class:`int`, :class:`float`] and :class:`float` to the
+        constructor.
 
     Attributes
     ----------
@@ -75,7 +80,41 @@ class Equalizer:
         The bands to set the gains of.
     """
 
-    bands: list[EQBand]
+    __slots__ = ("bands",)
+
+    def __init__(
+        self, bands: list[EQBand] | list[tuple[int, float]] | list[float]
+    ) -> None:
+        self.bands = [self._convert_band(band, i) for i, band in enumerate(bands)]
+
+    @staticmethod
+    def _convert_band(band: EQBand | tuple[int, float] | float, i: int) -> EQBand:
+        if isinstance(band, EQBand):
+            return band
+        elif isinstance(band, tuple):
+            return EQBand(band=band[0], gain=band[1])
+        elif isinstance(
+            band, (float, int)
+        ):  # pyright: ignore[reportUnnecessaryIsInstance]
+            return EQBand(band=i, gain=band)
+        else:
+            msg = f"Expected EQBand, tuple[int, float] or float, got {band!r}"
+            raise TypeError(msg)
+
+    def __eq__(self, other: object) -> bool:
+        """Check if this equaliser is equal to another."""
+        if not isinstance(other, Equalizer):
+            return NotImplemented
+
+        return self.bands == other.bands
+
+    def __repr__(self) -> str:
+        """Generate a representation of this equaliser."""
+        return f"<Equalizer bands={self.bands!r}>"
+
+    def __hash__(self) -> int:
+        """Get the hash of this equaliser."""
+        return hash(tuple(self.bands))
 
     @property
     def payload(self) -> list[EQBandPayload]:
@@ -508,7 +547,6 @@ class LowPass:
         return cls(smoothing=payload.get("smoothing"))
 
 
-@dataclass(unsafe_hash=True)
 class Filter:
     r"""Represents a filter which can be applied to audio.
 
@@ -529,6 +567,14 @@ class Filter:
         .. describe:: x &= y
 
             Merges two filters together, favouring attributes from y, assigning to x.
+
+    .. versionchanged:: 2.1
+
+        ``equalizer`` now accepts a :class:`list` of any of the following:
+
+        - :class:`tuple`\[:class:`int`, :class:`float`\]
+        - :class:`float`
+        - :class:`EQBand`
 
     Attributes
     ----------
@@ -554,16 +600,110 @@ class Filter:
         The volume to use.
     """
 
-    equalizer: Equalizer | None = None
-    karaoke: Karaoke | None = None
-    timescale: Timescale | None = None
-    tremolo: Tremolo | None = None
-    vibrato: Vibrato | None = None
-    rotation: Rotation | None = None
-    distortion: Distortion | None = None
-    channel_mix: ChannelMix | None = None
-    low_pass: LowPass | None = None
-    volume: float | None = None
+    __slots__ = (
+        "equalizer",
+        "karaoke",
+        "timescale",
+        "tremolo",
+        "vibrato",
+        "rotation",
+        "distortion",
+        "channel_mix",
+        "low_pass",
+        "volume",
+    )
+
+    def __init__(
+        self,
+        *,
+        equalizer: Equalizer
+        | list[tuple[int, float]]
+        | list[float]
+        | list[EQBand]
+        | None = None,
+        karaoke: Karaoke | None = None,
+        timescale: Timescale | None = None,
+        tremolo: Tremolo | None = None,
+        vibrato: Vibrato | None = None,
+        rotation: Rotation | None = None,
+        distortion: Distortion | None = None,
+        channel_mix: ChannelMix | None = None,
+        low_pass: LowPass | None = None,
+        volume: float | None = None,
+    ) -> None:
+        self.equalizer: Equalizer | None = self._convert_equalizer(equalizer)
+        self.karaoke: Karaoke | None = karaoke
+        self.timescale: Timescale | None = timescale
+        self.tremolo: Tremolo | None = tremolo
+        self.vibrato: Vibrato | None = vibrato
+        self.rotation: Rotation | None = rotation
+        self.distortion: Distortion | None = distortion
+        self.channel_mix: ChannelMix | None = channel_mix
+        self.low_pass: LowPass | None = low_pass
+        self.volume: float | None = volume
+
+    def _convert_equalizer(
+        self,
+        equalizer: Equalizer
+        | list[tuple[int, float]]
+        | list[float]
+        | list[EQBand]
+        | None,
+    ) -> Equalizer | None:
+        if equalizer is None:
+            return None
+
+        if isinstance(equalizer, list):
+            return Equalizer(equalizer)
+
+        return equalizer
+
+    def __hash__(self) -> int:
+        """Get the hash of this filter."""
+        return hash(
+            (
+                self.equalizer,
+                self.karaoke,
+                self.timescale,
+                self.tremolo,
+                self.vibrato,
+                self.rotation,
+                self.distortion,
+                self.channel_mix,
+                self.low_pass,
+                self.volume,
+            )
+        )
+
+    def __eq__(self, other: object) -> bool:
+        """Check if two filters are equal."""
+        if not isinstance(other, Filter):
+            return NotImplemented
+
+        return (
+            self.equalizer == other.equalizer
+            and self.karaoke == other.karaoke
+            and self.timescale == other.timescale
+            and self.tremolo == other.tremolo
+            and self.vibrato == other.vibrato
+            and self.rotation == other.rotation
+            and self.distortion == other.distortion
+            and self.channel_mix == other.channel_mix
+            and self.low_pass == other.low_pass
+            and self.volume == other.volume
+        )
+
+    def __repr__(self) -> str:
+        """Gemerate the string representation of this filter."""
+        slots = self.__slots__
+
+        attrs = [
+            f"{attr}={getattr(self, attr)!r}"
+            for attr in slots
+            if getattr(self, attr) is not None
+        ]
+
+        return f"<Filter {' '.join(attrs)}>" if attrs else "<Filter>"
 
     @property
     def payload(self) -> Filters:
