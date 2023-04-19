@@ -683,6 +683,23 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         await self._update_filters(fast_apply=fast_apply)
 
+    async def has_filter(self, label: str) -> bool:
+        """Check if the player has a filter with the given label.
+
+        .. versionadded:: 2.1
+
+        Parameters
+        ----------
+        label:
+            The label to check for.
+
+        Returns
+        -------
+        :class:`bool`
+            Whether the player has a filter with the given label.
+        """
+        return label in self._filters
+
     async def remove_filter(self, label: str, *, fast_apply: bool = False) -> None:
         """Remove a filter from the player.
 
