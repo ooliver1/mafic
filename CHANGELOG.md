@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.1](https://github.com/ooliver1/mafic/compare/v2.1.0...v2.1.1) (2023-04-30)
+
+
+### Bug Fixes
+
+* **node:** urlencode query ([#66](https://github.com/ooliver1/mafic/issues/66)) ([f31ff5e](https://github.com/ooliver1/mafic/commit/f31ff5e8ddd2bbe728f9b4a61a4b5fb88ababcad))
+
+
+### Documentation
+
+* **filter:** gemerate ([bb17994](https://github.com/ooliver1/mafic/commit/bb17994f2642dc9d627fb2d4e43ffc16a1cb32c6))
+
 ## [2.1.0](https://github.com/ooliver1/mafic/compare/v2.0.1...v2.1.0) (2023-04-19)
 
 
