@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/ooliver1/mafic/compare/v2.1.1...v2.1.2) (2023-04-30)
+
+
+### Reverts
+
+* "fix(node): urlencode query ([#66](https://github.com/ooliver1/mafic/issues/66))" ([2308d15](https://github.com/ooliver1/mafic/commit/2308d156f34ade79725ed3cab745a0c94187044f))
+
 ## [2.1.1](https://github.com/ooliver1/mafic/compare/v2.1.0...v2.1.1) (2023-04-30)
 
 
