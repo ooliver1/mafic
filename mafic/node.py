@@ -11,7 +11,6 @@ from asyncio import Event, TimeoutError, create_task, gather, sleep, wait_for
 from logging import getLogger
 from traceback import print_exc
 from typing import TYPE_CHECKING, Generic, cast
-from urllib.parse import quote
 
 import aiohttp
 import yarl
@@ -965,7 +964,7 @@ class Node(Generic[ClientT]):
             query = f"{search_type}:{query}"
 
         data: TrackLoadingResult = await self.__request(
-            "GET", "loadtracks", params={"identifier": quote(query)}
+            "GET", "loadtracks", params={"identifier": query}
         )
 
         if data["loadType"] == "NO_MATCHES":
