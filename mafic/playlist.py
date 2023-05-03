@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .track import Track
 
@@ -24,13 +24,24 @@ class Playlist:
         The index of the selected track, if any.
     tracks: :class:`list`\[:class:`Track`]
         A list of tracks in the playlist.
+    plugin_info: :class:`dict`\[:class:`str`, :class:`Any`]
+        A dictionary containing plugin-specific information.
+
+        .. versionadded:: 2.3
     """
 
-    __slots__ = ("name", "selected_track", "tracks")
+    __slots__ = ("name", "plugin_info", "selected_track", "tracks")
 
-    def __init__(self, *, info: PlaylistInfo, tracks: list[TrackWithInfo]) -> None:
+    def __init__(
+        self,
+        *,
+        info: PlaylistInfo,
+        tracks: list[TrackWithInfo],
+        plugin_info: dict[str, Any],
+    ) -> None:
         self.name: str = info["name"]
         self.selected_track: int = info["selectedTrack"]
         self.tracks: list[Track] = [
             Track.from_data_with_info(track) for track in tracks
         ]
+        self.plugin_info: dict[str, Any] = plugin_info

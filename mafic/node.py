@@ -1054,7 +1054,11 @@ class Node(Generic[ClientT]):
         elif data["loadType"] == "track":
             return [Track.from_data_with_info(data["data"])]
         elif data["loadType"] == "playlist":
-            return Playlist(info=data["data"]["info"], tracks=data["data"]["tracks"])
+            return Playlist(
+                info=data["data"]["info"],
+                tracks=data["data"]["tracks"],
+                plugin_info=data["data"]["pluginInfo"],
+            )
         elif data["loadType"] == "search":
             return [Track.from_data_with_info(track) for track in data["data"]]
         elif data["loadType"] == "error":
@@ -1062,7 +1066,9 @@ class Node(Generic[ClientT]):
         elif data["loadType"] == "TRACK_LOADED":
             return [Track.from_data_with_info(data["tracks"][0])]
         elif data["loadType"] == "PLAYLIST_LOADED":
-            return Playlist(info=data["playlistInfo"], tracks=data["tracks"])
+            return Playlist(
+                info=data["playlistInfo"], tracks=data["tracks"], plugin_info={}
+            )
         elif data["loadType"] == "SEARCH_RESULT":
             return [Track.from_data_with_info(track) for track in data["tracks"]]
         elif data["loadType"] == "LOAD_FAILED":
