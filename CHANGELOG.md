@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/ooliver1/mafic/compare/v2.1.2...v2.2.0) (2023-05-03)
+
+
+### Features
+
+* support lavalink v4 ([#68](https://github.com/ooliver1/mafic/issues/68)) ([cd63b41](https://github.com/ooliver1/mafic/commit/cd63b4103a4db1de4a6f65e7771339565fce6ea5))
+
 ## [2.1.2](https://github.com/ooliver1/mafic/compare/v2.1.1...v2.1.2) (2023-04-30)
 
 
