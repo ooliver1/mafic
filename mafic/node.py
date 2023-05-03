@@ -1023,7 +1023,7 @@ class Node(Generic[ClientT]):
             _log.debug("Received raw data %s from %s", json, path)
             return json
 
-    async def fetch_tracks(
+    async def fetch_tracks(  # noqa: PLR0911  # V3/V4 compat.
         self, query: str, *, search_type: str
     ) -> list[Track] | Playlist | None:
         r"""Fetch tracks from the node.
@@ -1051,8 +1051,16 @@ class Node(Generic[ClientT]):
             "GET", "loadtracks", params={"identifier": query}
         )
 
-        if data["loadType"] == "NO_MATCHES":
+        if data["loadType"] in ("empty", "NO_MATCHES"):
             return []
+        elif data["loadType"] == "track":
+            return [Track.from_data_with_info(data["data"])]
+        elif data["loadType"] == "playlist":
+            return Playlist(info=data["data"]["info"], tracks=data["data"]["tracks"])
+        elif data["loadType"] == "search":
+            return [Track.from_data_with_info(track) for track in data["data"]]
+        elif data["loadType"] == "error":
+            raise TrackLoadException.from_data(data["data"])
         elif data["loadType"] == "TRACK_LOADED":
             return [Track.from_data_with_info(data["tracks"][0])]
         elif data["loadType"] == "PLAYLIST_LOADED":
