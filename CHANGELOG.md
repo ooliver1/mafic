@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/ooliver1/mafic/compare/v2.2.0...v2.3.0) (2023-05-03)
+
+
+### Features
+
+* **playlist:** pass through plugin info ([#70](https://github.com/ooliver1/mafic/issues/70)) ([1f78c7c](https://github.com/ooliver1/mafic/commit/1f78c7cf5e29a071c9454fb017173d992421758c))
+
+
+### Bug Fixes
+
+* **stats:** check if frame stats is None ([978918e](https://github.com/ooliver1/mafic/commit/978918ed7b225d2f0f017f6ccb0e23c926ad41f3))
+
 ## [2.2.0](https://github.com/ooliver1/mafic/compare/v2.1.2...v2.2.0) (2023-05-03)
 
 
