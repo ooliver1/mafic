@@ -64,11 +64,18 @@ class TrackEndEvent(PayloadWithGuild):
     # V4
     track: NotRequired[TrackWithInfo]
     reason: Literal[
+        # V3
         "FINISHED",
         "LOAD_FAILED",
         "STOPPED",
         "REPLACED",
         "CLEANUP",
+        # V4
+        "finished",
+        "loadFailed",
+        "stopped",
+        "replaced",
+        "cleanup",
     ]
 
 
