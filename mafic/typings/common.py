@@ -171,4 +171,5 @@ class Stats(TypedDict):
     uptime: int
     memory: Memory
     cpu: CPU
-    frameStats: NotRequired[FrameStats]
+    # V3 is NotRequired, V4 is None
+    frameStats: NotRequired[FrameStats | None]
