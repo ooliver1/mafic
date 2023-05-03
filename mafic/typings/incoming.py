@@ -51,18 +51,18 @@ class TrackStartEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackStartEvent"]
     # V3
-    encodedTrack: str
+    encodedTrack: NotRequired[str]
     # V4
-    track: TrackWithInfo
+    track: NotRequired[TrackWithInfo]
 
 
 class TrackEndEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackEndEvent"]
     # V3
-    encodedTrack: str
+    encodedTrack: NotRequired[str]
     # V4
-    track: TrackWithInfo
+    track: NotRequired[TrackWithInfo]
     reason: Literal[
         "FINISHED",
         "LOAD_FAILED",
@@ -76,9 +76,9 @@ class TrackExceptionEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackExceptionEvent"]
     # V3
-    encodedTrack: str
+    encodedTrack: NotRequired[str]
     # V4
-    track: TrackWithInfo
+    track: NotRequired[TrackWithInfo]
     exception: LavalinkException
 
 
@@ -86,9 +86,9 @@ class TrackStuckEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackStuckEvent"]
     # V3
-    encodedTrack: str
+    encodedTrack: NotRequired[str]
     # V4
-    track: TrackWithInfo
+    track: NotRequired[TrackWithInfo]
     thresholdMs: int
 
 

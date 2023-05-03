@@ -24,6 +24,7 @@ from .pool import NodePool
 from .search_type import SearchType
 from .track import Track
 from .type_variables import ClientT
+from .typings import TrackWithInfo
 
 if TYPE_CHECKING:
     from .__libraries import (
@@ -243,7 +244,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._current
                 if self.node.version == 3
-                else Track.from_data_with_info(data["track"])
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
             )
 
             if track is None:
@@ -260,7 +261,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._last_track
                 if self.node.version == 3
-                else Track.from_data_with_info(data["track"])
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
             )
 
             if track is None:
@@ -279,7 +280,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._current
                 if self.node.version == 3
-                else Track.from_data_with_info(data["track"])
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
             )
 
             if track is None:
@@ -296,7 +297,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._current
                 if self.node.version == 3
-                else Track.from_data_with_info(data["track"])
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
             )
 
             if track is None:

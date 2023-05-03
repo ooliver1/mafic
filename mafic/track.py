@@ -59,12 +59,24 @@ class Track:
         The current position of the track.
     length: :class:`int`
         The length of the track.
+    artwork_url: :data:`~typing.Optional`\[:class:`str`]
+        The artwork URL of the track.
+        This is always ``None`` if the node does not use Lavalink v4.
+
+        .. versionadded:: 2.2
+    isrc: :data:`~typing.Optional`\[:class:`str`]
+        The ISRC of the track.
+        This is always ``None`` if the node does not use Lavalink v4.
+
+        .. versionadded:: 2.2
     """
 
     __slots__ = (
         "author",
+        "artwork_url",
         "id",
         "identifier",
+        "isrc",
         "length",
         "position",
         "seekable",
@@ -78,15 +90,17 @@ class Track:
         self,
         *,
         track_id: str,
-        title: str,
-        author: str,
         identifier: str,
-        uri: str | None,
-        source: str,
-        stream: bool,
         seekable: bool,
-        position: int = 0,
+        author: str,
         length: int,
+        stream: bool,
+        position: int = 0,
+        title: str,
+        uri: str | None,
+        artwork_url: str | None,
+        isrc: str | None,
+        source: str,
     ) -> None:
         self.id: str = track_id
 
@@ -103,6 +117,9 @@ class Track:
 
         self.position: int = position
         self.length: int = length
+
+        self.artwork_url: str | None = artwork_url
+        self.isrc: str | None = isrc
 
     @classmethod
     def from_data(cls, *, track: str, info: TrackInfo) -> Self:
@@ -131,6 +148,8 @@ class Track:
             seekable=info["isSeekable"],
             position=info["position"],
             length=info["length"],
+            artwork_url=info.get("artworkUrl"),
+            isrc=info.get("isrc"),
         )
 
     @classmethod
