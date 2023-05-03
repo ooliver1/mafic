@@ -674,9 +674,7 @@ class Node(Generic[ClientT]):
             _log.debug("Received message from websocket.", extra={"label": self._label})
 
             # Please aiohttp, fix your typehints.
-            _type: aiohttp.WSMsgType = (
-                msg.type
-            )  # pyright: ignore[reportUnknownMemberType]
+            _type: aiohttp.WSMsgType = msg.type  # pyright: ignore
 
             if _type is aiohttp.WSMsgType.CLOSED:
                 self._available = False

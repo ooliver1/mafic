@@ -407,7 +407,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             msg = "Voice channel must be a VoiceChannel or StageChannel."
             raise TypeError(msg)
 
-        if not NodePool.nodes:
+        if not NodePool.nodes:  # pyright: ignore
             raise NoNodesAvailable
 
         _log.debug("Connecting to voice channel %s", self.channel.id)

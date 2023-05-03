@@ -3,31 +3,32 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
 T = TypeVar("T")
+R = TypeVar("R")
 
 __all__ = ("classproperty",)
 
 
-class _ClassPropertyDescriptor(Generic[T]):
+class _ClassPropertyDescriptor(Generic[T, R]):
     """A descriptor that mimics the behavior of a property, but for classmethods."""
 
-    def __init__(self, fget: classmethod[T] | staticmethod[T]) -> None:
+    def __init__(self, fget: classmethod[T, ..., R] | staticmethod[..., R]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: object, owner: type | None = None) -> T:
+    def __get__(self, instance: T, owner: type[T] | None = None) -> R:
         if owner is None:
-            owner = type(instance)
+            owner = cast(Type[T], type(instance))
         return self.fget.__get__(instance, owner)()
 
 
 def classproperty(
-    func: Callable[..., T] | classmethod[T] | staticmethod[T]
-) -> _ClassPropertyDescriptor[T]:
+    func: Callable[[T], R] | classmethod[T, ..., R] | staticmethod[..., R]
+) -> _ClassPropertyDescriptor[T, R]:
     """Contains a decorator to mimic the behavior of a property, but for classmethods.
 
     Parameters
