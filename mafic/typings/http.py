@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, TypedDict, Union
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
@@ -49,6 +49,9 @@ __all__ = (
 )
 
 
+# V3
+
+
 class PlaylistTracks(TypedDict):
     loadType: Literal["PLAYLIST_LOADED"]
     playlistInfo: PlaylistInfo
@@ -69,7 +72,50 @@ class NoMatches(TypedDict):
     loadType: Literal["NO_MATCHES"]
 
 
-TrackLoadingResult = Union[PlaylistTracks, GenericTracks, TracksFailed, NoMatches]
+# V4
+
+
+class TrackLoadedV4(TypedDict):
+    loadType: Literal["track"]
+    data: TrackWithInfo
+
+
+class PlaylistLoadedV4(TypedDict):
+    loadType: Literal["playlist"]
+    data: PlaylistDataV4
+
+
+class PlaylistDataV4(TypedDict):
+    info: PlaylistInfo
+    pluginInfo: dict[str, Any]
+    tracks: list[TrackWithInfo]
+
+
+class SearchResultV4(TypedDict):
+    loadType: Literal["search"]
+    data: list[TrackWithInfo]
+
+
+class SearchEmptyV4(TypedDict):
+    loadType: Literal["empty"]
+
+
+class LoadErrorV4(TypedDict):
+    loadType: Literal["error"]
+    data: LavalinkException
+
+
+TrackLoadingResult = Union[
+    PlaylistTracks,
+    GenericTracks,
+    TracksFailed,
+    NoMatches,
+    TrackLoadedV4,
+    PlaylistLoadedV4,
+    SearchResultV4,
+    SearchEmptyV4,
+    LoadErrorV4,
+]
 
 
 class PluginData(TypedDict):

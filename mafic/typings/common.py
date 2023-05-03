@@ -133,7 +133,10 @@ class TrackInfo(TypedDict):
     isStream: bool
     position: int
     title: str
-    uri: str
+    uri: str | None
+    # TODO: Remove NotRequired when V3 support removed
+    artworkUrl: NotRequired[str | None]
+    isrc: NotRequired[str | None]
     sourceName: str
 
 

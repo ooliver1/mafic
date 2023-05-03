@@ -24,6 +24,7 @@ from .pool import NodePool
 from .search_type import SearchType
 from .track import Track
 from .type_variables import ClientT
+from .typings import TrackWithInfo
 
 if TYPE_CHECKING:
     from .__libraries import (
@@ -240,7 +241,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             _log.debug("Received websocket closed event: %s", event)
             self.client.dispatch("websocket_closed", event)
         elif data["type"] == "TrackStartEvent":
-            track = self._current
+            track = (
+                self._current
+                if self.node.version == 3
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+            )
 
             if track is None:
                 _log.error(
@@ -253,7 +258,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             _log.debug("Received track start event: %s", event)
             self._last_track = track
         elif data["type"] == "TrackEndEvent":
-            track = self._last_track
+            track = (
+                self._last_track
+                if self.node.version == 3
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+            )
 
             if track is None:
                 _log.error(
@@ -268,7 +277,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             if data["reason"] != "REPLACED":
                 self._current = None
         elif data["type"] == "TrackExceptionEvent":
-            track = self._current
+            track = (
+                self._current
+                if self.node.version == 3
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+            )
 
             if track is None:
                 _log.error(
@@ -281,7 +294,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             self.client.dispatch("track_exception", event)
             _log.debug("Received track exception event: %s", event)
         elif data["type"] == "TrackStuckEvent":
-            track = self._current
+            track = (
+                self._current
+                if self.node.version == 3
+                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+            )
 
             if track is None:
                 _log.error(
@@ -390,7 +407,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             msg = "Voice channel must be a VoiceChannel or StageChannel."
             raise TypeError(msg)
 
-        if not NodePool.nodes:
+        if not NodePool.nodes:  # pyright: ignore
             raise NoNodesAvailable
 
         _log.debug("Connecting to voice channel %s", self.channel.id)

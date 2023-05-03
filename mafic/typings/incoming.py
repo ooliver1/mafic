@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict, Union
 
-from .common import Stats
+from .common import Stats, TrackWithInfo
 from .misc import PayloadWithGuild
 
 if TYPE_CHECKING:
@@ -50,33 +50,52 @@ class WebSocketClosedEvent(PayloadWithGuild):
 class TrackStartEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackStartEvent"]
-    encodedTrack: str
+    # V3
+    encodedTrack: NotRequired[str]
+    # V4
+    track: NotRequired[TrackWithInfo]
 
 
 class TrackEndEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackEndEvent"]
-    encodedTrack: str
+    # V3
+    encodedTrack: NotRequired[str]
+    # V4
+    track: NotRequired[TrackWithInfo]
     reason: Literal[
+        # V3
         "FINISHED",
         "LOAD_FAILED",
         "STOPPED",
         "REPLACED",
         "CLEANUP",
+        # V4
+        "finished",
+        "loadFailed",
+        "stopped",
+        "replaced",
+        "cleanup",
     ]
 
 
 class TrackExceptionEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackExceptionEvent"]
-    encodedTrack: str
+    # V3
+    encodedTrack: NotRequired[str]
+    # V4
+    track: NotRequired[TrackWithInfo]
     exception: LavalinkException
 
 
 class TrackStuckEvent(PayloadWithGuild):
     op: Literal["event"]
     type: Literal["TrackStuckEvent"]
-    encodedTrack: str
+    # V3
+    encodedTrack: NotRequired[str]
+    # V4
+    track: NotRequired[TrackWithInfo]
     thresholdMs: int
 
 

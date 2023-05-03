@@ -40,7 +40,7 @@ yarl = "^1.0.0"
 speedups = ["orjson"]
 
 [tool.poetry.group.dev.dependencies]
-pyright = "1.1.289"
+pyright = "1.1.306"
 black = "^22.8.0"
 taskipy = "^1.10.3"
 pre-commit = "^2.20.0"

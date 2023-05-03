@@ -130,7 +130,7 @@ class TrackEndEvent(Generic[PlayerT]):
         self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT
     ) -> None:
         self.track: Track = track
-        self.reason: EndReason = EndReason(payload["reason"])
+        self.reason: EndReason = EndReason(payload["reason"].upper())
         self.player: PlayerT = player
 
     def __repr__(self) -> str:

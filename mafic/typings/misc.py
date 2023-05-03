@@ -14,7 +14,16 @@ __all__ = (
 T = TypeVar("T")
 
 Coro = Coroutine[Any, Any, T]
-ExceptionSeverity = Literal["COMMON", "SUSPICIOUS", "FAULT"]
+ExceptionSeverity = Literal[
+    # V3
+    "COMMON",
+    "SUSPICIOUS",
+    "FAULT",
+    # V4
+    "common",
+    "suspicious",
+    "fault",
+]
 
 
 class LavalinkException(TypedDict):

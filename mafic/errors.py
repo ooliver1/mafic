@@ -71,6 +71,8 @@ class TrackLoadException(PlayerException):
         The message returned by the node.
     severity: :data:`~typing.Literal`\[``"COMMON"``, ``"SUSPICIOUS"``, ``"FATAL"``]
         The severity of the error.
+
+        This is lowercase in Lavalink v4.
     cause: :class:`str`
         The cause of the error.
     """
