@@ -14,12 +14,23 @@ services:
       GW_PROXY: ws://gateway-proxy:7878
       LAVALINK_FILE: lavalink/nodes.json
   lavalink:
-    build: lavalink
+    image: ghcr.io/freyacodes/lavalink:v4
     volumes:
       - ./logs/lava:/opt/Lavalink/logs
     ports:
       # debugging
       - "6969:6969"
+    environment:
+      JDK_JAVA_OPTIONS: -Xmx2G
+      SERVER_PORT: 6969
+      SERVER_ADDRESS: 0.0.0.0
+      LAVALINK_SERVER_PASSWORD: haha
+      LOGGING_FILE_PATH: ./logs/
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_LAVALINK: INFO
+      LOGGING_REQUEST_ENABLED: true
+      LOGGING_LOGBACK_ROLLINGPOLICY_MAXFILESIZE: 100MB
+      LOGGING_LOGBACK_ROLLINGPOLICY_MAXHISTORY: 30
   gateway-proxy:
     image: gelbpunkt/gateway-proxy:x86-64
     volumes:

@@ -108,6 +108,7 @@ class NodePool(Generic[ClientT]):
         resume_key: str | None = None,
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
+        resuming_session_id: str | None = None,
     ) -> Node[ClientT]:
         r"""Create a node and connect it.
 
@@ -132,17 +133,28 @@ class NodePool(Generic[ClientT]):
         session: :data:`~typing.Optional`\[:class:`aiohttp.ClientSession`]
             The session to use for the node websocket connection.
         resume_key:
-            The key to use to resume the node websocket connection.
-            This is used to resume a connection if the connection is lost.
-            Defaults to using the `host`, `port` and `label`.
+            The key to use when resuming the node.
+            If not provided, the key will be generated from the host, port and label.
+
+            .. warning::
+
+                This is ignored in lavalink V4, use ``resuming_session_id`` instead.
         regions:
-            The regions this node is best to connect to.
-            This is used to determine if this is the best node for a connection
-            with :attr:`Strategy.LOCATION`.
+            The voice regions that the node can be used in.
+            This is used to determine when to use this node.
         shard_ids:
-            The shard IDs this node is best to connect to.
-            This is used to determine if this is the best node for a connection
-            with :attr:`Strategy.SHARD`.
+            The shard IDs that the node can be used in.
+            This is used to determine when to use this node.
+        resuming_session_id:
+            The session ID to use when resuming the node.
+            If not provided, the node will not resume.
+
+            This should be stored from :func:`~mafic.on_node_ready` with
+            :attr:`session_id` to resume the session and gain control of the players.
+            If the node is not resuming, players will be destroyed if Lavalink loses
+            connection to us.
+
+            .. versionadded:: 2.2
 
         Returns
         -------
@@ -171,6 +183,7 @@ class NodePool(Generic[ClientT]):
             resume_key=resume_key,
             regions=regions,
             shard_ids=shard_ids,
+            resuming_session_id=resuming_session_id,
         )
 
         # Add to dictionaries, creating a set or extending it if needed.

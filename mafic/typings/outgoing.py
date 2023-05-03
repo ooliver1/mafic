@@ -20,7 +20,10 @@ __all__ = (
 
 
 class UpdateSessionPayload(TypedDict, total=False):
+    # V3
     resumingKey: str | None
+    # V4
+    resuming: bool
     timeout: int
 
 

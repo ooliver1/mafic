@@ -32,6 +32,8 @@ if TYPE_CHECKING:
     from nextcord.abc import Connectable
     from typing_extensions import NotRequired
 
+    from mafic import Node
+
     class LavalinkInfo(TypedDict):
         host: str
         port: int
@@ -76,6 +78,12 @@ class TestBot(BotBase):
         with open(environ["LAVALINK_FILE"], "rb") as f:
             data: list[LavalinkInfo] = orjson.loads(f.read())
 
+        try:
+            with open("lavalink.txt") as f:
+                session_id = f.read()
+        except FileNotFoundError:
+            session_id = None
+
         for node in data:
             regions: list[Group | Region | VoiceRegion] | None = None
             if "regions" in node:
@@ -98,10 +106,17 @@ class TestBot(BotBase):
                 regions=regions,
                 label=node["label"],
                 shard_ids=node.get("shard_ids"),
+                resuming_session_id=session_id,
             )
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         await gather(self.add_nodes(), super().start(token, reconnect=reconnect))
+
+    async def on_node_ready(self, node: Node) -> None:
+        # ! DO NOT USE A TEXT FILE FOR REAL DATA STORAGE
+        # ! THIS IS FOR TESTING ONLY
+        with open("lavalink.txt", "w") as f:
+            f.write(node.session_id)
 
 
 bot = TestBot()

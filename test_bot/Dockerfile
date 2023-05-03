@@ -1,4 +1,4 @@
-FROM --platform=amd64 python:3.10-slim-buster
+FROM python:3.11-slim-bullseye
 
 WORKDIR /bot
 

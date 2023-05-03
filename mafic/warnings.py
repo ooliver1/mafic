@@ -19,5 +19,6 @@ class UnknownVersionWarning(UserWarning):
 
     message: str = (
         "The version of Lavalink you are using is unknown to Mafic. "
-        "It should still work but not all features are supported."
+        "It should still work but not all features are supported. "
+        "Assuming Lavalink v3.7."
     )

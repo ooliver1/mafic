@@ -62,6 +62,7 @@ if TYPE_CHECKING:
         TrackLoadingResult,
         UpdatePlayerParams,
         UpdatePlayerPayload,
+        UpdateSessionPayload,
     )
 
 _log = getLogger(__name__)
@@ -141,12 +142,25 @@ class Node(Generic[ClientT]):
     resume_key:
         The key to use when resuming the node.
         If not provided, the key will be generated from the host, port and label.
+
+        .. warning::
+
+            This is ignored in lavalink V4, use ``resuming_session_id`` instead.
     regions:
         The voice regions that the node can be used in.
         This is used to determine when to use this node.
     shard_ids:
         The shard IDs that the node can be used in.
         This is used to determine when to use this node.
+    resuming_session_id:
+        The session ID to use when resuming the node.
+        If not provided, the node will not resume.
+
+        This should be stored from :func:`~mafic.on_node_ready` with :attr:`session_id`
+        to resume the session and gain control of the players. If the node is not
+        resuming, players will be destroyed if Lavalink loses connection to us.
+
+        .. versionadded:: 2.2
 
     Attributes
     ----------
@@ -162,6 +176,7 @@ class Node(Generic[ClientT]):
         "__password",
         "__session",
         "_available",
+        "_checked_version",
         "_client",
         "_connect_task",
         "_heartbeat",
@@ -175,8 +190,10 @@ class Node(Generic[ClientT]):
         "_timeout",
         "_ready",
         "_rest_uri",
+        "_resuming_session_id",
         "_session_id",
         "_stats",
+        "_version",
         "_ws",
         "_ws_uri",
         "_ws_task",
@@ -199,6 +216,7 @@ class Node(Generic[ClientT]):
         resume_key: str | None = None,
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
+        resuming_session_id: str | None = None,
     ) -> None:
         self._host = host
         self._port = port
@@ -217,6 +235,7 @@ class Node(Generic[ClientT]):
         )
         self._ws_uri = yarl.URL.build(scheme=f"ws{'s'*secure}", host=host, port=port)
         self._resume_key = resume_key or f"{host}:{port}:{label}"
+        self._resuming_session_id: str = resuming_session_id or ""
 
         self._ws: ClientWebSocketResponse | None = None
         self._ws_task: Task[None] | None = None
@@ -231,6 +250,9 @@ class Node(Generic[ClientT]):
 
         self._msg_tasks: set[Task[None]] = set()
         self._connect_task: Task[None] | None = None
+
+        self._checked_version: bool = False
+        self._version: int = 3
 
     @property
     def host(self) -> str:
@@ -365,6 +387,14 @@ class Node(Generic[ClientT]):
         """
         return [*self._players.values()]
 
+    @property
+    def session_id(self) -> str | None:
+        """The session ID of the node.
+
+        This is ``None`` if the node is not connected.
+        """
+        return self._session_id
+
     def get_player(self, guild_id: int) -> Player[ClientT] | None:
         r"""Get a player from the node.
 
@@ -407,29 +437,31 @@ class Node(Generic[ClientT]):
         """
         self._players.pop(guild_id, None)
 
-    async def _check_version(self) -> None:
-        """Check the version of the node.
+    async def _check_version(self) -> int:
+        """:class:`int`: The major version of the node.
+
+        This also does checks based on if that is supported.
 
         Raises
         ------
         :exc:`RuntimeError`
             If the
-            - major version is not 3
-            - minor version is less than 7
+            - major version is not in (3, 4)
+            - minor version is less than 7 when the major version is 3
 
-            This is because the rest api is in 3.7, and v4 will have breaking changes.
+            This is because the rest api is in 3.7, and v5 will have breaking changes.
 
         Warns
         -----
         :class:`UnsupportedVersionWarning`
-            If the minor version is greater than 7.
+            If the
+            - major version is 3 and the minor version is more than 7
+            - major version is 4 and the minor version is more than 0
             Some features may not work.
         """
-        if self._rest_uri.path.endswith("/v3") or self._ws_uri.path.endswith(
-            "/websocket"
-        ):
+        if self._checked_version:
             # This process was already ran likely.
-            return
+            return self._version
 
         if self.__session is None:
             self.__session = await self._create_session()
@@ -444,21 +476,34 @@ class Node(Generic[ClientT]):
             try:
                 major, minor, _ = version.split(".", maxsplit=2)
             except ValueError:
-                message = UnknownVersionWarning.message
-                warnings.warn(message, UnknownVersionWarning)
+                if version.endswith("-SNAPSHOT"):
+                    major = 4
+                    minor = 0
+                else:
+                    major = 3
+                    minor = 7
+                    message = UnknownVersionWarning.message
+                    warnings.warn(message, UnknownVersionWarning)
             else:
                 major = int(major)
                 minor = int(minor)
 
-                if major != 3 or minor < 7:
-                    msg = f"Unsupported lavalink version {version} (expected 3.7.x)"
+                if major not in (3, 4) or (major == 3 and minor < 7):
+                    msg = (
+                        f"Unsupported lavalink version {version} "
+                        "(expected 3.7.x or 4.x.x)"
+                    )
                     raise RuntimeError(msg)
-                elif minor > 7:
+                elif (major == 3 and minor > 7) or (major == 4 and minor > 0):
                     message = UnsupportedVersionWarning.message
                     warnings.warn(message, UnsupportedVersionWarning)
 
-            self._rest_uri /= "v3"
-            self._ws_uri /= "v3/websocket"
+            self._rest_uri /= f"v{major}"
+            self._ws_uri /= f"v{major}/websocket"
+
+            self._version = major
+            self._checked_version = True
+            return major
 
     async def _connect_to_websocket(
         self, headers: dict[str, str], session: aiohttp.ClientSession
@@ -522,15 +567,20 @@ class Node(Generic[ClientT]):
 
         session = self.__session
 
+        _log.debug("Checking lavalink version...", extra={"label": self._label})
+        version = await self._check_version()
+
         headers: dict[str, str] = {
             "Authorization": self.__password,
             "User-Id": str(self._client.user.id),
             "Client-Name": f"Mafic/{__import__('mafic').__version__}",
-            "Resume-Key": self._resume_key,
         }
 
-        _log.debug("Checking lavalink version...", extra={"label": self._label})
-        await self._check_version()
+        # V4 uses session ID resuming
+        if version == 3:
+            headers["Resume-Key"] = self._resume_key
+        else:
+            headers["Session-Id"] = self._resuming_session_id
 
         _log.info(
             "Connecting to lavalink at %s...",
@@ -590,6 +640,7 @@ class Node(Generic[ClientT]):
             )
             await self.sync_players()
             self._available = True
+            self._client.dispatch("node_ready", self)
 
     async def _ws_listener(self) -> None:
         """Listen for messages from the websocket."""
@@ -656,8 +707,8 @@ class Node(Generic[ClientT]):
         data:
             The data to handle.
         """
-        _log.debug("Received event with op %s", data["op"])
         _log.debug("Event data: %s", data)
+        _log.debug("Received event with op %s", data["op"])
 
         if data["op"] == "playerUpdate":
             guild_id = int(data["guildId"])
@@ -692,11 +743,18 @@ class Node(Generic[ClientT]):
                     extra={"label": self._label},
                 )
             else:
-                _log.debug(
-                    "Sending configuration to resume with key %s",
-                    self._resume_key,
-                    extra={"label": self._label},
-                )
+                if self._version == 3:
+                    _log.debug(
+                        "Sending configuration to resume with key %s",
+                        self._resume_key,
+                        extra={"label": self._label},
+                    )
+                else:
+                    _log.debug(
+                        "Sending configuration to resume with session ID %s",
+                        self._session_id,
+                        extra={"label": self._label},
+                    )
                 await self.configure_resuming()
 
             self._ready.set()
@@ -765,19 +823,32 @@ class Node(Generic[ClientT]):
 
     def configure_resuming(self) -> Coro[None]:
         """Configure the node to resume."""
-        _log.info(
-            "Sending resume configuration to lavalink with resume key %s.",
-            self._resume_key,
-            extra={"label": self._label},
-        )
+        data: UpdateSessionPayload
+        if self._version == 3:
+            _log.info(
+                "Sending resume configuration to lavalink with resume key %s.",
+                self._resume_key,
+                extra={"label": self._label},
+            )
+            data = {
+                "resumingKey": self._resume_key,
+                "timeout": 60,
+            }
+        else:
+            _log.info(
+                "Sending resume configuration to lavalink with session ID %s.",
+                self._session_id,
+                extra={"label": self._label},
+            )
+            data = {
+                "resuming": True,
+                "timeout": 60,
+            }
 
         return self.__request(
             "PATCH",
             f"sessions/{self._session_id}",
-            {
-                "resumingKey": self._resume_key,
-                "timeout": 60,
-            },
+            data,
         )
 
     def destroy(self, guild_id: int) -> Coro[None]:
