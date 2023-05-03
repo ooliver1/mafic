@@ -392,8 +392,21 @@ class Node(Generic[ClientT]):
         """The session ID of the node.
 
         This is ``None`` if the node is not connected.
+
+        .. versionadded:: 2.2
         """
         return self._session_id
+
+    @property
+    def version(self) -> int:
+        """The major semver version of the node.
+
+        This is ``3`` if the node is not connected.
+        This is mostly used in :class:`Player` for version checks.
+
+        .. versionadded:: 2.2
+        """
+        return self._version
 
     def get_player(self, guild_id: int) -> Player[ClientT] | None:
         r"""Get a player from the node.

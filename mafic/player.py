@@ -240,7 +240,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             _log.debug("Received websocket closed event: %s", event)
             self.client.dispatch("websocket_closed", event)
         elif data["type"] == "TrackStartEvent":
-            track = self._current
+            track = (
+                self._current
+                if self.node.version == 3
+                else Track.from_data_with_info(data["track"])
+            )
 
             if track is None:
                 _log.error(
@@ -253,7 +257,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             _log.debug("Received track start event: %s", event)
             self._last_track = track
         elif data["type"] == "TrackEndEvent":
-            track = self._last_track
+            track = (
+                self._last_track
+                if self.node.version == 3
+                else Track.from_data_with_info(data["track"])
+            )
 
             if track is None:
                 _log.error(
@@ -268,7 +276,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             if data["reason"] != "REPLACED":
                 self._current = None
         elif data["type"] == "TrackExceptionEvent":
-            track = self._current
+            track = (
+                self._current
+                if self.node.version == 3
+                else Track.from_data_with_info(data["track"])
+            )
 
             if track is None:
                 _log.error(
@@ -281,7 +293,11 @@ class Player(VoiceProtocol, Generic[ClientT]):
             self.client.dispatch("track_exception", event)
             _log.debug("Received track exception event: %s", event)
         elif data["type"] == "TrackStuckEvent":
-            track = self._current
+            track = (
+                self._current
+                if self.node.version == 3
+                else Track.from_data_with_info(data["track"])
+            )
 
             if track is None:
                 _log.error(
