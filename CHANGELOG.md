@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/ooliver1/mafic/compare/v2.3.0...v2.3.1) (2023-05-09)
+
+
+### Bug Fixes
+
+* **player:** Player.connected being False sometimes ([#73](https://github.com/ooliver1/mafic/issues/73)) ([a7a9b8d](https://github.com/ooliver1/mafic/commit/a7a9b8d0d7b6741d0c596c5d81d7d69c604b4169))
+
 ## [2.3.0](https://github.com/ooliver1/mafic/compare/v2.2.0...v2.3.0) (2023-05-03)
 
 
