@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import asyncio
+from asyncio import Event
 from collections import OrderedDict
 from functools import reduce
 from logging import getLogger
@@ -101,6 +103,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
         # Used to get the last track for TrackEndEvent.
         self._last_track: Track | None = None
         self._paused: bool = False
+
+        self._voice_server_update_event: Event = Event()
+        self._voice_state_update_event: Event = Event()
 
     def set_state(self, state: PlayerPayload) -> None:
         """Set the state of the player.
@@ -334,7 +339,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
         if channel_id is None:  # pyright: ignore[reportUnnecessaryComparison]
             # This can happen and is on disconnect.
             # Not sure why this is typed as always Snowflake.
-            return self.cleanup()
+            await self.disconnect(force=True)
+            return
 
         channel = self.guild.get_channel(int(channel_id))
         if not isinstance(channel, (VoiceChannel, StageChannel)):
@@ -343,8 +349,10 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         self.channel = channel
 
-        if self._session_id != before_session_id:  # noqa: RET503
-            await self._dispatch_player_update()  # noqa: RET503
+        if self._session_id != before_session_id:
+            await self._dispatch_player_update()
+
+        self._voice_state_update_event.set()
 
     async def on_voice_server_update(self, data: VoiceServerUpdatePayload) -> None:
         """Handle a voice server update.
@@ -380,10 +388,12 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         await self._dispatch_player_update()
 
+        self._voice_server_update_event.set()
+
     async def connect(
         self,
         *,
-        timeout: float,  # noqa: ARG002
+        timeout: float,
         reconnect: bool,  # noqa: ARG002
         self_mute: bool = False,
         self_deaf: bool = False,
@@ -415,7 +425,19 @@ class Player(VoiceProtocol, Generic[ClientT]):
         await self.channel.guild.change_voice_state(
             channel=self.channel, self_mute=self_mute, self_deaf=self_deaf
         )
-        self._connected = True
+        futures = [
+            self._voice_state_update_event.wait(),
+            self._voice_server_update_event.wait(),
+        ]
+
+        ensured = [asyncio.ensure_future(fut) for fut in futures]
+        _, pending = await asyncio.wait(
+            ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED
+        )
+
+        if len(pending) != 0:
+            await self.disconnect(force=True)
+            raise asyncio.TimeoutError
 
     async def disconnect(self, *, force: bool = False) -> None:
         """Disconnect from the voice channel.

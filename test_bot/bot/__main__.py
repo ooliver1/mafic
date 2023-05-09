@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import traceback
 from asyncio import gather
 from logging import DEBUG, getLogger
@@ -136,8 +137,15 @@ async def join(inter: Interaction):
     if not inter.user.voice:
         return await inter.response.send_message("You are not in a voice channel.")
 
+    await inter.response.defer()
+
     channel = inter.user.voice.channel
-    await channel.connect(cls=MyPlayer)
+
+    try:
+        await channel.connect(cls=MyPlayer, timeout=5)
+    except asyncio.TimeoutError:
+        return await inter.send("Timed out connecting to voice channel.")
+
     await inter.send(f"Joined {channel.mention}.")
 
 
