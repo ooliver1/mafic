@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/ooliver1/mafic/compare/v2.3.1...v2.4.0) (2023-05-14)
+
+
+### Features
+
+* **player:** support str for playing identifiers ([#75](https://github.com/ooliver1/mafic/issues/75)) ([6d1fde0](https://github.com/ooliver1/mafic/commit/6d1fde0a9922c1ee9774e6eb8d193915756e7640))
+
 ## [2.3.1](https://github.com/ooliver1/mafic/compare/v2.3.0...v2.3.1) (2023-05-09)
 
 
