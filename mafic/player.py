@@ -510,7 +510,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
     async def update(
         self,
         *,
-        track: Track | None = MISSING,
+        track: Track | str | None = MISSING,
         position: int | None = None,
         end_time: int | None = None,
         volume: int | None = None,
@@ -523,7 +523,10 @@ class Player(VoiceProtocol, Generic[ClientT]):
         Parameters
         ----------
         track:
-            The track to play.
+            The track to play. This can be a :class:`Track` or an identifier.
+
+            .. versionchanged:: 2.4
+                The track can now be a :class:`str` to play an identifier.
         position:
             The position to start the track at.
         end_time:
@@ -545,13 +548,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
         if self._node is None or not self._connected:
             raise PlayerNotConnected
 
-        if track is not MISSING:
-            self._current = track
-
-        if position is not None:
-            self._position = position
-
-        await self._node.update(
+        data = await self._node.update(
             guild_id=self._guild_id,
             track=track,
             position=position,
@@ -562,12 +559,18 @@ class Player(VoiceProtocol, Generic[ClientT]):
             no_replace=not replace,
         )
 
-        if pause is not None:
-            self._paused = pause
+        if data["track"]:
+            self._current = Track.from_data_with_info(data["track"])
+
+        if data["volume"]:
+            self._volume = data["volume"]
+
+        if data["paused"]:
+            self._paused = data["paused"]
 
     async def play(
         self,
-        track: Track,
+        track: Track | str,
         /,
         *,
         start_time: int | None = None,
@@ -581,7 +584,10 @@ class Player(VoiceProtocol, Generic[ClientT]):
         Parameters
         ----------
         track:
-            The track to play.
+            The track to play. This can be a :class:`Track` or an identifier.
+
+            .. versionchanged:: 2.4
+                The track can now be a :class:`str` to play an identifier.
         start_time:
             The position to start the track at.
         end_time:

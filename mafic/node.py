@@ -880,14 +880,14 @@ class Node(Generic[ClientT]):
         self,
         *,
         guild_id: int,
-        track: Track | None = MISSING,
+        track: Track | str | None = MISSING,
         position: int | None = None,
         end_time: int | None = None,
         volume: int | None = None,
         no_replace: bool | None = None,
         pause: bool | None = None,
         filter: Filter | None = None,
-    ) -> Coro[None]:
+    ) -> Coro[PlayerPayload]:
         """Update a player.
 
         Parameters
@@ -896,7 +896,11 @@ class Node(Generic[ClientT]):
             The guild ID to update the player for.
         track:
             The track to update the player with.
+            This can be either a :class:`Track` or an identifier.
             Setting this to ``None`` will clear the track.
+
+            .. versionchanged:: 2.4
+                The track can now be a :class:`str` to play an identifier.
         position:
             The position to update the player with.
         end_time:
@@ -913,7 +917,10 @@ class Node(Generic[ClientT]):
         data: UpdatePlayerPayload = {}
 
         if track is not MISSING:
-            data["encodedTrack"] = track.id if track is not None else None
+            if isinstance(track, Track) or track is None:
+                data["encodedTrack"] = track.id if track is not None else None
+            else:
+                data["identifier"] = track
 
         if position is not None:
             data["position"] = position
