@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/ooliver1/mafic/compare/v2.4.0...v2.4.1) (2023-05-15)
+
+
+### Bug Fixes
+
+* **player:** pre-emptively update .current if v3 ([#78](https://github.com/ooliver1/mafic/issues/78)) ([3ecb4d9](https://github.com/ooliver1/mafic/commit/3ecb4d9a792843893100867a4693bddc20612cbe))
+
 ## [2.4.0](https://github.com/ooliver1/mafic/compare/v2.3.1...v2.4.0) (2023-05-14)
 
 
