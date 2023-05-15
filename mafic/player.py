@@ -570,6 +570,18 @@ class Player(VoiceProtocol, Generic[ClientT]):
         if self._node is None or not self._connected:
             raise PlayerNotConnected
 
+        # v4+ receives the full payload in events, so there is no need to
+        # pre-emptyively update the player.
+        if track is not None and self.node.version == 3:
+            if isinstance(track, str):
+                message = (
+                    "Lavalink version 3 does not support identifiers "
+                    "due to unexpected behaviour with events."
+                )
+                raise TypeError(message)
+
+            self._current = track
+
         data = await self._node.update(
             guild_id=self._guild_id,
             track=track,
