@@ -783,6 +783,29 @@ class Node(Generic[ClientT]):
             The data to handle.
         """
         if not (player := self.get_player(int(data["guildId"]))):
+            if data["type"] == "WebSocketClosedEvent":
+                # Make sure it has cleaned up properly.
+                client = self.client
+                guild = client.get_guild(int(data["guildId"]))
+                if guild is None:
+                    return
+
+                if not (player := guild.voice_client):
+                    return
+
+                player = cast("Player[ClientT]", player)
+
+                if player.node is not self:
+                    return
+
+                _log.debug(
+                    "Received WebSocketClosedEvent for guild %s, cleaning up.",
+                    guild.id,
+                    extra={"label": self._label},
+                )
+                await player.disconnect(force=True)
+                return
+
             _log.error(
                 "Could not find player for guild %s, discarding event.", data["guildId"]
             )
