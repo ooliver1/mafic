@@ -58,7 +58,6 @@ if TYPE_CHECKING:
         Player as PlayerPayload,
         PluginData,
         RoutePlannerStatus as RoutePlannerStatusPayload,
-        TrackInfo,
         TrackLoadingResult,
         UpdatePlayerParams,
         UpdatePlayerPayload,
@@ -94,9 +93,9 @@ def _wrap_regions(
     for item in regions:
         if isinstance(item, Group):
             for region in item.value:
-                actual_regions.append(region.value)
+                actual_regions.extend(region.value)
         elif isinstance(item, Region):
-            actual_regions.append(item.value)
+            actual_regions.extend(item.value)
         elif isinstance(
             item, VoiceRegion
         ):  # pyright: ignore[reportUnnecessaryIsInstance]
@@ -1124,11 +1123,11 @@ class Node(Generic[ClientT]):
         --------
         :meth:`decode_tracks`
         """
-        info: TrackInfo = await self.__request(
+        track_object: TrackWithInfo = await self.__request(
             "GET", "decodetrack", params={"encodedTrack": track}
         )
 
-        return Track.from_data(track=track, info=info)
+        return Track.from_data_with_info(track_object)
 
     async def decode_tracks(self, tracks: list[str]) -> list[Track]:
         r"""Decode a list of tracks from the encoded base64 data.
