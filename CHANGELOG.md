@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/ooliver1/mafic/compare/v2.4.1...v2.4.2) (2023-05-21)
+
+
+### Bug Fixes
+
+* **node:** fix decode_track parsing ([#80](https://github.com/ooliver1/mafic/issues/80)) ([5ea27a9](https://github.com/ooliver1/mafic/commit/5ea27a924b7af1106a4fffe9798bc41fd70c1662))
+
 ## [2.4.1](https://github.com/ooliver1/mafic/compare/v2.4.0...v2.4.1) (2023-05-15)
 
 
