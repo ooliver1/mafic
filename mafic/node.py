@@ -1123,11 +1123,11 @@ class Node(Generic[ClientT]):
         --------
         :meth:`decode_tracks`
         """
-        track: TrackWithInfo = await self.__request(
+        track_object: TrackWithInfo = await self.__request(
             "GET", "decodetrack", params={"encodedTrack": track}
         )
 
-        return Track.from_data_with_info(track)
+        return Track.from_data_with_info(track_object)
 
     async def decode_tracks(self, tracks: list[str]) -> list[Track]:
         r"""Decode a list of tracks from the encoded base64 data.
