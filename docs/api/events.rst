@@ -63,3 +63,12 @@ Callbacks
 
    :param event: The event that was dispatched.
    :type event: :class:`TrackStuckEvent`
+
+.. function:: on_node_stats()
+
+   Called when Lavalink sends node statistics.
+
+   .. versionadded:: 2.5
+
+   :param node: The node that sent the statistics.
+   :type node: :class:`Node`
