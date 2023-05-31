@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/ooliver1/mafic/compare/v2.4.2...v2.5.0) (2023-05-31)
+
+
+### Features
+
+* **node:** add on_node_stats ([af9fba5](https://github.com/ooliver1/mafic/commit/af9fba51fed8940be60a9b041953210bc9cfe737))
+
 ## [2.4.2](https://github.com/ooliver1/mafic/compare/v2.4.1...v2.4.2) (2023-05-21)
 
 
