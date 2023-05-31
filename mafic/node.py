@@ -736,6 +736,7 @@ class Node(Generic[ClientT]):
             player.update_state(data["state"])
         elif data["op"] == "stats":
             self._stats = NodeStats(data)
+            self.client.dispatch("node_stats", self)
         elif data["op"] == "event":
             await self._handle_event(data)
         elif data["op"] == "ready":
