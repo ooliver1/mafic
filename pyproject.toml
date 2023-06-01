@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mafic"
-version = "2.5.0"
+version = "2.6.0"
 description = "A properly typehinted lavalink client for discord.py, nextcord, disnake and py-cord."
 authors = ["ooliver1 <oliverwilkes2006@icloud.com>"]
 license = "MIT"
