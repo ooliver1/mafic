@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/ooliver1/mafic/compare/v2.5.0...v2.6.0) (2023-06-01)
+
+
+### Features
+
+* transfer players to new nodes ([#85](https://github.com/ooliver1/mafic/issues/85)) ([bd833ee](https://github.com/ooliver1/mafic/commit/bd833eec2bfb469f5a8b1fa739c6626f7ac68fb8))
+
 ## [2.5.0](https://github.com/ooliver1/mafic/compare/v2.4.2...v2.5.0) (2023-05-31)
 
 
