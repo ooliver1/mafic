@@ -3,13 +3,14 @@ r"""A module containing a :class:`NodePool`, used to manage :class:`Node`\s."""
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Sequence
 from functools import partial
 from logging import getLogger
 from random import choice
 from typing import TYPE_CHECKING, Any, Generic, List, TypeVar, Union, cast
 
-from .errors import NoNodesAvailable
+from .errors import NoNodesAvailable, PlayerNotConnected
 from .node import Node
 from .strategy import Strategy, StrategyCallable, call_strategy
 from .type_variables import ClientT
@@ -206,6 +207,81 @@ class NodePool(Generic[ClientT]):
 
         self._nodes[label] = node
         return node
+
+    async def remove_node(
+        self, node: Node[ClientT] | str, *, transfer_players: bool = True
+    ) -> None:
+        """Remove a node from the pool.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        node:
+            The node to remove.
+        transfer_players:
+            Whether to transfer players to other nodes or destroy them.
+        """
+        if isinstance(node, str):
+            node = self._nodes[node]
+
+        if node.regions:
+            for region in node.regions:
+                self._node_regions[region].remove(node)
+
+        if node.shard_ids:
+            for shard_id in node.shard_ids:
+                self._node_shards[shard_id].remove(node)
+
+        # Remove prematurely so it is not chosen.
+        del self._nodes[node.label]
+
+        if transfer_players:
+            if TYPE_CHECKING:
+                from .player import Player
+
+            async def transfer_player(player: Player[ClientT]) -> None:
+                try:
+                    target = self.get_node(
+                        guild_id=player.guild.id,
+                        endpoint=player.endpoint,  # pyright: ignore[reportPrivateUsage]
+                    )
+                    await player.transfer_to(target)
+                except (RuntimeError, NoNodesAvailable, PlayerNotConnected):
+                    _log.error(
+                        "Failed to transfer player %d, destroying it...",
+                        player.guild.id,
+                        exc_info=True,
+                        extra={"label": node.label},
+                    )
+                    await player.destroy()
+
+            tasks = [transfer_player(player) for player in node.players]
+            await asyncio.gather(*tasks)
+        else:
+            if TYPE_CHECKING:
+                from .player import Player
+
+            async def destroy_player(player: Player[ClientT]) -> None:
+                _log.debug(
+                    "Destroying player %d due to node removal...",
+                    player.guild.id,
+                    extra={"label": node.label},
+                )
+                await player.destroy()
+
+            tasks = [destroy_player(player) for player in node.players]
+            await asyncio.gather(*tasks)
+
+        await node.close()
+
+    async def close(self) -> None:
+        """Close all nodes in the pool.
+
+        .. versionadded:: 2.6
+        """
+        for node in self._nodes.values():
+            await node.close()
 
     @classmethod
     def get_node(

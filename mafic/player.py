@@ -88,6 +88,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             raise TypeError(msg)
 
         self.guild: Guild = self.channel.guild
+        self.endpoint: str | None = None
 
         self._node = node
 
@@ -384,6 +385,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
         self._node.add_player(self._guild_id, self)
 
         self._guild_id = int(data["guild_id"])
+        self._endpoint = data["endpoint"]
         self._server_state = data
 
         await self._dispatch_player_update()
@@ -477,6 +479,54 @@ class Player(VoiceProtocol, Generic[ClientT]):
         self._connected = False
 
         return super().cleanup()
+
+    async def transfer_to(self, node: Node[ClientT]) -> None:
+        """Transfer the player to a new node.
+
+        Parameters
+        ----------
+        node:
+            The node to transfer to.
+        """
+        if self._node is None:
+            raise PlayerNotConnected
+
+        if self._node == node:
+            return
+
+        state = await self._node.fetch_player(self.guild.id)
+
+        # Remove from the current node, but no need to destroy.
+        self._node.remove_player(self.guild.id)
+
+        old_node = self._node
+        self._node = node
+        self._node.add_player(self.guild.id, self)
+
+        if self._session_id is None or self._server_state is None:
+            msg = "Cannot transfer player with session data."
+            raise RuntimeError(msg)
+
+        # We need to update the voice server as the endpoint may have changed.
+        await self._node.voice_update(
+            guild_id=self._guild_id,
+            session_id=self._session_id,
+            data=self._server_state,
+        )
+
+        # Needed so .update does not fail.
+        self._connected = True
+        # Update player with all other state.
+        # Position, filters, track, etc.
+        await self.update(
+            track=self._current,
+            position=self.position,
+            volume=state["volume"],
+            pause=self._paused,
+            filter=reduce(or_, self._filters.values()) if self._filters else Filter(),
+        )
+
+        await old_node.destroy(guild_id=self.guild.id)
 
     async def destroy(self) -> None:
         """Destroy the player.
