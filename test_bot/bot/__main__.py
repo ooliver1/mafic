@@ -75,7 +75,7 @@ class TestBot(BotBase):
         # gateway-proxy
         return
 
-    async def add_nodes(self) -> None:
+    async def add_nodes(self) -> None:  # noqa: PLR0912
         with open(environ["LAVALINK_FILE"], "rb") as f:
             data: list[LavalinkInfo] = orjson.loads(f.read())
 
@@ -100,15 +100,25 @@ class TestBot(BotBase):
 
                     regions.append(region)
 
-            await self.pool.create_node(
-                host=node["host"],
-                port=node["port"],
-                password=node["password"],
-                regions=regions,
-                label=node["label"],
-                shard_ids=node.get("shard_ids"),
-                resuming_session_id=session_id,
-            )
+            if environ["LAVALINK_FILE"] == "lavalink/multi-nodes.json":
+                await asyncio.sleep(10)
+
+            for tries in range(5):
+                try:
+                    await self.pool.create_node(
+                        host=node["host"],
+                        port=node["port"],
+                        password=node["password"],
+                        regions=regions,
+                        label=node["label"],
+                        shard_ids=node.get("shard_ids"),
+                        resuming_session_id=session_id,
+                    )
+                except:  # noqa: E722
+                    traceback.print_exc()
+                    await asyncio.sleep(tries * 2)
+                else:
+                    break
 
     async def start(self, token: str, *, reconnect: bool = True) -> None:
         await gather(self.add_nodes(), super().start(token, reconnect=reconnect))
@@ -243,6 +253,12 @@ async def stats(inter: Interaction):
 async def close(inter: Interaction):
     await inter.send("Closing bot.")
     await bot.close()
+
+
+@bot.slash_command()
+async def transfer(inter: Interaction):
+    await bot.pool.remove_node(inter.guild.voice_client.node)
+    await inter.send("Transferred node.")
 
 
 @bot.slash_command()

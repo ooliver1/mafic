@@ -422,6 +422,29 @@ class Node(Generic[ClientT]):
         """
         return self._players.get(guild_id)
 
+    async def fetch_player(self, guild_id: int) -> PlayerPayload:
+        """Fetch player data from the node.
+
+        .. note::
+
+            This is an API call. Usually you should use :meth:`get_player` instead.
+
+        .. versionadded:: 2.6
+
+        Parameters
+        ----------
+        guild_id:
+            The guild ID to fetch the player for.
+
+        Returns
+        -------
+        :class:`dict`
+            The player data for the guild.
+        """
+        return await self.__request(
+            "GET", f"sessions/{self._session_id}/players/{guild_id}"
+        )
+
     def add_player(self, guild_id: int, player: Player[ClientT]) -> None:
         """Add a player to the node.
 
@@ -653,6 +676,44 @@ class Node(Generic[ClientT]):
             await self.sync_players()
             self._available = True
             self._client.dispatch("node_ready", self)
+
+    async def close(self) -> None:
+        """Close the node.
+
+        This will disconnect the websocket and close the session.
+
+        .. versionadded:: 2.6
+        """
+        if self._ws is not None:
+            _log.debug("Closing websocket.", extra={"label": self._label})
+            await self._ws.close()
+            self._ws = None
+            _log.debug("Websocket closed.", extra={"label": self._label})
+
+        if self.__session is not None:
+            _log.debug("Closing session.", extra={"label": self._label})
+            await self.__session.close()
+            self.__session = None
+            _log.debug("Session closed.", extra={"label": self._label})
+
+        if self._ws_task is not None:
+            _log.debug(
+                "Cancelling websocket listener task.", extra={"label": self._label}
+            )
+            self._ws_task.cancel()
+            self._ws_task = None
+            _log.debug(
+                "Websocket listener task cancelled.", extra={"label": self._label}
+            )
+
+        if self._connect_task is not None:
+            _log.debug("Cancelling connection task.", extra={"label": self._label})
+            self._connect_task.cancel()
+            self._connect_task = None
+            _log.debug("Connection task cancelled.", extra={"label": self._label})
+
+        _log.info("Node %s is now closed.", self._label, extra={"label": self._label})
+        self._available = False
 
     async def _ws_listener(self) -> None:
         """Listen for messages from the websocket."""

@@ -3,3 +3,4 @@
 !pyproject.toml
 !poetry.lock
 !lavalink/
+!gateway-proxy/
