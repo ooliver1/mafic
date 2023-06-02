@@ -117,7 +117,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             You should not need to use this.
         """
         self._session_id = state["voice"]["sessionId"]
-        self._ping = state["voice"]["ping"]
+        self._ping = state["voice"].get("ping", -1)
         self._current = (
             Track.from_data_with_info(state["track"]) if state["track"] else None
         )

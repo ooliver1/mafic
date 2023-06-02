@@ -1313,6 +1313,7 @@ class Node(Generic[ClientT]):
         player = Player(self.client, channel)
 
         player.set_state(state)
+        player._node = self  # pyright: ignore[reportPrivateUsage]
 
         self._players[player_id] = player
 
