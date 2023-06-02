@@ -676,8 +676,8 @@ class Node(Generic[ClientT]):
             _log.info(
                 "Node %s is now available.", self._label, extra={"label": self._label}
             )
-            self._event_queue.set()
             await self.sync_players()
+            self._event_queue.set()
             self._available = True
             self._client.dispatch("node_ready", self)
 
