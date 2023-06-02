@@ -713,7 +713,16 @@ class Node(Generic[ClientT]):
             _log.debug("Connection task cancelled.", extra={"label": self._label})
 
         _log.info("Node %s is now closed.", self._label, extra={"label": self._label})
+        self.cleanup()
+
+    def cleanup(self) -> None:
+        """Cleanup the node, as if it was never connected."""
         self._available = False
+        self._ws = None
+        self._ws_task = None
+        self._connect_task = None
+        self.__session = None
+        self._ready.clear()
 
     async def _ws_listener(self) -> None:
         """Listen for messages from the websocket."""

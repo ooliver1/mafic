@@ -187,6 +187,25 @@ class NodePool(Generic[ClientT]):
             resuming_session_id=resuming_session_id,
         )
 
+        await self.add_node(node)
+        return node
+
+    async def add_node(self, node: Node[ClientT]) -> None:
+        """Add an existing node to this pool.
+
+        .. note::
+
+            You generally do not want this, use :meth:`create_node` instead.
+            This is used for after running :meth:`remove_node` to re-add the node
+            if it has been restarted.
+
+        .. versionadded:: 2.7
+
+        Parameters
+        ----------
+        node:
+            The node to add.
+        """
         # Add to dictionaries, creating a set or extending it if needed.
         if node.regions:
             for region in node.regions:
@@ -202,11 +221,10 @@ class NodePool(Generic[ClientT]):
                     *self._node_shards.get(shard_id, set()),
                 }
 
-        _log.info("Created node, connecting it...", extra={"label": label})
+        _log.info("Created node, connecting it...", extra={"label": node.label})
         await node.connect()
 
-        self._nodes[label] = node
-        return node
+        self._nodes[node.label] = node
 
     async def remove_node(
         self, node: Node[ClientT] | str, *, transfer_players: bool = True
