@@ -646,11 +646,8 @@ class Player(VoiceProtocol, Generic[ClientT]):
         if data["track"]:
             self._current = Track.from_data_with_info(data["track"])
 
-        if data["volume"]:
-            self._volume = data["volume"]
-
-        if data["paused"]:
-            self._paused = data["paused"]
+        self._volume = data["volume"]
+        self._paused = data["paused"]
 
     async def play(
         self,
