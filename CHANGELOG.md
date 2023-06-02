@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.8.0](https://github.com/ooliver1/mafic/compare/v2.7.0...v2.8.0) (2023-06-02)
+
+
+### Features
+
+* allow for custom player cls when resuming ([ed36171](https://github.com/ooliver1/mafic/commit/ed36171bc4a76e724f8ab1fae367097f62d8a2f7))
+
+
+### Bug Fixes
+
+* **node:** add player to client state ([325750b](https://github.com/ooliver1/mafic/commit/325750b5f905f08c4430c7f5ad1da468dd4b814f))
+* **player:** cleanup if NoNodesAvailable ([12a8e03](https://github.com/ooliver1/mafic/commit/12a8e03754154764db9a97f4e7c1b3bfb8be0083))
+* **player:** resolve issue with resuming unknown players ([b450e08](https://github.com/ooliver1/mafic/commit/b450e08787951a976c766d35fa35ed7c3da016be))
+* **player:** set paused and volume anyway ([23c4d22](https://github.com/ooliver1/mafic/commit/23c4d221276aca7b31cb3073bf5bc80a4332ac24))
+
 ## [2.7.0](https://github.com/ooliver1/mafic/compare/v2.6.0...v2.7.0) (2023-06-02)
 
 
