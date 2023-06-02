@@ -196,6 +196,7 @@ class Node(Generic[ClientT]):
         "_ws",
         "_ws_uri",
         "_ws_task",
+        "_event_queue",
         "regions",
         "shard_ids",
     )
@@ -252,6 +253,8 @@ class Node(Generic[ClientT]):
 
         self._checked_version: bool = False
         self._version: int = 3
+
+        self._event_queue: Event = Event()
 
     @property
     def host(self) -> str:
@@ -673,6 +676,7 @@ class Node(Generic[ClientT]):
             _log.info(
                 "Node %s is now available.", self._label, extra={"label": self._label}
             )
+            self._event_queue.set()
             await self.sync_players()
             self._available = True
             self._client.dispatch("node_ready", self)
@@ -723,6 +727,7 @@ class Node(Generic[ClientT]):
         self._connect_task = None
         self.__session = None
         self._ready.clear()
+        self._event_queue.clear()
 
     async def _ws_listener(self) -> None:
         """Listen for messages from the websocket."""
@@ -789,6 +794,9 @@ class Node(Generic[ClientT]):
         """
         _log.debug("Event data: %s", data)
         _log.debug("Received event with op %s", data["op"])
+        # Queue up events like "playerUpdate" until we receive "ready" and resumed.
+        if data["op"] != "ready":
+            await self._event_queue.wait()
 
         if data["op"] == "playerUpdate":
             guild_id = int(data["guildId"])
@@ -877,7 +885,9 @@ class Node(Generic[ClientT]):
                 return
 
             _log.error(
-                "Could not find player for guild %s, discarding event.", data["guildId"]
+                "Could not find player for guild %s, discarding event.",
+                data["guildId"],
+                extra={"label": self._label},
             )
             return
 
