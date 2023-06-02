@@ -420,6 +420,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             raise TypeError(msg)
 
         if not NodePool.nodes:  # pyright: ignore
+            self.cleanup()
             raise NoNodesAvailable
 
         _log.debug("Connecting to voice channel %s", self.channel.id)
