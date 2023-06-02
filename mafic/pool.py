@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
     import aiohttp
 
+    from .player import Player
     from .region import Group, Region, VoiceRegion
 
 
@@ -110,6 +111,7 @@ class NodePool(Generic[ClientT]):
         regions: Sequence[Group | Region | VoiceRegion] | None = None,
         shard_ids: Sequence[int] | None = None,
         resuming_session_id: str | None = None,
+        player_cls: type[Player[ClientT]] | None = None,
     ) -> Node[ClientT]:
         r"""Create a node and connect it.
 
@@ -156,6 +158,10 @@ class NodePool(Generic[ClientT]):
             connection to us.
 
             .. versionadded:: 2.2
+        player_cls:
+            The player class to use for this node when resuming.
+
+            .. versionadded:: 2.8
 
         Returns
         -------
@@ -187,10 +193,12 @@ class NodePool(Generic[ClientT]):
             resuming_session_id=resuming_session_id,
         )
 
-        await self.add_node(node)
+        await self.add_node(node, player_cls=player_cls)
         return node
 
-    async def add_node(self, node: Node[ClientT]) -> None:
+    async def add_node(
+        self, node: Node[ClientT], *, player_cls: type[Player[ClientT]] | None = None
+    ) -> None:
         """Add an existing node to this pool.
 
         .. note::
@@ -205,6 +213,10 @@ class NodePool(Generic[ClientT]):
         ----------
         node:
             The node to add.
+        player:
+            The player class to use for this node when resuming.
+
+            .. versionadded:: 2.8
         """
         # Add to dictionaries, creating a set or extending it if needed.
         if node.regions:
@@ -222,7 +234,7 @@ class NodePool(Generic[ClientT]):
                 }
 
         _log.info("Created node, connecting it...", extra={"label": node.label})
-        await node.connect()
+        await node.connect(player_cls=player_cls)
 
         self._nodes[node.label] = node
 
@@ -255,8 +267,6 @@ class NodePool(Generic[ClientT]):
         del self._nodes[node.label]
 
         if transfer_players:
-            if TYPE_CHECKING:
-                from .player import Player
 
             async def transfer_player(player: Player[ClientT]) -> None:
                 try:
@@ -277,8 +287,6 @@ class NodePool(Generic[ClientT]):
             tasks = [transfer_player(player) for player in node.players]
             await asyncio.gather(*tasks)
         else:
-            if TYPE_CHECKING:
-                from .player import Player
 
             async def destroy_player(player: Player[ClientT]) -> None:
                 _log.debug(

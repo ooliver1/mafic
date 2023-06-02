@@ -574,7 +574,10 @@ class Node(Generic[ClientT]):
             raise
 
     async def connect(
-        self, *, backoff: ExponentialBackoff[Literal[False]] | None = None
+        self,
+        *,
+        backoff: ExponentialBackoff[Literal[False]] | None = None,
+        player_cls: type[Player[ClientT]] | None = None,
     ) -> None:
         """Connect to the node.
 
@@ -582,6 +585,10 @@ class Node(Generic[ClientT]):
         ----------
         backoff:
             The backoff to use when reconnecting.
+        player_cls:
+            The player class to use for the node when resuming.
+
+            .. versionadded:: 2.8
 
         Raises
         ------
@@ -676,7 +683,7 @@ class Node(Generic[ClientT]):
             _log.info(
                 "Node %s is now available.", self._label, extra={"label": self._label}
             )
-            await self.sync_players()
+            await self.sync_players(player_cls=player_cls)
             self._event_queue.set()
             self._available = True
             self._client.dispatch("node_ready", self)
@@ -1293,7 +1300,12 @@ class Node(Generic[ClientT]):
         """Unmark all failed addresses so they can be used again."""
         await self.__request("POST", "routeplanner/free/all")
 
-    async def _add_unknown_player(self, player_id: int, state: PlayerPayload) -> None:
+    async def _add_unknown_player(
+        self,
+        player_id: int,
+        state: PlayerPayload,
+        cls: type[Player[ClientT]] | None = None,
+    ) -> None:
         """Add an unknown player to the node.
 
         Parameters
@@ -1302,6 +1314,8 @@ class Node(Generic[ClientT]):
             The guild ID of the player.
         state:
             The state of the player.
+        cls:
+            The class of the player to use.
         """
         guild = self.client.get_guild(player_id)
         if guild is None:
@@ -1320,7 +1334,7 @@ class Node(Generic[ClientT]):
         # Circular, pool -> node -> player -> pool
         from .player import Player
 
-        player = Player(self.client, channel)
+        player = (cls or Player)(self.client, channel)
 
         player.set_state(state)
         player._node = self  # pyright: ignore[reportPrivateUsage]
@@ -1340,13 +1354,22 @@ class Node(Generic[ClientT]):
         await self._players[player_id].disconnect(force=True)
         self.remove_player(player_id)
 
-    async def sync_players(self) -> None:
+    async def sync_players(
+        self, player_cls: type[Player[ClientT]] | None = None
+    ) -> None:
         """Sync the players with the node.
 
         .. note::
 
             This method is called automatically when the client is ready.
             You should not need to call this method yourself.
+
+        Parameters
+        ----------
+        player_cls:
+            The class of the player to use.
+
+            .. versionadded:: 2.8
         """
         players: list[PlayerPayload] = await self.__request(
             "GET", f"sessions/{self._session_id}/players"
@@ -1357,7 +1380,9 @@ class Node(Generic[ClientT]):
 
         await gather(
             *(
-                self._add_unknown_player(player_id, actual_players[player_id])
+                self._add_unknown_player(
+                    player_id, actual_players[player_id], cls=player_cls
+                )
                 for player_id in actual_player_ids - expected_player_ids
             ),
             *(
