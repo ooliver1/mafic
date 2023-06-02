@@ -1326,6 +1326,8 @@ class Node(Generic[ClientT]):
         player._node = self  # pyright: ignore[reportPrivateUsage]
 
         self._players[player_id] = player
+        key, _ = player.channel._get_voice_client_key()  # pyright: ignore
+        self.client._connection._add_voice_client(key, player)  # pyright: ignore
 
     async def _remove_unknown_player(self, player_id: int) -> None:
         """Remove an unknown player from the node.
