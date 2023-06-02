@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/ooliver1/mafic/compare/v2.6.0...v2.7.0) (2023-06-02)
+
+
+### Features
+
+* **pool:** support re-adding nodes ([d2b35da](https://github.com/ooliver1/mafic/commit/d2b35da2bd4539bd81514ec21c24dba6306060b1))
+
 ## [2.6.0](https://github.com/ooliver1/mafic/compare/v2.5.0...v2.6.0) (2023-06-01)
 
 
