@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import asyncio
+import warnings
 from asyncio import Event
 from collections import OrderedDict
 from functools import reduce
@@ -457,6 +458,14 @@ class Player(VoiceProtocol, Generic[ClientT]):
         if self.client.is_closed():
             return
 
+        _log.debug(
+            "Disconnecting player and destroying client.",
+            extra={"guild": self._guild_id},
+        )
+        if self._node is not None:
+            self._node.remove_player(self.guild.id)
+            await self._node.destroy(guild_id=self.guild.id)
+
         try:
             _log.debug(
                 "Disconnecting from voice channel.",
@@ -529,20 +538,13 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         await old_node.destroy(guild_id=self.guild.id)
 
-    async def destroy(self) -> None:
-        """Destroy the player.
-
-        This will disconnect the player and remove it from the node.
-        """
-        _log.debug(
-            "Disconnecting player and destroying client.",
-            extra={"guild": self._guild_id},
+    async def destroy(self) -> None:  # noqa: D102
+        warnings.warn(
+            "Player.destroy is deprecated and will be removed in 3.0.0, "
+            "use .disconnect instead.",
+            DeprecationWarning,
         )
         await self.disconnect()
-
-        if self._node is not None:
-            self._node.remove_player(self.guild.id)
-            await self._node.destroy(guild_id=self.guild.id)
 
     async def fetch_tracks(
         self, query: str, search_type: SearchType | str = SearchType.YOUTUBE
