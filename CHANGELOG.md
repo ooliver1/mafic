@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/ooliver1/mafic/compare/v2.8.0...v2.9.0) (2023-06-04)
+
+
+### Features
+
+* **player:** destroy in disconnect ([#89](https://github.com/ooliver1/mafic/issues/89)) ([0e204c8](https://github.com/ooliver1/mafic/commit/0e204c80a48bfcdd8a1b0b6e8f66e34f07bfe25d))
+
 ## [2.8.0](https://github.com/ooliver1/mafic/compare/v2.7.0...v2.8.0) (2023-06-02)
 
 
