@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.1](https://github.com/ooliver1/mafic/compare/v2.9.0...v2.9.1) (2023-06-04)
+
+
+### Bug Fixes
+
+* sorry frankfurt ([#91](https://github.com/ooliver1/mafic/issues/91)) ([b09daef](https://github.com/ooliver1/mafic/commit/b09daef2b57f98fc9174bd5963b80be4b1ecbb8c))
+
 ## [2.9.0](https://github.com/ooliver1/mafic/compare/v2.8.0...v2.9.0) (2023-06-04)
 
 
