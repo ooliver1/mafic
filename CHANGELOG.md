@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.2](https://github.com/ooliver1/mafic/compare/v2.9.1...v2.9.2) (2023-06-04)
+
+
+### Bug Fixes
+
+* **strategy:** properly match all regions to a node ([#93](https://github.com/ooliver1/mafic/issues/93)) ([f25b84f](https://github.com/ooliver1/mafic/commit/f25b84f6a2a68dc7297cac3cfec53d8b367bcd36))
+
 ## [2.9.1](https://github.com/ooliver1/mafic/compare/v2.9.0...v2.9.1) (2023-06-04)
 
 
