@@ -114,6 +114,7 @@ class Group(Enum):
         Region.WEST_EUROPE,
         Region.SOUTH_EUROPE,
         Region.EAST_EUROPE,
+        Region.CENTRAL_EUROPE,
         Region.SOUTH_AFRICA,
     )
     EAST = (
