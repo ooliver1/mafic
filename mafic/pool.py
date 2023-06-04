@@ -65,8 +65,6 @@ class NodePool(Generic[ClientT]):
     # Generics as expected, do not work in class variables.
     # Don't fear, the public methods using this are typed well.
     _nodes: ClassVar[dict[str, Node[Any]]] = {}
-    _node_regions: ClassVar[dict[VoiceRegion, set[Node[Any]]]] = {}
-    _node_shards: ClassVar[dict[int, set[Node[Any]]]] = {}
     _client: ClientT | None = None
 
     def __init__(
@@ -218,21 +216,6 @@ class NodePool(Generic[ClientT]):
 
             .. versionadded:: 2.8
         """
-        # Add to dictionaries, creating a set or extending it if needed.
-        if node.regions:
-            for region in node.regions:
-                self._node_regions[region] = {
-                    node,
-                    *self._node_regions.get(region, set()),
-                }
-
-        if node.shard_ids:
-            for shard_id in node.shard_ids:
-                self._node_shards[shard_id] = {
-                    node,
-                    *self._node_shards.get(shard_id, set()),
-                }
-
         _log.info("Created node, connecting it...", extra={"label": node.label})
         await node.connect(player_cls=player_cls)
 
@@ -254,14 +237,6 @@ class NodePool(Generic[ClientT]):
         """
         if isinstance(node, str):
             node = self._nodes[node]
-
-        if node.regions:
-            for region in node.regions:
-                self._node_regions[region].remove(node)
-
-        if node.shard_ids:
-            for shard_id in node.shard_ids:
-                self._node_shards[shard_id].remove(node)
 
         # Remove prematurely so it is not chosen.
         del self._nodes[node.label]
