@@ -323,7 +323,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
             event_type = cast(str, data["type"])
             _log.warning("Unknown incoming event type %s", event_type)
 
-    async def on_voice_state_update(self, data: GuildVoiceStatePayload) -> None:
+    async def on_voice_state_update(  # pyright: ignore[reportIncompatibleMethodOverride]  # noqa: E501
+        self, data: GuildVoiceStatePayload
+    ) -> None:
         """Dispatch a voice state update.
 
         This is called by the library and usually should not be called by the user.
@@ -420,7 +422,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
             msg = "Voice channel must be a VoiceChannel or StageChannel."
             raise TypeError(msg)
 
-        if not NodePool.nodes:  # pyright: ignore
+        # I really don't like how pyright rules are so incredibly long,
+        # This has 2 type issues.
+        if not NodePool.nodes:  # pyright: ignore   # noqa: PGH003
             self.cleanup()
             raise NoNodesAvailable
 
@@ -543,6 +547,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             "Player.destroy is deprecated and will be removed in 3.0.0, "
             "use .disconnect instead.",
             DeprecationWarning,
+            stacklevel=2,
         )
         await self.disconnect()
 

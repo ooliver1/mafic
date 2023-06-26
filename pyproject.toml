@@ -134,6 +134,9 @@ select = [
 # ANN101, ANN102 ask for `self` and `cls` annotations, what?
 # RET505-RET508 does not allow for any branches where it is an elif and else after a return
 # PLR2004 too much to deal with right now
+# PLR0913 a bit of a churn to deal with for Client and Filter
+# UP006-UP007, UP035,UP038 currently supporting 3.8, would like to keep Optional when needed
+# S311 I do not need cryptographically secure random node selection thanks
 ignore = [
     "F403",
     "F405",
@@ -147,11 +150,14 @@ ignore = [
     "RET507",
     "RET508",
     "PLR2004",
+    "PLR0913",
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP038",
+    "S311",
 ]
 unfixable = ["RET502", "RET503"]
-
-[tool.ruff.pyupgrade]
-keep-runtime-typing = true
 
 [tool.ruff.pydocstyle]
 convention = "numpy"

@@ -8,7 +8,7 @@ import importlib
 import inspect
 import re
 from collections import OrderedDict
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple
 
 from docutils import nodes
 from sphinx import addnodes
@@ -113,7 +113,7 @@ class PyAttributeTable(SphinxDirective):
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = False
-    option_spec = {}
+    option_spec: ClassVar[dict[Any, Any]] = {}
 
     def parse_name(self, content: str) -> tuple[str, str]:
         match = _name_parser_regex.match(content)

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+# ruff: noqa: PGH003
 
 from __future__ import annotations
 
@@ -42,22 +43,21 @@ for library in libraries:
         found.append(library)
 
 
-if not getenv("MAFIC_IGNORE_LIBRARY_CHECK", default=False):
+if not getenv("MAFIC_IGNORE_LIBRARY_CHECK"):
     if len(found) == 0:
         raise NoCompatibleLibraries
     elif len(found) > 1:
         raise MultipleCompatibleLibraries(found)
-else:
-    if found[0] == "nextcord":
-        from warnings import simplefilter
+elif found[0] == "nextcord":
+    from warnings import simplefilter
 
-        # Ignore RuntimeWarning as we import the warning to filter :}
-        simplefilter("ignore", RuntimeWarning)
-        from nextcord.health_check import DistributionWarning
+    # Ignore RuntimeWarning as we import the warning to filter :}
+    simplefilter("ignore", RuntimeWarning)
+    from nextcord.health_check import DistributionWarning
 
-        simplefilter("always", RuntimeWarning)
+    simplefilter("always", RuntimeWarning)
 
-        simplefilter("ignore", DistributionWarning)
+    simplefilter("ignore", DistributionWarning)
 
 
 library = found[0]
@@ -97,10 +97,11 @@ elif library == "disnake":
     if TYPE_CHECKING:
         if version_info >= (2, 6):
             from disnake.types.gateway import (
-                VoiceServerUpdateEvent as VoiceServerUpdatePayload,  # pyright: ignore
+                VoiceServerUpdateEvent as VoiceServerUpdatePayload,
             )
         else:
             from disnake.types.voice import (
+                # Pyright rules are unnecessarily long.
                 VoiceServerUpdate as VoiceServerUpdatePayload,  # pyright: ignore
             )
         from disnake.types.voice import GuildVoiceState as GuildVoiceStatePayload

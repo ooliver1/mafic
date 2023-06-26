@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, Type, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -22,7 +22,7 @@ class _ClassPropertyDescriptor(Generic[T, R]):
 
     def __get__(self, instance: T, owner: type[T] | None = None) -> R:
         if owner is None:
-            owner = cast(Type[T], type(instance))
+            owner = cast(type[T], type(instance))
         return self.fget.__get__(instance, owner)()
 
 
