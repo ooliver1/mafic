@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from functools import partial
 from logging import getLogger
 from random import choice
-from typing import TYPE_CHECKING, Any, Generic, List, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union, cast
 
 from .errors import NoNodesAvailable, PlayerNotConnected
 from .node import Node
@@ -325,7 +325,7 @@ class NodePool(Generic[ClientT]):
         actual_strategies = [strategies] if callable(strategies) else strategies
 
         # It is a classproperty.
-        nodes = cast(List[Node[ClientT]], cls.nodes)  # pyright: ignore
+        nodes = cast(list[Node[ClientT]], cls.nodes)  # pyright: ignore  # noqa: PGH003
 
         for strategy in actual_strategies:
             if isinstance(strategy, Strategy):

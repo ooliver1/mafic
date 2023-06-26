@@ -11,7 +11,6 @@ from random import choice
 from typing import List, Optional
 
 from .node import Node
-from .region import VoiceRegion
 from .type_variables import ClientT
 
 StrategyCallable = Callable[
@@ -105,17 +104,6 @@ def location_strategy(
             "defaulting to all nodes.",
             endpoint,
             match.group("region"),
-        )
-        return nodes
-
-    try:
-        voice_region = VoiceRegion(voice_region)
-    except ValueError:
-        _log.error(
-            "Failed to match endpoint %s (match: %s) to a region, "
-            "defaulting to all nodes.",
-            endpoint,
-            voice_region,
         )
         return nodes
 

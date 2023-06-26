@@ -521,7 +521,7 @@ class Node(Generic[ClientT]):
                     major = 3
                     minor = 7
                     message = UnknownVersionWarning.message
-                    warnings.warn(message, UnknownVersionWarning)
+                    warnings.warn(message, UnknownVersionWarning, stacklevel=4)
             else:
                 major = int(major)
                 minor = int(minor)
@@ -534,7 +534,7 @@ class Node(Generic[ClientT]):
                     raise RuntimeError(msg)
                 elif (major == 3 and minor > 7) or (major == 4 and minor > 0):
                     message = UnsupportedVersionWarning.message
-                    warnings.warn(message, UnsupportedVersionWarning)
+                    warnings.warn(message, UnsupportedVersionWarning, stacklevel=4)
 
             self._rest_uri /= f"v{major}"
             self._ws_uri /= f"v{major}/websocket"
@@ -755,7 +755,7 @@ class Node(Generic[ClientT]):
             _log.debug("Received message from websocket.", extra={"label": self._label})
 
             # Please aiohttp, fix your typehints.
-            _type: aiohttp.WSMsgType = msg.type  # pyright: ignore
+            _type: aiohttp.WSMsgType = msg.type  # pyright: ignore  # noqa: PGH003
 
             if _type is aiohttp.WSMsgType.CLOSED:
                 self._available = False
@@ -1340,8 +1340,13 @@ class Node(Generic[ClientT]):
         player._node = self  # pyright: ignore[reportPrivateUsage]
 
         self._players[player_id] = player
-        key, _ = player.channel._get_voice_client_key()  # pyright: ignore
-        self.client._connection._add_voice_client(key, player)  # pyright: ignore
+        (
+            key,
+            _,
+        ) = player.channel._get_voice_client_key()  # pyright: ignore   # noqa: PGH003
+        self.client._connection._add_voice_client(  # pyright: ignore  # noqa: PGH003
+            key, player
+        )
 
     async def _remove_unknown_player(self, player_id: int) -> None:
         """Remove an unknown player from the node.
