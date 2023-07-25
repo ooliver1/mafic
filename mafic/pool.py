@@ -91,8 +91,8 @@ class NodePool(Generic[ClientT]):
 
     @classproperty
     def nodes(cls) -> list[Node[ClientT]]:
-        """Get the list of all nodes."""
-        return list(cls._nodes.values())
+        """Get the list of all available nodes."""
+        return list(filter(lambda n: n.available, cls._nodes.values()))
 
     async def create_node(
         self,
@@ -364,7 +364,10 @@ class NodePool(Generic[ClientT]):
         ValueError
             If there are no nodes.
         """
-        if node := choice(list(cls._nodes.values())):
+        # It is a classproperty.
+        nodes = cast(list[Node[ClientT]], cls.nodes)  # pyright: ignore  # noqa: PGH003
+
+        if node := choice(nodes):
             return node
 
         raise NoNodesAvailable
