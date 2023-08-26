@@ -72,3 +72,17 @@ Callbacks
 
    :param node: The node that sent the statistics.
    :type node: :class:`Node`
+
+.. function:: on_node_ready()
+
+    Called when Lavalink node is ready.
+
+    :param node: The node that was ready.
+    :type node: :class:`Node`
+
+.. function:: on_node_unavailable()
+
+    Called when Lavalink node becomes unavailable.
+
+    :param node: The node that became unavailable.
+    :type node: :class:`Node`
