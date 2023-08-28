@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.9.3](https://github.com/ooliver1/mafic/compare/v2.9.2...v2.9.3) (2023-08-28)
+
+
+### Bug Fixes
+
+* **events:** handle v4 loadFailed EndReason ([7fc34b5](https://github.com/ooliver1/mafic/commit/7fc34b58b73f17533f2c24d524de759ea8440dc4))
+* **stats:** use ms in uptime over seconds ([#96](https://github.com/ooliver1/mafic/issues/96)) ([8ab596a](https://github.com/ooliver1/mafic/commit/8ab596a40e57de9104a6ace2ea159cb06f9134f6))
+
 ## [2.9.2](https://github.com/ooliver1/mafic/compare/v2.9.1...v2.9.2) (2023-06-04)
 
 
