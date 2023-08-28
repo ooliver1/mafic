@@ -115,7 +115,7 @@ class NodeStats:
     def __init__(self, data: Stats) -> None:
         self.player_count: int = data["players"]
         self.playing_player_count: int = data["playingPlayers"]
-        self.uptime: timedelta = timedelta(seconds=data["uptime"])
+        self.uptime: timedelta = timedelta(milliseconds=data["uptime"])
         self.memory: MemoryStats = MemoryStats(data["memory"])
         self.cpu: CPUStats = CPUStats(data["cpu"])
         self.frame_stats: FrameStats | None = (
