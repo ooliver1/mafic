@@ -37,19 +37,19 @@ __all__ = (
 class EndReason(str, Enum):
     """Represents the reason why a track ended."""
 
-    FINISHED = "FINISHED"
+    FINISHED = "finished"
     """The track finished playing."""
 
-    LOAD_FAILED = "LOAD_FAILED"
+    LOAD_FAILED = "loadFailed"
     """The track failed to load."""
 
-    STOPPED = "STOPPED"
+    STOPPED = "stopped"
     """The track was stopped."""
 
-    REPLACED = "REPLACED"
+    REPLACED = "replaced"
     """The track was replaced."""
 
-    CLEANUP = "CLEANUP"
+    CLEANUP = "cleanup"
     """The track was cleaned up."""
 
 
@@ -130,7 +130,13 @@ class TrackEndEvent(Generic[PlayerT]):
         self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT
     ) -> None:
         self.track: Track = track
-        self.reason: EndReason = EndReason(payload["reason"].upper())
+        reason = payload["reason"]
+        if reason.isupper():
+            reason = reason.lower()
+            if reason == "loadfailed":
+                # Only case this happens, not worth a regex sub.
+                reason = "loadFailed"
+        self.reason: EndReason = EndReason(reason)
         self.player: PlayerT = player
 
     def __repr__(self) -> str:
