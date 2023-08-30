@@ -325,7 +325,9 @@ class NodePool(Generic[ClientT]):
         actual_strategies = [strategies] if callable(strategies) else strategies
 
         # It is a classproperty.
-        nodes = cast(list[Node[ClientT]], cls.nodes)  # pyright: ignore  # noqa: PGH003
+        # fmt: off
+        nodes = cast("list[Node[ClientT]]", cls.nodes)  # pyright: ignore  # noqa: PGH003, E501
+        # fmt: on
 
         for strategy in actual_strategies:
             if isinstance(strategy, Strategy):
