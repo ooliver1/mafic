@@ -127,7 +127,9 @@ def location_strategy(
     )
 
     if not regional_nodes:
-        _log.error("No nodes found for the region, defaulting to all nodes.")
+        _log.error(
+            "No nodes found for the region: %r, defaulting to all nodes.", voice_region
+        )
         return nodes
 
     return regional_nodes
