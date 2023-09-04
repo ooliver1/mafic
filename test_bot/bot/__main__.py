@@ -268,7 +268,7 @@ async def boost(inter: Interaction):
 
     player: MyPlayer = inter.guild.voice_client
 
-    bassboost_equalizer = Equalizer([EQBand(idx, 0.30) for idx in range(0, 15)])
+    bassboost_equalizer = Equalizer([EQBand(idx, 0.30) for idx in range(15)])
 
     bassboost_filter = Filter(bassboost_equalizer)
     await player.add_filter(bassboost_filter, label="boost")
