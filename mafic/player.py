@@ -706,7 +706,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             pause=pause,
         )
 
-    async def pause(self, pause: bool = True) -> None:  # noqa: FBT
+    async def pause(self, pause: bool = True) -> None:  # noqa: FBT001, FBT002
         """Pause the current track.
 
         Parameters
