@@ -326,7 +326,7 @@ class NodePool(Generic[ClientT]):
 
         # It is a classproperty.
         # fmt: off
-        nodes = cast("list[Node[ClientT]]", cls.nodes)  # pyright: ignore  # noqa: PGH003, E501
+        nodes = cast("list[Node[ClientT]]", cls.nodes)  # pyright: ignore  # noqa: PGH003
         # fmt: on
 
         for strategy in actual_strategies:
