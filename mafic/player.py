@@ -323,7 +323,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             event_type = cast(str, data["type"])
             _log.warning("Unknown incoming event type %s", event_type)
 
-    async def on_voice_state_update(  # pyright: ignore[reportIncompatibleMethodOverride]  # noqa: E501
+    async def on_voice_state_update(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, data: GuildVoiceStatePayload
     ) -> None:
         """Dispatch a voice state update.
