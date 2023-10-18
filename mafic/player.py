@@ -212,6 +212,10 @@ class Player(VoiceProtocol, Generic[ClientT]):
         This is an alias for :attr:`connected`.
         """
         return self._connected
+    
+    def is_playing(self) -> bool:
+        """Whether the player is playing anything."""
+        return self.current is None
 
     async def _dispatch_player_update(self) -> None:
         """Dispatch a player update to the node."""
