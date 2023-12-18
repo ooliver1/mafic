@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.10.0](https://github.com/ooliver1/mafic/compare/v2.9.3...v2.10.0) (2023-12-18)
+
+
+### Features
+
+* **node:** support unavailable node handling ([#98](https://github.com/ooliver1/mafic/issues/98)) ([a26cfa4](https://github.com/ooliver1/mafic/commit/a26cfa4e6671df62429151b4396e22a8af7c2237))
+
+
+### Bug Fixes
+
+* **events:** re-support v3 LOAD_FAILED endreason ([1c54ceb](https://github.com/ooliver1/mafic/commit/1c54ceb7248e5c8f653c1317a215cdc6a1e3a358))
+* **player:** fix Player._connected isn't True after Player.connect() ([#99](https://github.com/ooliver1/mafic/issues/99)) ([5304cde](https://github.com/ooliver1/mafic/commit/5304cde4e4aef256fed8d05013ca77f0aff141c2))
+* **pool:** cast supporting 3.8 ([fb529bf](https://github.com/ooliver1/mafic/commit/fb529bfea2b2c84976ea7d2941f305118a2050f7))
+* **strategy:** where did commit f25b84f go ([89204ac](https://github.com/ooliver1/mafic/commit/89204ac3625cc291cc705022d17bb413bbb33d6a))
+* support 3.8 again lol ([8b4bd4a](https://github.com/ooliver1/mafic/commit/8b4bd4a6443f08c3d9fe4641797f0251a26a78ad))
+
 ## [2.9.3](https://github.com/ooliver1/mafic/compare/v2.9.2...v2.9.3) (2023-08-28)
 
 
