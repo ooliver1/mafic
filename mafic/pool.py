@@ -367,7 +367,9 @@ class NodePool(Generic[ClientT]):
             If there are no nodes.
         """
         # It is a classproperty.
-        nodes = cast(list[Node[ClientT]], cls.nodes)  # pyright: ignore  # noqa: PGH003
+        nodes = cast(
+            "list[Node[ClientT]]", cls.nodes  # pyright: ignore  # noqa: PGH003
+        )
 
         if node := choice(nodes):
             return node
