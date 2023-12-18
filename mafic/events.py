@@ -133,7 +133,7 @@ class TrackEndEvent(Generic[PlayerT]):
         reason = payload["reason"]
         if reason.isupper():
             reason = reason.lower()
-            if reason == "loadfailed":
+            if reason == "load_failed":
                 # Only case this happens, not worth a regex sub.
                 reason = "loadFailed"
         self.reason: EndReason = EndReason(reason)
