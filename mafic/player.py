@@ -108,6 +108,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
         self._voice_server_update_event: Event = Event()
         self._voice_state_update_event: Event = Event()
+        self._node_player_ready_event: Event = Event()
 
     def set_state(self, state: PlayerPayload) -> None:
         """Set the state of the player.
@@ -200,6 +201,9 @@ class Player(VoiceProtocol, Generic[ClientT]):
         state:
             The state to update the player with.
         """
+        if not self._node_player_ready_event.is_set():
+            self._node_player_ready_event.set()
+
         self._last_update = state["time"]
         self._position = state.get("position", 0)
         self._connected = state["connected"]
@@ -436,6 +440,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
         futures = [
             self._voice_state_update_event.wait(),
             self._voice_server_update_event.wait(),
+            self._node_player_ready_event.wait(),
         ]
 
         ensured = [asyncio.ensure_future(fut) for fut in futures]
