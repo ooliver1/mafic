@@ -215,7 +215,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
 
     def is_playing(self) -> bool:
         """Whether the player is playing anything."""
-        return self.current is None
+        return self.current is not None
 
     async def _dispatch_player_update(self) -> None:
         """Dispatch a player update to the node."""
