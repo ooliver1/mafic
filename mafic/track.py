@@ -1,4 +1,5 @@
 """The module containing :class:`Track`."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations

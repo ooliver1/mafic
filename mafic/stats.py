@@ -1,4 +1,5 @@
 """A module containing classes to represent node statistics."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
