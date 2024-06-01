@@ -759,7 +759,9 @@ class Node(Generic[ClientT]):
 
             if _type is aiohttp.WSMsgType.CLOSED:
                 self._available = False
+                self._client.dispatch("node_unavailable", self)
                 close_code = self._ws.close_code
+                self._ready.clear()
                 self._ws = None
 
                 wait_time = backoff.delay()
