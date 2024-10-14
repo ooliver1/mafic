@@ -1,4 +1,5 @@
 """Filters that can be applied to a Player."""
+
 # SPDX-License-Identifier: MIT
 # Reference to filter meanings can be found in:
 # https://github.com/natanbc/lavadsp
@@ -616,11 +617,9 @@ class Filter:
     def __init__(
         self,
         *,
-        equalizer: Equalizer
-        | list[tuple[int, float]]
-        | list[float]
-        | list[EQBand]
-        | None = None,
+        equalizer: (
+            Equalizer | list[tuple[int, float]] | list[float] | list[EQBand] | None
+        ) = None,
         karaoke: Karaoke | None = None,
         timescale: Timescale | None = None,
         tremolo: Tremolo | None = None,
@@ -644,11 +643,9 @@ class Filter:
 
     def _convert_equalizer(
         self,
-        equalizer: Equalizer
-        | list[tuple[int, float]]
-        | list[float]
-        | list[EQBand]
-        | None,
+        equalizer: (
+            Equalizer | list[tuple[int, float]] | list[float] | list[EQBand] | None
+        ),
     ) -> Equalizer | None:
         if equalizer is None:
             return None

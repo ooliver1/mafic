@@ -1,4 +1,5 @@
 """Node class to represent one Lavalink instance."""
+
 # SPDX-License-Identifier: MIT
 # pyright: reportImportCycles=false
 # Player import.

@@ -1,4 +1,5 @@
 """Contains the warnings shown from Mafic."""
+
 # SPDX-License-Identifier: MIT
 
 

@@ -182,8 +182,7 @@ RotatingNanoIPRoutePlanner = TypedDict(
 )
 
 
-class BalancingIPRouteDetails(BaseDetails):
-    ...
+class BalancingIPRouteDetails(BaseDetails): ...
 
 
 BalancingIPRoutePlanner = TypedDict(
