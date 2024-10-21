@@ -1,4 +1,5 @@
 """A Player is used to connect to a channel."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
