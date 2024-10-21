@@ -1,4 +1,5 @@
 """Contains a decorator to merge properties and classmethods."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations

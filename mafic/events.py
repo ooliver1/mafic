@@ -1,4 +1,5 @@
 """Objects for dispatched events via the client."""
+
 # SPDX-License-Identifier: MIT
 # pyright: reportImportCycles=false
 # Player import.
