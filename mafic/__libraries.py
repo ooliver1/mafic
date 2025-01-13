@@ -135,6 +135,6 @@ except ImportError:
     from json import dumps, loads
 
 
-if version_info.major != 2:
-    msg = f"Mafic requires version 2 of {library}."
+if version_info.major < 2 or version_info.major > 3:
+    msg = f"Mafic requires version 2 or 3 of {library}."
     raise RuntimeError(msg)
