@@ -20,3 +20,4 @@ build:
       # Poetry setup still seems to fail on readthedocs.
 sphinx:
   fail_on_warning: false
+  configuration: docs/conf.py
