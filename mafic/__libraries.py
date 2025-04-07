@@ -3,13 +3,9 @@
 
 from __future__ import annotations
 
+from importlib.metadata import PackageNotFoundError, version
 from os import getenv
 from typing import TYPE_CHECKING, Any
-
-from pkg_resources import (
-    DistributionNotFound,
-    get_distribution,  # pyright: ignore[reportUnknownVariableType]
-)
 
 from .errors import MultipleCompatibleLibraries, NoCompatibleLibraries
 
@@ -36,8 +32,8 @@ found: list[str] = []
 
 for library in libraries:
     try:
-        get_distribution(library)
-    except DistributionNotFound:
+        version(library)
+    except PackageNotFoundError:
         pass
     else:
         found.append(library)
