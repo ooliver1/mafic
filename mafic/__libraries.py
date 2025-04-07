@@ -54,14 +54,35 @@ if not getenv("MAFIC_IGNORE_LIBRARY_CHECK"):
 
         # Ignore RuntimeWarning as we import the warning to filter :}
         simplefilter("ignore", RuntimeWarning)
-        from nextcord.health_check import DistributionWarning
-
-        simplefilter("always", RuntimeWarning)
-
-        simplefilter("ignore", DistributionWarning)
+        try:
+            from nextcord.health_check import DistributionWarning
+        except ImportError:
+            # nextcord >= 3.0
+            pass
+        else:
+            simplefilter("ignore", DistributionWarning)
+        finally:
+            simplefilter("always", RuntimeWarning)
 
 
 library = found[0]
+
+
+if library == "nextcord":
+    from nextcord import version_info
+elif library == "disnake":
+    from disnake import version_info
+else:
+    from discord import version_info
+
+
+if library == "nextcord":
+    if version_info.major not in (2, 3):
+        msg = "Mafic requires version 2 or 3 of nextcord."
+        raise RuntimeError(msg)
+elif version_info.major != 2:
+    msg = f"Mafic requires version 2 of {library}."
+    raise RuntimeError(msg)
 
 
 if library == "nextcord":
@@ -134,8 +155,3 @@ try:
 
 except ImportError:
     from json import dumps, loads
-
-
-if version_info.major != 2:
-    msg = f"Mafic requires version 2 of {library}."
-    raise RuntimeError(msg)
