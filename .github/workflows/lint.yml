@@ -31,6 +31,8 @@ jobs:
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
+        with:
+          version: 1.8.5
 
       - name: Export dependencies
         run: poetry export --no-interaction -f requirements.txt --output requirements.txt --with lint,docs,dev
