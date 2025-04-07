@@ -14,9 +14,12 @@ build:
       - asdf plugin add poetry
       - asdf install poetry latest
       - asdf global poetry latest
+      - poetry config virtualenvs.create false
     post_install:
-      - poetry export --no-interaction -f requirements.txt --output requirements.txt --with lint,docs
-      - pip install -r requirements.txt
+      # - poetry export --no-interaction -f requirements.txt --output requirements.txt --with lint,docs
+      # - pip install -r requirements.txt
       # Poetry setup still seems to fail on readthedocs.
+      - poetry install --with lint,docs
 sphinx:
   fail_on_warning: false
+  configuration: docs/conf.py
