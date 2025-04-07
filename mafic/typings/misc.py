@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Coroutine
-from typing import Any, Literal, TypedDict, TypeVar
+from typing import Any, Coroutine, Literal, TypedDict, TypeVar
 
 __all__ = (
     "Coro",
