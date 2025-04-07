@@ -10,15 +10,11 @@ build:
     python: "3.11"
   jobs:
     # See https://github.com/readthedocs/readthedocs.org/issues/4912
-    pre_create_environment:
-      - asdf plugin add poetry
-      - asdf install poetry latest
-      - asdf global poetry latest
-      - poetry config virtualenvs.create false
     post_install:
       # - poetry export --no-interaction -f requirements.txt --output requirements.txt --with lint,docs
       # - pip install -r requirements.txt
       # Poetry setup still seems to fail on readthedocs.
+      - pip install poetry
       - poetry install --with lint,docs
 sphinx:
   fail_on_warning: false
