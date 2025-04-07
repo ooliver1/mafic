@@ -1,4 +1,5 @@
 """Represents a search type for Lavalink."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations

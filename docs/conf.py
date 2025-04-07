@@ -22,7 +22,7 @@ os.environ["MAFIC_IGNORE_LIBRARY_CHECK"] = "1"
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.append(os.path.abspath("extensions"))
-from mafic import __version__  # noqa: E402
+from mafic import __version__
 
 project = "Mafic"
 copyright = "2022-present, Oliver Wilkes"
@@ -91,7 +91,7 @@ aliases = {
 
 
 def typehints_formatter(annotation: Any, _: Config) -> str | None:  # noqa: ANN401
-    return aliases.get(annotation, None)
+    return aliases.get(annotation)
 
 
 intersphinx_mapping = {

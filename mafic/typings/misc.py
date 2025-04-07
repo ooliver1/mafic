@@ -7,8 +7,8 @@ from typing import Any, Literal, TypedDict, TypeVar
 
 __all__ = (
     "Coro",
-    "LavalinkException",
     "ExceptionSeverity",
+    "LavalinkException",
     "PayloadWithGuild",
 )
 T = TypeVar("T")
