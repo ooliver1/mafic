@@ -48,16 +48,17 @@ if not getenv("MAFIC_IGNORE_LIBRARY_CHECK"):
         raise NoCompatibleLibraries
     elif len(found) > 1:
         raise MultipleCompatibleLibraries(found)
-elif found[0] == "nextcord":
-    from warnings import simplefilter
 
-    # Ignore RuntimeWarning as we import the warning to filter :}
-    simplefilter("ignore", RuntimeWarning)
-    from nextcord.health_check import DistributionWarning
+    if found[0] == "nextcord":
+        from warnings import simplefilter
 
-    simplefilter("always", RuntimeWarning)
+        # Ignore RuntimeWarning as we import the warning to filter :}
+        simplefilter("ignore", RuntimeWarning)
+        from nextcord.health_check import DistributionWarning
 
-    simplefilter("ignore", DistributionWarning)
+        simplefilter("always", RuntimeWarning)
+
+        simplefilter("ignore", DistributionWarning)
 
 
 library = found[0]
