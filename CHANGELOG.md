@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.10.1](https://github.com/ooliver1/mafic/compare/v2.10.0...v2.10.1) (2025-04-08)
+
+
+### Bug Fixes
+
+* **libraries:** support nextcord v3 ([6c33903](https://github.com/ooliver1/mafic/commit/6c33903416e8f0b83e074d19aa3075f2fd83c61d))
+* **libraries:** use importlib over pkg_resources ([52a515f](https://github.com/ooliver1/mafic/commit/52a515f84a63dd4517d0fefc959fcc0e54ba0a03))
+
+
+### Documentation
+
+* **installing:** mafic is in fact on pypi ([#122](https://github.com/ooliver1/mafic/issues/122)) ([a1b9408](https://github.com/ooliver1/mafic/commit/a1b9408d5321a2268110ba4155ea8080323b3663))
+* **rtd:** fix poetry install ([#120](https://github.com/ooliver1/mafic/issues/120)) ([cc0a682](https://github.com/ooliver1/mafic/commit/cc0a6825f1031dd621da35d36178f547c07b161a))
+
 ## [2.10.0](https://github.com/ooliver1/mafic/compare/v2.9.3...v2.10.0) (2023-12-18)
 
 
