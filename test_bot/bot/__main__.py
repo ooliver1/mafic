@@ -75,7 +75,7 @@ class TestBot(BotBase):
         # gateway-proxy
         return
 
-    async def add_nodes(self) -> None:  # noqa: PLR0912
+    async def add_nodes(self) -> None:
         with open(environ["LAVALINK_FILE"], "rb") as f:
             data: list[LavalinkInfo] = orjson.loads(f.read())
 

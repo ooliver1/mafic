@@ -1,4 +1,5 @@
 """A Player is used to connect to a channel."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -255,7 +256,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._current
                 if self.node.version == 3
-                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+                else Track.from_data_with_info(cast("TrackWithInfo", data.get("track")))
             )
 
             if track is None:
@@ -272,7 +273,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._last_track
                 if self.node.version == 3
-                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+                else Track.from_data_with_info(cast("TrackWithInfo", data.get("track")))
             )
 
             if track is None:
@@ -291,7 +292,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._current
                 if self.node.version == 3
-                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+                else Track.from_data_with_info(cast("TrackWithInfo", data.get("track")))
             )
 
             if track is None:
@@ -308,7 +309,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             track = (
                 self._current
                 if self.node.version == 3
-                else Track.from_data_with_info(cast(TrackWithInfo, data.get("track")))
+                else Track.from_data_with_info(cast("TrackWithInfo", data.get("track")))
             )
 
             if track is None:
@@ -324,7 +325,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             # Pyright expects this to never happen, so do I, I really hope.
             # Nobody expects the Spanish Inquisition, neither does pyright.
 
-            event_type = cast(str, data["type"])
+            event_type = cast("str", data["type"])
             _log.warning("Unknown incoming event type %s", event_type)
 
     async def on_voice_state_update(  # pyright: ignore[reportIncompatibleMethodOverride]
