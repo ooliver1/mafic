@@ -1,4 +1,5 @@
 """A module contains region enums for voice regions and groups."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
