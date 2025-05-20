@@ -11,7 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        nextcord-version: [">=2.0.0,<3.0.0"]
+        include:
+          - python-version: 3.12
+            nextcord-version: ">=3.0.0"
+          - python-version: 3.13
+            nextcord-version: ">=3.0.0"
       fail-fast: false
     steps:
       - name: Check out repository
@@ -21,7 +27,7 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
 
       - name: Load cached Poetry installation
         uses: actions/cache@v4
@@ -39,6 +45,9 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Install specific nextcord version
+        run: pip install "nextcord${{ matrix.nextcord-version }}"
 
       - name: Set up pyright
         run: echo "PYRIGHT_VERSION=$(python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_ENV
