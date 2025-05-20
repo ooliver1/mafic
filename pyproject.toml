@@ -54,7 +54,7 @@ nextcord = "^2.0.0"
 disnake = "^2.0.0"
 py-cord = "^2.0.0"
 "discord.py" = "^2.0.0"
-orjson = "^3.8.0"
+orjson = "^3.5.0"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^6.1.3"
