@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.0](https://github.com/ooliver1/mafic/compare/v2.10.1...v2.11.0) (2025-05-20)
+
+
+### Features
+
+* **search-type:** add VK_MUSIC ([#125](https://github.com/ooliver1/mafic/issues/125)) ([aaeefd5](https://github.com/ooliver1/mafic/commit/aaeefd5f720964b15d02088e88be22bd6c89014e))
+
 ## [2.10.1](https://github.com/ooliver1/mafic/compare/v2.10.0...v2.10.1) (2025-04-08)
 
 
