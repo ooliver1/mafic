@@ -40,6 +40,7 @@ class SearchType(Enum):
     DEEZER_SEARCH = "dzsearch"
     DEEZER_ISRC = "dzisrc"
     YANDEX_MUSIC = "ymsearch"
+    VK_MUSIC = "vksearch"
 
     # DuncteBot
     TTS = "speak"
