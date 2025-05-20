@@ -21,7 +21,8 @@ class SearchType(Enum):
             - :attr:`APPLE_MUSIC`
             - :attr:`DEEZER_SEARCH`
             - :attr:`DEEZER_ISRC`
-            - :attr:`YANDEX`
+            - :attr:`YANDEX_MUSIC`
+            - :attr:`VK_MUSIC`
 
         `DuncteBot <https://github.com/DuncteBot/skybot-lavalink-plugin>`_:
             - :attr:`SPEECH`
