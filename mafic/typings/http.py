@@ -16,36 +16,36 @@ if TYPE_CHECKING:
 __all__ = (
     "BalancingIPRouteDetails",
     "BalancingIPRoutePlanner",
+    "BalancingIPRoutePlanner",
     "BaseDetails",
     "ConfigureResumingResponse",
-    "FailingIPAddress",
+    "EmptyRoutePlanner",
     "EmptyRoutePlanner",
     "Error",
+    "FailingIPAddress",
     "GenericTracks",
+    "Git",
     "Git",
     "IPBlock",
     "Info",
+    "Info",
     "NanoIPRouteDetails",
+    "NanoIPRoutePlanner",
     "NanoIPRoutePlanner",
     "NoMatches",
     "PlaylistTracks",
     "PluginData",
     "RotatingIPRouteDetails",
     "RotatingIPRoutePlanner",
+    "RotatingIPRoutePlanner",
     "RotatingNanoIPRouteDetails",
     "RotatingNanoIPRoutePlanner",
+    "RotatingNanoIPRoutePlanner",
+    "RoutePlannerStatus",
     "RoutePlannerStatus",
     "TrackLoadingResult",
     "TracksFailed",
     "Version",
-    "Git",
-    "Info",
-    "RotatingIPRoutePlanner",
-    "NanoIPRoutePlanner",
-    "RotatingNanoIPRoutePlanner",
-    "BalancingIPRoutePlanner",
-    "EmptyRoutePlanner",
-    "RoutePlannerStatus",
 )
 
 
@@ -182,8 +182,7 @@ RotatingNanoIPRoutePlanner = TypedDict(
 )
 
 
-class BalancingIPRouteDetails(BaseDetails):
-    ...
+class BalancingIPRouteDetails(BaseDetails): ...
 
 
 BalancingIPRoutePlanner = TypedDict(

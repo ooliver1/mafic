@@ -1,4 +1,5 @@
 """The strategy system for selecting a :class:`Node` from a :class:`NodePool`."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations

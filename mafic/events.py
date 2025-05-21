@@ -1,4 +1,5 @@
 """Objects for dispatched events via the client."""
+
 # SPDX-License-Identifier: MIT
 # pyright: reportImportCycles=false
 # Player import.
@@ -71,7 +72,7 @@ class WebSocketClosedEvent(Generic[PlayerT]):
         The player that the event was dispatched from.
     """
 
-    __slots__ = ("code", "reason", "by_discord", "player")
+    __slots__ = ("by_discord", "code", "player", "reason")
 
     def __init__(
         self, *, payload: WebSocketClosedEventPayload, player: PlayerT
@@ -100,7 +101,7 @@ class TrackStartEvent(Generic[PlayerT]):
         The player that the event was dispatched from.
     """
 
-    __slots__ = ("track", "player")
+    __slots__ = ("player", "track")
 
     def __init__(self, *, track: Track, player: PlayerT) -> None:
         self.track: Track = track
@@ -124,7 +125,7 @@ class TrackEndEvent(Generic[PlayerT]):
         The player that the event was dispatched from.
     """
 
-    __slots__ = ("track", "reason", "player")
+    __slots__ = ("player", "reason", "track")
 
     def __init__(
         self, *, track: Track, payload: TrackEndEventPayload, player: PlayerT
@@ -157,7 +158,7 @@ class TrackExceptionEvent(Generic[PlayerT]):
         The player that the event was dispatched from.
     """
 
-    __slots__ = ("track", "exception", "player")
+    __slots__ = ("exception", "player", "track")
 
     def __init__(
         self,
@@ -190,7 +191,7 @@ class TrackStuckEvent(Generic[PlayerT]):
         The player that the event was dispatched from.
     """
 
-    __slots__ = ("track", "threshold_ms", "player")
+    __slots__ = ("player", "threshold_ms", "track")
 
     def __init__(
         self, *, track: Track, payload: TrackStuckEventPayload, player: PlayerT

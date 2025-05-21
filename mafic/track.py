@@ -1,4 +1,5 @@
 """The module containing :class:`Track`."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -72,8 +73,8 @@ class Track:
     """
 
     __slots__ = (
-        "author",
         "artwork_url",
+        "author",
         "id",
         "identifier",
         "isrc",
