@@ -10,10 +10,6 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Optional
-
-if TYPE_CHECKING:
-    from sphinx.config import Config
 
 os.environ["MAFIC_IGNORE_LIBRARY_CHECK"] = "1"
 
@@ -70,29 +66,6 @@ autodoc_typehints = "both"
 autodoc_default_options = {"members": True, "show-inheritance": True}
 autodoc_type_aliases = {"StrategyList": "mafic.pool.StrategyList"}
 autodoc_typehints_description_target = "documented"
-
-from mafic.ip import RoutePlannerStatus  # noqa: E402
-
-# Desired explicit aliases.
-from mafic.pool import StrategyList  # noqa: E402
-from mafic.strategy import StrategyCallable  # noqa: E402
-from mafic.type_variables import ClientT  # noqa: E402
-
-aliases = {
-    ClientT: ":data:`~mafic.type_variables.ClientT`",
-    StrategyCallable: ":data:`~mafic.strategy.StrategyCallable`",
-    StrategyList: ":data:`~mafic.pool.StrategyList`",
-    StrategyList[ClientT]: ":data:`~mafic.pool.StrategyList`",
-    Optional[
-        StrategyList[ClientT]
-    ]: ":data:`~typing.Optional`\\[:data:`~mafic.pool.StrategyList`]",
-    RoutePlannerStatus: ":data:`~mafic.ip.RoutePlannerStatus`",
-}
-
-
-def typehints_formatter(annotation: Any, _: Config) -> str | None:  # noqa: ANN401
-    return aliases.get(annotation, None)
-
 
 intersphinx_mapping = {
     "py": ("https://docs.python.org/3", None),

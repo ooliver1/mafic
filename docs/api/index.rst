@@ -16,4 +16,3 @@ The full API reference for Mafic:
    track-and-playlist
    filters
    errors-and-warnings
-   utils

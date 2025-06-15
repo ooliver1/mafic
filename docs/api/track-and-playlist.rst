@@ -3,8 +3,7 @@
 Tracks and Playlists
 ====================
 
-Tracks and playlists are returned from :meth:`Player.fetch_tracks` and
-:meth:`Node.decode_track`.
+Tracks and playlists are returned from :meth:`Player.fetch_tracks`.
 
 .. attributetable:: Track
 
