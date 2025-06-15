@@ -50,7 +50,10 @@ typing-extensions = "^4.3.0"
 ruff = "^0.0.251"
 
 [tool.poetry.group.lint.dependencies]
-nextcord = "^2.0.0"
+nextcord = [
+    { version = "^3.0.1", python = "^3.12"},
+    { version = "^2.0.0", python = "<3.12" },
+]
 disnake = "^2.0.0"
 py-cord = "^2.0.0"
 "discord.py" = "^2.0.0"
