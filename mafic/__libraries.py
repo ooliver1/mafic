@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import sys
 from importlib.metadata import PackageNotFoundError, version
 from os import getenv
 from typing import TYPE_CHECKING, Any
@@ -45,7 +46,7 @@ if not getenv("MAFIC_IGNORE_LIBRARY_CHECK"):
     elif len(found) > 1:
         raise MultipleCompatibleLibraries(found)
 
-    if found[0] == "nextcord":
+    if found[0] == "nextcord" and sys.version_info < (3, 12):
         from warnings import simplefilter
 
         # Ignore RuntimeWarning as we import the warning to filter :}
