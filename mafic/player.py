@@ -235,6 +235,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             guild_id=self._guild_id,
             session_id=self._session_id,
             data=self._server_state,
+            channel_id=int(self.channel.id),
         )
 
     def dispatch_event(self, data: EventPayload) -> None:
@@ -531,6 +532,7 @@ class Player(VoiceProtocol, Generic[ClientT]):
             guild_id=self._guild_id,
             session_id=self._session_id,
             data=self._server_state,
+            channel_id=int(self.channel.id),
         )
 
         # Needed so .update does not fail.
