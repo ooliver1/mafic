@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.11.0](https://github.com/ooliver1/mafic/compare/v2.10.1...v2.11.0) (2026-03-19)
+
+
+### Features
+
+* **search-type:** add VK_MUSIC ([#125](https://github.com/ooliver1/mafic/issues/125)) ([aaeefd5](https://github.com/ooliver1/mafic/commit/aaeefd5f720964b15d02088e88be22bd6c89014e))
+
+
+### Bug Fixes
+
+* include channelId in voice state updates for Lavalink 4.2.x ([#133](https://github.com/ooliver1/mafic/issues/133)) ([28c15a1](https://github.com/ooliver1/mafic/commit/28c15a10f261743c3a442a9489d5f4639076cf32))
+
 ## [2.10.1](https://github.com/ooliver1/mafic/compare/v2.10.0...v2.10.1) (2025-04-08)
 
 
