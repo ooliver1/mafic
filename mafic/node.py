@@ -907,6 +907,7 @@ class Node(Generic[ClientT]):
         guild_id: int,
         session_id: str,
         data: VoiceServerUpdatePayload,
+        channel_id: int,
     ) -> Coro[None]:
         """Send a voice update to the node.
 
@@ -918,6 +919,8 @@ class Node(Generic[ClientT]):
             The **Discord** session ID to send.
         data:
             The voice server update payload to send.
+        channel_id:
+            The voice channel ID to connect to. Required by Lavalink>=4.2 voice state.
 
         Raises
         ------
@@ -940,6 +943,7 @@ class Node(Generic[ClientT]):
                     "sessionId": session_id,
                     "endpoint": data["endpoint"],
                     "token": data["token"],
+                    "channelId": str(channel_id),
                 },
             },
         )

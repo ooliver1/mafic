@@ -113,6 +113,7 @@ class VoiceStateRequest(TypedDict):
     token: str
     endpoint: str
     sessionId: str
+    channelId: str
 
 
 class VoiceState(VoiceStateRequest):

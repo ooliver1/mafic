@@ -231,10 +231,15 @@ class Player(VoiceProtocol, Generic[ClientT]):
             _log.debug("Receieved player update before server state was found")
             return
 
+        if not isinstance(self.channel, (VoiceChannel, StageChannel)):
+            _log.debug("Received player update before channel was set.")
+            return
+
         await self._node.voice_update(
             guild_id=self._guild_id,
             session_id=self._session_id,
             data=self._server_state,
+            channel_id=int(self.channel.id),
         )
 
     def dispatch_event(self, data: EventPayload) -> None:
@@ -526,11 +531,17 @@ class Player(VoiceProtocol, Generic[ClientT]):
             msg = "Cannot transfer player with session data."
             raise RuntimeError(msg)
 
+        if not isinstance(self.channel, (VoiceChannel, StageChannel)):
+            msg = "Voice channel must be a VoiceChannel or StageChannel."
+            _log.warning(msg)
+            return
+
         # We need to update the voice server as the endpoint may have changed.
         await self._node.voice_update(
             guild_id=self._guild_id,
             session_id=self._session_id,
             data=self._server_state,
+            channel_id=int(self.channel.id),
         )
 
         # Needed so .update does not fail.
