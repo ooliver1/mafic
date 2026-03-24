@@ -19,6 +19,7 @@ if TYPE_CHECKING:
         TrackStuckEvent as TrackStuckEventPayload,
         WebSocketClosedEvent as WebSocketClosedEventPayload,
     )
+    from .typings.common import LyricsLine, LyricsObject
 
 
 # This needs HKTs in python - as Player is generic on ClientT.
@@ -31,6 +32,9 @@ __all__ = (
     "TrackStartEvent",
     "TrackStuckEvent",
     "WebSocketClosedEvent",
+    "LyricsLineEvent",
+    "LyricsFoundEvent",
+    "LyricsNotFoundEvent",
 )
 
 
@@ -87,6 +91,69 @@ class WebSocketClosedEvent(Generic[PlayerT]):
             f"<WebSocketClosedEvent code={self.code} reason={self.reason!r} "
             f"by_discord={self.by_discord}>"
         )
+
+
+class LyricsLineEvent(Generic[PlayerT]):
+    """Represents a lyrics line event.
+
+    Attributes
+    ----------
+    guildId: :class:`str`
+        The guild ID that received the lyrics line.
+    line: :class:`LyricsLine`
+        Information about the lyrics line.
+    """
+
+    __slots__ = ("guildId", "line")
+
+    def __init__(self, *, guildId: str, line: LyricsLine) -> None:
+        self.guildId: str = guildId
+        self.line: LyricsLine = line
+
+    def __repr__(self) -> str:
+        """Get a string representation of the event."""
+        return f"<LyricsLineEvent guildId={self.guildId} line={self.line!r}>"
+
+
+class LyricsFoundEvent(Generic[PlayerT]):
+    """Represents a lyrics found event.
+
+    Attributes
+    ----------
+    guildId: :class:`str`
+        The guild ID that received the lyrics line.
+    lyrics: :class:`LyricsObject`
+        Information about all lyrics, including provider and platform.
+    """
+
+    __slots__ = ("guildId", "lyrics")
+
+    def __init__(self, *, guildId: str, lyrics: LyricsObject) -> None:
+        self.guildId: str = guildId
+        self.lyrics: LyricsObject = lyrics
+
+    def __repr__(self) -> str:
+        """Get a string representation of the event."""
+        return f"<LyricsFoundEvent guildId={self.guildId} lyrics={self.lyrics!r}>"
+
+
+class LyricsNotFoundEvent(Generic[PlayerT]):
+    """Represents a lyrics not found event.
+
+    Attributes
+    ----------
+    guildId: :class:`str`
+        The guild ID that received event.
+    """
+
+    __slots__ = ("guildId",)
+
+    def __init__(self, *, guildId: str) -> None:
+        self.guildId: str = guildId
+
+    def __repr__(self) -> str:
+        """Get a string representation of the event."""
+        return f"<LyricsNotFoundEvent guildId={self.guildId}>"
 
 
 class TrackStartEvent(Generic[PlayerT]):

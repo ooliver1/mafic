@@ -325,6 +325,18 @@ class Player(VoiceProtocol, Generic[ClientT]):
             event = TrackStuckEvent(player=self, track=track, payload=data)
             self.client.dispatch("track_stuck", event)
             _log.debug("Received track stuck event: %s", event)
+        elif data["type"] == "LyricsLineEvent":
+            event = LyricsLineEvent(guildId=data["guildId"], line=data["line"])
+            self.client.dispatch("lyrics_line", event)
+            _log.debug("Received lyrics line event: %s", event)
+        elif data["type"] == "LyricsFoundEvent":
+            event = LyricsFoundEvent(guildId=data["guildId"], lyrics=data["lyrics"])
+            self.client.dispatch("lyrics_found", event)
+            _log.debug("Received lyrics found event: %s", event)
+        elif data["type"] == "LyricsNotFoundEvent":
+            event = LyricsNotFoundEvent(guildId=data["guildId"])
+            self.client.dispatch("lyrics_not_found", event)
+            _log.debug("Received lyrics not found event: %s", event)
         else:
             # Pyright expects this to never happen, so do I, I really hope.
             # Nobody expects the Spanish Inquisition, neither does pyright.

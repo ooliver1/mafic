@@ -9,6 +9,8 @@ from .misc import PayloadWithGuild
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
+    from . import PluginData
+
 __all__ = (
     "Filters",
     "ChannelMix",
@@ -31,6 +33,8 @@ __all__ = (
     "CPU",
     "FrameStats",
     "Stats",
+    "LyricsObject",
+    "LyricsLine",
 )
 
 
@@ -174,3 +178,18 @@ class Stats(TypedDict):
     cpu: CPU
     # V3 is NotRequired, V4 is None
     frameStats: NotRequired[FrameStats | None]
+
+
+class LyricsObject(TypedDict):
+    sourceName: str
+    provider: str
+    text: str
+    lines: list[LyricsLine]
+    plugin: PluginData
+
+
+class LyricsLine(TypedDict):
+    timestamp: int
+    duration: int
+    line: str
+    plugin: PluginData
