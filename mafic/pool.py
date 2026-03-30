@@ -1,4 +1,5 @@
 r"""A module containing a :class:`NodePool`, used to manage :class:`Node`\s."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
