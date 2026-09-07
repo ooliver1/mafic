@@ -1,4 +1,5 @@
 """Type variables used in mafic."""
+
 # SPDX-License-Identifier: MIT
 # This was originally made to avoid the import cycle of
 # mafic.pool -> mafic.node -> mafic.pool
