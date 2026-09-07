@@ -13,8 +13,8 @@ __all__ = (
     "OutgoingParams",
     "TrackLoadParams",
     "UnmarkAddressPayload",
-    "UpdatePlayerPayload",
     "UpdatePlayerParams",
+    "UpdatePlayerPayload",
     "UpdateSessionPayload",
 )
 
