@@ -1,4 +1,5 @@
 """The Lavalink route planner API."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -20,12 +21,12 @@ if TYPE_CHECKING:
     )
 
 __all__ = (
-    "IPRoutePlannerType",
-    "IPBlockType",
-    "IPBlock",
-    "FailingAddress",
-    "BaseIPRoutePlannerStatus",
     "BalancingIPRoutePlannerStatus",
+    "BaseIPRoutePlannerStatus",
+    "FailingAddress",
+    "IPBlock",
+    "IPBlockType",
+    "IPRoutePlannerType",
     "NanoIPRoutePlannerStatus",
     "RotatingIPRoutePlannerStatus",
     "RotatingNanoIPRoutePlannerStatus",
