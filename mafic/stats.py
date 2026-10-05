@@ -1,4 +1,5 @@
 """A module containing classes to represent node statistics."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -31,7 +32,7 @@ class CPUStats:
         The load Lavalink is using.
     """
 
-    __slots__ = ("cores", "system_load", "lavalink_load")
+    __slots__ = ("cores", "lavalink_load", "system_load")
 
     def __init__(self, payload: CPU) -> None:
         self.cores: int = payload["cores"]
@@ -54,7 +55,7 @@ class MemoryStats:
         The amount of reservable memory for the node. Set by ``-Xmx`` for Java.
     """
 
-    __slots__ = ("free", "used", "allocated", "reservable")
+    __slots__ = ("allocated", "free", "reservable", "used")
 
     def __init__(self, payload: Memory) -> None:
         self.free: int = payload["free"]
@@ -76,7 +77,7 @@ class FrameStats:
         The amount of frames deficit.
     """
 
-    __slots__ = ("sent", "nulled", "deficit")
+    __slots__ = ("deficit", "nulled", "sent")
 
     def __init__(self, payload: FrameStatsPayload) -> None:
         self.sent: int = payload["sent"]
