@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: MIT
-# ruff: noqa: UP013
 # `class` in `TypedDict` does not work as that is a reserved keyword
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, Union
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
@@ -18,9 +17,9 @@ __all__ = (
     "BalancingIPRoutePlanner",
     "BaseDetails",
     "ConfigureResumingResponse",
-    "FailingIPAddress",
     "EmptyRoutePlanner",
     "Error",
+    "FailingIPAddress",
     "GenericTracks",
     "Git",
     "IPBlock",
@@ -38,14 +37,6 @@ __all__ = (
     "TrackLoadingResult",
     "TracksFailed",
     "Version",
-    "Git",
-    "Info",
-    "RotatingIPRoutePlanner",
-    "NanoIPRoutePlanner",
-    "RotatingNanoIPRoutePlanner",
-    "BalancingIPRoutePlanner",
-    "EmptyRoutePlanner",
-    "RoutePlannerStatus",
 )
 
 
@@ -162,8 +153,8 @@ class NanoIPRouteDetails(BaseDetails):
 NanoIPRoutePlanner = TypedDict(
     "NanoIPRoutePlanner",
     {
-        "class": Optional[Literal["NanoIpRoutePlanner"]],
-        "details": Optional[NanoIPRouteDetails],
+        "class": Literal["NanoIpRoutePlanner"] | None,
+        "details": NanoIPRouteDetails | None,
     },
 )
 
@@ -176,21 +167,20 @@ class RotatingNanoIPRouteDetails(BaseDetails):
 RotatingNanoIPRoutePlanner = TypedDict(
     "RotatingNanoIPRoutePlanner",
     {
-        "class": Optional[Literal["RotatingNanoIpRoutePlanner"]],
-        "details": Optional[RotatingNanoIPRouteDetails],
+        "class": Literal["RotatingNanoIpRoutePlanner"] | None,
+        "details": RotatingNanoIPRouteDetails | None,
     },
 )
 
 
-class BalancingIPRouteDetails(BaseDetails):
-    ...
+class BalancingIPRouteDetails(BaseDetails): ...
 
 
 BalancingIPRoutePlanner = TypedDict(
     "BalancingIPRoutePlanner",
     {
-        "class": Optional[Literal["BalancingIpRoutePlanner"]],
-        "details": Optional[BalancingIPRouteDetails],
+        "class": Literal["BalancingIpRoutePlanner"] | None,
+        "details": BalancingIPRouteDetails | None,
     },
 )
 
