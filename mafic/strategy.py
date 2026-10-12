@@ -1,4 +1,5 @@
 """The strategy system for selecting a :class:`Node` from a :class:`NodePool`."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -8,14 +9,14 @@ from collections.abc import Callable
 from enum import Enum, auto
 from logging import getLogger
 from random import choice
-from typing import List, Optional
+from typing import List
 
 from .node import Node
 from .region import VoiceRegion
 from .type_variables import ClientT
 
 StrategyCallable = Callable[
-    [List[Node[ClientT]], int, Optional[int], Optional[str]], List[Node[ClientT]]
+    [List[Node[ClientT]], int, int | None, str | None], List[Node[ClientT]]
 ]
 """Represents a strategy callable.
 
