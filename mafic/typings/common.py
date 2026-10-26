@@ -10,16 +10,19 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
 __all__ = (
-    "Filters",
+    "CPU",
     "ChannelMix",
-    "EQBand",
     "Distortion",
+    "EQBand",
     "Filters",
+    "FrameStats",
     "Karaoke",
     "LowPass",
+    "Memory",
     "Player",
     "PlaylistInfo",
     "Rotation",
+    "Stats",
     "Timescale",
     "TrackInfo",
     "TrackWithInfo",
@@ -27,10 +30,6 @@ __all__ = (
     "Vibrato",
     "VoiceState",
     "VoiceStateRequest",
-    "Memory",
-    "CPU",
-    "FrameStats",
-    "Stats",
 )
 
 

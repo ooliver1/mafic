@@ -153,7 +153,7 @@ async def join(inter: Interaction):
 
     try:
         await channel.connect(cls=MyPlayer, timeout=5)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return await inter.send("Timed out connecting to voice channel.")
 
     await inter.send(f"Joined {channel.mention}.")
