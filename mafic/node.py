@@ -1,13 +1,15 @@
 """Node class to represent one Lavalink instance."""
+
 # SPDX-License-Identifier: MIT
 # pyright: reportImportCycles=false
 # Player import.
 
 from __future__ import annotations
 
+import builtins
 import re
 import warnings
-from asyncio import Event, TimeoutError, create_task, gather, sleep, wait_for
+from asyncio import Event, create_task, gather, sleep, wait_for
 from logging import getLogger
 from traceback import print_exc
 from typing import TYPE_CHECKING, Generic, cast
@@ -178,25 +180,25 @@ class Node(Generic[ClientT]):
         "_checked_version",
         "_client",
         "_connect_task",
+        "_event_queue",
         "_heartbeat",
         "_host",
         "_label",
         "_msg_tasks",
         "_players",
         "_port",
-        "_resume_key",
-        "_secure",
-        "_timeout",
         "_ready",
         "_rest_uri",
+        "_resume_key",
         "_resuming_session_id",
+        "_secure",
         "_session_id",
         "_stats",
+        "_timeout",
         "_version",
         "_ws",
-        "_ws_uri",
         "_ws_task",
-        "_event_queue",
+        "_ws_uri",
         "regions",
         "shard_ids",
     )
@@ -673,7 +675,7 @@ class Node(Generic[ClientT]):
         try:
             _log.debug("Waiting for ready", extra={"label": self._label})
             await wait_for(self._ready.wait(), timeout=self._timeout)
-        except TimeoutError:
+        except builtins.TimeoutError:
             _log.error(
                 "Timed out waiting for node to become ready.",
                 extra={"label": self._label},
@@ -858,7 +860,7 @@ class Node(Generic[ClientT]):
             self._ready.set()
         else:
             # Of course pyright considers this to be `Never`, so this is to keep types.
-            op = cast(str, data["op"])
+            op = cast("str", data["op"])
             _log.warn("Unknown incoming message op code %s", op)
 
     async def _handle_event(self, data: EventPayload) -> None:
@@ -1272,17 +1274,17 @@ class Node(Generic[ClientT]):
 
         if data["class"] == "RotatingIpRoutePlanner":
             return RotatingIPRoutePlannerStatus(
-                cast(RotatingIPRouteDetails, data["details"])
+                cast("RotatingIPRouteDetails", data["details"])
             )
         elif data["class"] == "NanoIpRoutePlanner":
-            return NanoIPRoutePlannerStatus(cast(NanoIPRouteDetails, data["details"]))
+            return NanoIPRoutePlannerStatus(cast("NanoIPRouteDetails", data["details"]))
         elif data["class"] == "RotatingNanoIpRoutePlanner":
             return RotatingNanoIPRoutePlannerStatus(
-                cast(RotatingNanoIPRouteDetails, data["details"])
+                cast("RotatingNanoIPRouteDetails", data["details"])
             )
         elif data["class"] == "BalancingIpRoutePlanner":
             return BalancingIPRoutePlannerStatus(
-                cast(BalancingIPRouteDetails, data["details"])
+                cast("BalancingIPRouteDetails", data["details"])
             )
         elif data["class"] is None:
             return None
