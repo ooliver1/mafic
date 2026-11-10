@@ -736,6 +736,72 @@ class Node(Generic[ClientT]):
         self._ready.clear()
         self._event_queue.clear()
 
+    async def _recover_websocket(
+        self,
+        backoff: ExponentialBackoff[Literal[False]],
+        close_code: int | None,
+    ) -> None:
+        """Mark the node as unavailable and schedule a reconnect.
+
+        Parameters
+        ----------
+        backoff:
+            The backoff to space reconnect attempts with.
+        close_code:
+            The RFC 6455 close code the websocket was closed with, if any.
+        """
+        self._available = False
+        self._client.dispatch("node_unavailable", self)
+        self._ready.clear()
+        self._ws = None
+
+        wait_time = backoff.delay()
+        if close_code is not None:
+            _log.warning(
+                "Websocket was closed from host %s port %s with RFC 6455 code %s. "
+                "Reconnecting in %.2fs",
+                self._host,
+                self._port,
+                close_code,
+                wait_time,
+                extra={"label": self._label},
+            )
+        else:
+            _log.warning(
+                "Websocket connection to host %s port %s was lost without a close "
+                "frame. Reconnecting in %.2fs",
+                self._host,
+                self._port,
+                wait_time,
+                extra={"label": self._label},
+            )
+
+        await sleep(wait_time)
+        task = create_task(self.connect(backoff=backoff))
+        self._connect_task = task
+
+        def remove_task(_: Task[None]) -> None:
+            self._connect_task = None
+
+        task.add_done_callback(remove_task)
+
+    def _signal_msg_task_done(self, task: Task[None]) -> None:
+        """Discard a finished message task, surfacing any exception it raised.
+
+        Parameters
+        ----------
+        task:
+            The finished task.
+        """
+        self._msg_tasks.discard(task)
+
+        if not task.cancelled() and task.exception() is not None:
+            _log.error(
+                "Unhandled exception whilst handling a websocket message.",
+                exc_info=task.exception(),
+                extra={"label": self._label},
+            )
+
     async def _ws_listener(self) -> None:
         """Listen for messages from the websocket."""
         backoff = ExponentialBackoff()
@@ -750,48 +816,61 @@ class Node(Generic[ClientT]):
 
         # To catch closing messages, we cannot use async for.
         while True:
-            msg = await self._ws.receive()
-
-            _log.debug("Received message from websocket.", extra={"label": self._label})
+            try:
+                msg = await self._ws.receive()
+            except (aiohttp.ClientError, OSError, TimeoutError):
+                _log.exception(
+                    "Websocket to host %s port %s failed whilst awaiting a message.",
+                    self._host,
+                    self._port,
+                    extra={"label": self._label},
+                )
+                await self._recover_websocket(backoff, None)
+                return
 
             # Please aiohttp, fix your typehints.
             _type: aiohttp.WSMsgType = msg.type  # pyright: ignore  # noqa: PGH003
 
-            if _type is aiohttp.WSMsgType.CLOSED:
-                self._available = False
-                self._client.dispatch("node_unavailable", self)
-                close_code = self._ws.close_code
-                self._ready.clear()
-                self._ws = None
+            if _type in (
+                aiohttp.WSMsgType.CLOSE,
+                aiohttp.WSMsgType.CLOSING,
+                aiohttp.WSMsgType.CLOSED,
+                aiohttp.WSMsgType.ERROR,
+            ):
+                if _type is aiohttp.WSMsgType.CLOSE:
+                    close_code = msg.data if isinstance(msg.data, int) else None
+                else:
+                    close_code = self._ws.close_code
 
-                wait_time = backoff.delay()
-                _log.warn(
-                    "Websocket was closed from host %s port %s with RFC 6455 code %s. "
-                    "Reconnecting in %.2fs",
-                    self._host,
-                    self._port,
-                    close_code,
-                    wait_time,
-                    extra={"label": self._label},
-                )
-
-                await sleep(wait_time)
-                task = create_task(self.connect(backoff=backoff))
-                self._connect_task = task
-
-                def remove_task(_: Task[None]) -> None:
-                    self._connect_task = None
-
-                task.add_done_callback(remove_task)
+                await self._recover_websocket(backoff, close_code)
                 return
-            else:
+
+            if _type is not aiohttp.WSMsgType.TEXT:
+                # PING, PONG and similar frames carry no Lavalink payload.
                 _log.debug(
-                    "Creating task to handle websocket message.",
+                    "Ignoring non-text websocket frame.",
                     extra={"label": self._label},
                 )
-                task = create_task(self._handle_msg(msg.json(loads=loads)))
-                self._msg_tasks.add(task)
-                task.add_done_callback(self._msg_tasks.discard)
+                continue
+
+            _log.debug("Received message from websocket.", extra={"label": self._label})
+
+            try:
+                data = msg.json(loads=loads)
+            except ValueError:
+                _log.warning(
+                    "Received malformed JSON from the websocket, ignoring it.",
+                    extra={"label": self._label},
+                )
+                continue
+
+            _log.debug(
+                "Creating task to handle websocket message.",
+                extra={"label": self._label},
+            )
+            task = create_task(self._handle_msg(data))
+            self._msg_tasks.add(task)
+            task.add_done_callback(self._signal_msg_task_done)
 
     async def _handle_msg(self, data: IncomingMessage) -> None:
         """Handle a message from the websocket.
