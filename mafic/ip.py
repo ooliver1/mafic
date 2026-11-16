@@ -1,10 +1,11 @@
 """The Lavalink route planner API."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
 from abc import ABC
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Union
 
@@ -20,12 +21,12 @@ if TYPE_CHECKING:
     )
 
 __all__ = (
-    "IPRoutePlannerType",
-    "IPBlockType",
-    "IPBlock",
-    "FailingAddress",
-    "BaseIPRoutePlannerStatus",
     "BalancingIPRoutePlannerStatus",
+    "BaseIPRoutePlannerStatus",
+    "FailingAddress",
+    "IPBlock",
+    "IPBlockType",
+    "IPRoutePlannerType",
     "NanoIPRoutePlannerStatus",
     "RotatingIPRoutePlannerStatus",
     "RotatingNanoIPRoutePlannerStatus",
@@ -115,7 +116,7 @@ class FailingAddress:
     def __init__(self, data: FailingIPAddress) -> None:
         self.address: str = data["address"]
         self.time: datetime = datetime.fromtimestamp(
-            data["failingTimestamp"], tz=timezone.utc
+            data["failingTimestamp"], tz=UTC
         )
 
 

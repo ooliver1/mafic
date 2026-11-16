@@ -1,4 +1,5 @@
 """Contains a decorator to merge properties and classmethods."""
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -27,7 +28,7 @@ class _ClassPropertyDescriptor(Generic[T, R]):
 
 
 def classproperty(
-    func: Callable[[T], R] | classmethod[T, ..., R] | staticmethod[..., R]
+    func: Callable[[T], R] | classmethod[T, ..., R] | staticmethod[..., R],
 ) -> _ClassPropertyDescriptor[T, R]:
     """Contains a decorator to mimic the behavior of a property, but for classmethods.
 

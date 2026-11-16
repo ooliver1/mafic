@@ -1,8 +1,9 @@
 """Contains the warnings shown from Mafic."""
+
 # SPDX-License-Identifier: MIT
 
 
-__all__ = ("UnsupportedVersionWarning", "UnknownVersionWarning")
+__all__ = ("UnknownVersionWarning", "UnsupportedVersionWarning")
 
 
 class UnsupportedVersionWarning(UserWarning):
